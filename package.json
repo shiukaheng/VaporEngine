@@ -1,0 +1,20 @@
+{
+  "name": "vapor",
+  "version": "1.0.0",
+  "description": "Game engine for The Lost Metropolis project",
+  "main": "vapor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "watchify -t browserify-css ./source/vapor.js --standalone Vapor -o ./build/vapor-build.js"
+  },
+  "author": "heng",
+  "license": "MIT",
+  "dependencies": {
+    "browserify": "^16.5.1",
+    "css-element-queries": "^1.2.3",
+    "three": "^0.116.1"
+  },
+  "devDependencies": {
+    "browserify-css": "^0.15.0"
+  }
+}
