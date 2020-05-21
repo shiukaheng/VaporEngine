@@ -51508,18 +51508,277 @@ class ViewerCamera extends THREE.PerspectiveCamera {
 
 module.exports = ViewerCamera
 },{"three":3}],5:[function(require,module,exports){
+class BaseModifier {
+    constructor() {
+    }
+    update(object, dt) {
+    }
+    load(object) {
+    }
+    unload(object) {
+    }
+}
+module.exports = BaseModifier
+},{}],6:[function(require,module,exports){
+BaseModifier = require("./base_modifier")
+THREE = require("three")
+class ConstantRotationModifier extends BaseModifier {
+    constructor(vector3=new THREE.Vector3(0, 0, 0)) {
+        super()
+        this.rotation = vector3
+    }
+    update(object, dt) {
+        super.update()
+        object.reference.rotation.x += this.rotation.x * dt
+        object.reference.rotation.y += this.rotation.y * dt
+        object.reference.rotation.z += this.rotation.z * dt
+    }
+}
+module.exports = ConstantRotationModifier
+},{"./base_modifier":5,"three":3}],7:[function(require,module,exports){
+BaseModifier = require("./base_modifier")
+class PlayerModifier extends BaseModifier{
+    constructor() {
+        super()
+    }
+    load(physical_object) {
+
+        // Creating control object
+
+        this._quaternion_container = new THREE.Quaternion()
+        this.object = physical_object
+
+        this.controlObject = new THREE.Object3D()
+        this.controlObject.rotation.order = 'YZX'
+
+
+        // Pointer lock
+
+        this.pointerlock = false
+
+        this.canvas = physical_object.viewer.renderer.domElement
+        console.log(this.canvas)
+        var scope = this
+        this.canvas.onclick = function() {
+            scope.canvas.requestPointerLock()
+        }
+
+        var boundLockChangeAlert = this.lockChangeAlert.bind(this)
+        this.boundUpdatePosition = this.updatePosition.bind(this)
+        
+        document.addEventListener('pointerlockchange', boundLockChangeAlert, false)
+        document.addEventListener('mozpointerlockchange', boundLockChangeAlert, false)
+
+        // Keybinds
+        this.forward = false
+        this.backward = false
+        this.left = false
+        this.right = false
+        this.up = false
+        this.down = false
+
+        var scope = this
+
+        function keyHandler(keyCode, boolean) {
+            switch(keyCode) {
+                case 87:
+                    scope.forward = boolean
+            }
+        }
+
+        function onKeyDown(e) {
+            e.preventDefault()
+            e.stopPropagation()
+            keyHandler(e.keyCode, true)
+        }
+
+        function onKeyUp(e) {
+            e.preventDefault()
+            e.stopPropagation()
+            keyHandler(e.keyCode, false)
+        }
+
+        document.addEventListener('keydown', onKeyDown, false)
+        document.addEventListener('keyup', onKeyUp, false)
+
+        this.removeListeners = function() {
+            document.removeEventListener('keydown', onKeyDown, false)
+            document.removeEventListener('keyup', onKeyUp, false)
+        }
+
+    }
+    unload(object) {
+        this.canvas.onclick = NaN
+        document.removeEventListener("mousemove", this.updatePosition, false)
+        document.removeEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false)
+        document.removeEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false)
+        this.removeListeners()
+    }
+    lockChangeAlert() {
+        if (document.pointerLockElement === this.canvas ||
+            document.mozPointerLockElement === this.canvas) {
+          this.pointerlock=true
+          document.addEventListener("mousemove", this.boundUpdatePosition, false)
+        } else {
+          this.pointerlock=false
+          document.removeEventListener("mousemove", this.boundUpdatePosition, false)
+        }
+    }
+    updatePosition(e) {
+        this.controlObject.setRotationFromQuaternion(this.object.reference.getWorldQuaternion(this._quaternion_container))
+        this.controlObject.rotation.x += e.movementY*0.01
+        this.controlObject.rotation.y -= e.movementX*0.01
+        if (this.controlObject.rotation.x > Math.PI/2) {
+            this.controlObject.rotation.x = Math.PI/2
+        }
+        if (this.controlObject.rotation.x < -Math.PI/2) {
+            this.controlObject.rotation.x = -Math.PI/2
+        }
+        this.object.reference.setRotationFromQuaternion(this.controlObject.getWorldQuaternion(this._quaternion_container))
+    }
+
+    update(dt) {
+        super.update(dt)
+        if (this.pointerlock) {
+            if (this.forward) {
+                this.object.addVelocity(this.object.reference.getWorldDirection(new THREE.Vector3()))
+            }
+        }
+    }
+}
+module.exports = PlayerModifier
+},{"./base_modifier":5}],8:[function(require,module,exports){
+BaseModifier = require("./base_modifier")
+class VelocityDragModifier extends BaseModifier{
+    constructor(coef=0.9) {
+        super()
+        this.coef=coef
+    }
+    update(physical_object, dt) {
+        physical_object.velocity = physical_object.velocity.clone().multiplyScalar((1-this.coef)**dt)
+    }
+}
+module.exports = VelocityDragModifier
+},{"./base_modifier":5}],9:[function(require,module,exports){
+THREE = require("three")
+
+class BaseObject {
+    constructor() {
+        this.reference = new THREE.Object3D()
+        this.modifiers = new ModifierArray(this)
+    }
+    getDistanceFromReference() {
+    }
+    load(viewer) {
+        this.viewer = viewer
+        viewer.scene.add(this.reference)
+    }
+    unload(viewer) {
+        this.viewer = undefined
+        viewer.scene.remove(this.reference)
+    }
+    update(dt) {
+        this.modifiers.update(dt)
+    }
+}
+
+class ModifierArray {
+    constructor(object, listOfModifiers=[]){
+        this.object = object
+        this._listOfModifiers=listOfModifiers
+        this._listOfModifiers.forEach(x => this.add(x))
+    }
+    add(modifier){
+        modifier.load(this.object)
+        this._listOfModifiers.push(modifier)
+    }
+    remove(modifier){
+        modifier.unload(this.object)
+        this._listOfModifiers.splice(this._listOfModifiers.indexOf(modifier), 1)
+    }
+    update(dt){
+        this._listOfModifiers.forEach(modifier => modifier.update(this.object, dt))
+    }
+}
+
+module.exports = BaseObject
+},{"three":3}],10:[function(require,module,exports){
+BaseObject = require("./base_object")
+
+class BasePhysicalObject extends BaseObject{
+    constructor(mass=1) {
+        super()
+        this.mass=mass
+    }
+    load(viewer){
+        this.velocity = new THREE.Vector3(0, 0, 0)
+        super.load(viewer)
+    }
+    addVelocity(vector3) {
+        this.velocity.add(vector3)
+    }
+    addMomentum(vector3) {
+        this.velocity.add(vector3.clone().multiplyScalar(this.mass))
+    }
+    update(dt) {
+        this.reference.position.add(this.velocity.clone().multiplyScalar(dt))
+        super.update(dt)
+    }
+}
+
+module.exports = BasePhysicalObject
+},{"./base_object":9}],11:[function(require,module,exports){
+BasePhysicalObject = require("./base_physical_object")
+
+class TestObject extends BasePhysicalObject{
+    constructor() {
+        super()
+        var geom = new THREE.BoxGeometry()
+        var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
+        this.obj = new THREE.Mesh(geom, mat)
+        this.reference.add(this.obj)
+    }
+}
+
+module.exports = TestObject
+},{"./base_physical_object":10}],12:[function(require,module,exports){
 var Viewer = require("./viewers/viewer")
 
 module.exports = {
     Viewer: Viewer
+    
 }
-},{"./viewers/viewer":7}],6:[function(require,module,exports){
+},{"./viewers/viewer":14}],13:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":1}],7:[function(require,module,exports){
+},{"browserify-css":1}],14:[function(require,module,exports){
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ViewerCamera = require("../cameras/viewerCamera")
+PlayerModifier = require("../modifiers/player")
+ConstantRotationModifier = require("../modifiers/constant_rotation")
+VelocityDragModifier = require("../modifiers/velocity_drag")
+BaseObject = require("../objects/base_object")
+TestObject = require("../objects/test_object")
 require("./viewer.css")
+
+class ObjectArray {
+    constructor(viewer, listOfObjects=[]){
+        this.viewer = viewer
+        this._listOfObjects=listOfObjects
+        this._listOfObjects.forEach(x => this.add(x))
+    }
+    add(object){
+        object.load(this.viewer)
+        this._listOfObjects.push(object)
+    }
+    remove(object){
+        object.unload(this.viewer)
+        this._listOfObjects.splice(this._listOfObjects.indexOf(object), 1)
+    }
+    update(dt){
+        this._listOfObjects.forEach(object => object.update(dt))
+    }
+}
 
 /** Viewer class that binds to a container element */
 class Viewer {
@@ -51546,7 +51805,10 @@ class Viewer {
         this.rendererCamera = new ViewerCamera(35, this.containerElement.scrollWidth/this.containerElement.scrollHeight, 0.1, 1000)
         this.scene.add(this.rendererCamera)
 
+        this.objects = new ObjectArray(this)
+
         this.devInit()
+        this.renderClock = new THREE.Clock()
         this.startRender()
     }
 
@@ -51568,7 +51830,8 @@ class Viewer {
     
     /** Render loop */
     renderLoop() {
-        // console.log("render")
+        var dt = this.renderClock.getDelta()
+        this.objects.update(dt)
         this.renderer.render(this.scene, this.rendererCamera)
         this.devRenderLoop()
     }
@@ -51582,23 +51845,34 @@ class Viewer {
         this.renderer.setSize(width, height)
     }
 
+    add(object) {
+        this.objects.add(object)
+    }
+
+    remove(object) {
+        this.objects.remove(object)
+    }
+
     devInit() {        
-        var geom = new THREE.BoxGeometry()
-        var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
-        this.obj = new THREE.Mesh(geom, mat)
-        this.scene.add(this.obj)
+        var o = new TestObject()
+        this.add(o)
+        
+        var m = new PlayerModifier()
+        o.modifiers.add(m)
+
+        var d = new VelocityDragModifier()
+        o.modifiers.add(d)
 
         this.rendererCamera.position.z = 5
-        console.log(this.scene)
+        console.log(this)
     }
 
     devRenderLoop() {
-        this.obj.rotation.x += 0.01
-        this.obj.rotation.y += 0.01
-        this.obj.rotation.z += 0.01
     }
 }
 
+
+
 module.exports = Viewer;
-},{"../cameras/viewerCamera":4,"./viewer.css":6,"css-element-queries/src/ResizeSensor":2,"three":3}]},{},[5])(5)
+},{"../cameras/viewerCamera":4,"../modifiers/constant_rotation":6,"../modifiers/player":7,"../modifiers/velocity_drag":8,"../objects/base_object":9,"../objects/test_object":11,"./viewer.css":13,"css-element-queries/src/ResizeSensor":2,"three":3}]},{},[12])(12)
 });

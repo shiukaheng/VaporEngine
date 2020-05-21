@@ -1,13 +1,11 @@
 class BaseModifier {
-    constructor()
+    constructor() {
+    }
     update(object, dt) {
     }
     load(object) {
     }
     unload(object) {
-    }
-    copy() {
-        return copy
     }
 }
 module.exports = BaseModifier

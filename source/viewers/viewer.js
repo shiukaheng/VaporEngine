@@ -1,7 +1,31 @@
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ViewerCamera = require("../cameras/viewerCamera")
+PlayerModifier = require("../modifiers/player")
+ConstantRotationModifier = require("../modifiers/constant_rotation")
+VelocityDragModifier = require("../modifiers/velocity_drag")
+BaseObject = require("../objects/base_object")
+TestObject = require("../objects/test_object")
 require("./viewer.css")
+
+class ObjectArray {
+    constructor(viewer, listOfObjects=[]){
+        this.viewer = viewer
+        this._listOfObjects=listOfObjects
+        this._listOfObjects.forEach(x => this.add(x))
+    }
+    add(object){
+        object.load(this.viewer)
+        this._listOfObjects.push(object)
+    }
+    remove(object){
+        object.unload(this.viewer)
+        this._listOfObjects.splice(this._listOfObjects.indexOf(object), 1)
+    }
+    update(dt){
+        this._listOfObjects.forEach(object => object.update(dt))
+    }
+}
 
 /** Viewer class that binds to a container element */
 class Viewer {
@@ -28,7 +52,10 @@ class Viewer {
         this.rendererCamera = new ViewerCamera(35, this.containerElement.scrollWidth/this.containerElement.scrollHeight, 0.1, 1000)
         this.scene.add(this.rendererCamera)
 
+        this.objects = new ObjectArray(this)
+
         this.devInit()
+        this.renderClock = new THREE.Clock()
         this.startRender()
     }
 
@@ -50,7 +77,8 @@ class Viewer {
     
     /** Render loop */
     renderLoop() {
-        // console.log("render")
+        var dt = this.renderClock.getDelta()
+        this.objects.update(dt)
         this.renderer.render(this.scene, this.rendererCamera)
         this.devRenderLoop()
     }
@@ -64,21 +92,32 @@ class Viewer {
         this.renderer.setSize(width, height)
     }
 
+    add(object) {
+        this.objects.add(object)
+    }
+
+    remove(object) {
+        this.objects.remove(object)
+    }
+
     devInit() {        
-        var geom = new THREE.BoxGeometry()
-        var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
-        this.obj = new THREE.Mesh(geom, mat)
-        this.scene.add(this.obj)
+        var o = new TestObject()
+        this.add(o)
+        
+        var m = new PlayerModifier()
+        o.modifiers.add(m)
+
+        var d = new VelocityDragModifier()
+        o.modifiers.add(d)
 
         this.rendererCamera.position.z = 5
-        console.log(this.scene)
+        console.log(this)
     }
 
     devRenderLoop() {
-        this.obj.rotation.x += 0.01
-        this.obj.rotation.y += 0.01
-        this.obj.rotation.z += 0.01
     }
 }
+
+
 
 module.exports = Viewer;
