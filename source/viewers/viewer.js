@@ -1,32 +1,9 @@
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
-ViewerCamera = require("../cameras/viewerCamera")
-PlayerModifier = require("../modifiers/player")
-ConstantRotationModifier = require("../modifiers/constant_rotation")
-VelocityDragModifier = require("../modifiers/velocity_drag")
-BaseObject = require("../objects/base_object")
-BasePhysicalObject = require("../objects/base_physical_object")
-TestObject = require("../objects/test_object")
-require("./viewer.css")
+ThreeLoader = require('@pnext/three-loader')
+ObjectArray = require("../arrays/object_array")
 
-class ObjectArray {
-    constructor(viewer, listOfObjects=[]){
-        this.viewer = viewer
-        this._listOfObjects=listOfObjects
-        this._listOfObjects.forEach(x => this.add(x))
-    }
-    add(object){
-        object.load(this.viewer)
-        this._listOfObjects.push(object)
-    }
-    remove(object){
-        object.unload(this.viewer)
-        this._listOfObjects.splice(this._listOfObjects.indexOf(object), 1)
-    }
-    update(dt){
-        this._listOfObjects.forEach(object => object.update(dt))
-    }
-}
+require("./viewer.css")
 
 /** Viewer class that binds to a container element */
 class Viewer {
@@ -38,9 +15,6 @@ class Viewer {
         this.pauseRenderFlag = false
         this.skippedRender = false
         this.containerElement = containerElement
-
-        // this.viewerCanvas = document.createElement("canvas")
-        // this.viewerCanvas.className += "vaporViewer"
 
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.domElement.className += "vaporViewer"
@@ -54,6 +28,14 @@ class Viewer {
         this.rendererCamera = undefined
 
         this.objects = new ObjectArray(this)
+
+        var gl = this.renderer.domElement.getContext('webgl')
+        gl.getExtension('EXT_frag_depth')
+        gl.getExtension('WEBGL_depth_texture')
+        gl.getExtension('OES_vertex_array_object')
+
+        this.potree = new ThreeLoader.Potree()
+        this.potreePointClouds = []
 
         this.devInit()
         this.renderClock = new THREE.Clock()
@@ -84,11 +66,12 @@ class Viewer {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
+            this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
             this.renderer.render(this.scene, this.rendererCamera)
             this.skippedRender = false
         } else {
             if (!this.skippedRender) {
-                console.log("No camera set. Skipping render.")
+                // console.log("No camera set. Skipping render.")
                 this.skippedRender = true
             }
         }
@@ -115,6 +98,7 @@ class Viewer {
 
     add(object) {
         this.objects.add(object)
+        object.modifiers.flushDeferredLoads()
     }
 
     remove(object) {
@@ -122,20 +106,6 @@ class Viewer {
     }
 
     devInit() {       
-        var t = new TestObject()
-        this.add(t)
-
-        t.reference.scale.x = 0.5
-        t.modifiers.add(new ConstantRotationModifier(new THREE.Vector3(0.1,1,0.1)))
-
-        var p = new BasePhysicalObject()
-        this.add(p)
-        
-        var m = new PlayerModifier()
-        p.modifiers.add(m)
-
-        var d = new VelocityDragModifier(0.9)
-        p.modifiers.add(d)
     }
 
     devRenderLoop() {

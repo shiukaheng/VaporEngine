@@ -4,6 +4,7 @@ BasePhysicalObject = require("../objects/base_physical_object")
 class PlayerModifier extends BaseModifier{
     constructor() {
         super()
+        this.speed = 5
     }
     load(physical_object) {
 
@@ -28,7 +29,6 @@ class PlayerModifier extends BaseModifier{
         this.pointerlock = false
 
         this.canvas = physical_object.viewer.renderer.domElement
-        console.log(this.canvas)
         var scope = this
         this.canvas.onclick = function() {
             scope.canvas.requestPointerLock()
@@ -100,7 +100,7 @@ class PlayerModifier extends BaseModifier{
         }
 
         // Create camera
-        this.camera = new THREE.PerspectiveCamera(35)
+        this.camera = new THREE.PerspectiveCamera(90)
         this.camera.rotation.y = Math.PI
         this.object.reference.add(this.camera)
 
@@ -138,8 +138,8 @@ class PlayerModifier extends BaseModifier{
     }
     update(dt) {
         super.update(dt)
-        var front = this.object.reference.getWorldDirection(new THREE.Vector3())
-        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3())
+        var front = this.object.reference.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
+        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
         if (this.pointerlock) {
             if (this.forward) {
                 this.object.addVelocity(front)
@@ -154,10 +154,10 @@ class PlayerModifier extends BaseModifier{
                 this.object.addVelocity(left.clone().multiplyScalar(-1))
             }
             if (this.up) {
-                this.object.addVelocity(this.up_direction)
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.speed))
             }
             if (this.down) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1))
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.speed))
             }
         }
     }

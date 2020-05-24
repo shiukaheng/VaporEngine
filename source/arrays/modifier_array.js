@@ -3,9 +3,17 @@ class ModifierArray {
         this.object = object
         this._listOfModifiers=listOfModifiers
         this._listOfModifiers.forEach(x => this.add(x))
+        this.deferredLoads = []
     }
     add(modifier){
-        modifier.load(this.object)
+        if (this.object.viewer) {
+            this.flushDeferredLoads()
+            modifier.load(this.object)
+        } else {
+            this.deferredLoads.push((function() {
+                modifier.load(this.object)
+            }).bind(this))
+        }
         this._listOfModifiers.push(modifier)
     }
     remove(modifier){
@@ -14,6 +22,11 @@ class ModifierArray {
     }
     update(dt){
         this._listOfModifiers.forEach(modifier => modifier.update(this.object, dt))
+    }
+    flushDeferredLoads() {
+        this.deferredLoads.forEach(deferredLoad => {
+            deferredLoad()
+        })
     }
 }
 module.exports = ModifierArray

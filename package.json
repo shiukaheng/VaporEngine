@@ -5,16 +5,18 @@
   "main": "vapor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "watchify -t browserify-css ./source/vapor.js --standalone Vapor -o ./build/vapor-build.js"
+    "build": "watchify -t browserify-css ./source/Vapor.js --standalone Vapor -o ./build/vapor-build.js"
   },
   "author": "heng",
   "license": "MIT",
   "dependencies": {
-    "browserify": "^16.5.1",
+    "@pnext/three-loader": "^0.2.0",
     "css-element-queries": "^1.2.3",
+    "potree-core": "^1.0.7",
     "three": "^0.116.1"
   },
   "devDependencies": {
+    "browserify": "^16.5.1",
     "browserify-css": "^0.15.0"
   }
 }

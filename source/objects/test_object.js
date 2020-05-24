@@ -1,5 +1,6 @@
 BasePhysicalObject = require("./base_physical_object")
 
+
 class TestObject extends BasePhysicalObject{
     constructor() {
         super()
