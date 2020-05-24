@@ -1,14 +1,14 @@
 elem = document.getElementById("test_div")
-viewer = new Vapor.Viewer(elem)
 
-// var t = new Vapor.TestObject()
-// viewer.add(t)
+viewer = new Vapor.Viewers.Viewer(elem)
+viewer.potree.pointBudget = 1000000
 
-// var p = new Vapor.BasePhysicalObject()
-// viewer.add(p)
+player = new Vapor.Objects.BasePhysicalObject()
 
-// var m = new Vapor.PlayerModifier()
-// p.modifiers.add(m)
+player.modifiers.add(new Vapor.Modifiers.PlayerModifier())
+player.modifiers.add(new Vapor.Modifiers.VelocityDragModifier())
+viewer.add(player)
 
-// var d = new Vapor.VelocityDragModifier()
-// p.modifiers.add(d)
+map = new Vapor.Objects.PotreeObject("cloud.js", "")
+viewer.add(map)
+map.reference.rotation.x = -0.08
