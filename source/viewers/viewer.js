@@ -5,6 +5,7 @@ PlayerModifier = require("../modifiers/player")
 ConstantRotationModifier = require("../modifiers/constant_rotation")
 VelocityDragModifier = require("../modifiers/velocity_drag")
 BaseObject = require("../objects/base_object")
+BasePhysicalObject = require("../objects/base_physical_object")
 TestObject = require("../objects/test_object")
 require("./viewer.css")
 
@@ -35,6 +36,7 @@ class Viewer {
      */
     constructor(containerElement) {
         this.pauseRenderFlag = false
+        this.skippedRender = false
         this.containerElement = containerElement
 
         // this.viewerCanvas = document.createElement("canvas")
@@ -49,8 +51,7 @@ class Viewer {
         this.containerElementResizeListener = new ResizeSensor(containerElement, onContainerElementResizeBound)
 
         this.scene = new THREE.Scene()
-        this.rendererCamera = new ViewerCamera(35, this.containerElement.scrollWidth/this.containerElement.scrollHeight, 0.1, 1000)
-        this.scene.add(this.rendererCamera)
+        this.rendererCamera = undefined
 
         this.objects = new ObjectArray(this)
 
@@ -79,7 +80,18 @@ class Viewer {
     renderLoop() {
         var dt = this.renderClock.getDelta()
         this.objects.update(dt)
-        this.renderer.render(this.scene, this.rendererCamera)
+        if (this.rendererCamera) {
+            if (this.skippedRender) {
+                this.onContainerElementResize()
+            }
+            this.renderer.render(this.scene, this.rendererCamera)
+            this.skippedRender = false
+        } else {
+            if (!this.skippedRender) {
+                console.log("No camera set. Skipping render.")
+                this.skippedRender = true
+            }
+        }
         this.devRenderLoop()
     }
 
@@ -87,9 +99,18 @@ class Viewer {
         var width = this.containerElement.clientWidth
         var height = this.containerElement.clientHeight
         
-        this.rendererCamera.aspect = width/height
-        this.rendererCamera.updateProjectionMatrix()
-        this.renderer.setSize(width, height)
+        try {
+            this.rendererCamera.aspect = width/height
+            this.rendererCamera.updateProjectionMatrix()
+            this.renderer.setSize(width, height)
+        }
+        catch(error) {
+            if (error instanceof TypeError) {
+                // console.log("TypeError while attempting to change camera parameters. Likely because camera is not set!")
+            } else {
+                throw(error)
+            }
+        }
     }
 
     add(object) {
@@ -100,18 +121,21 @@ class Viewer {
         this.objects.remove(object)
     }
 
-    devInit() {        
-        var o = new TestObject()
-        this.add(o)
+    devInit() {       
+        var t = new TestObject()
+        this.add(t)
+
+        t.reference.scale.x = 0.5
+        t.modifiers.add(new ConstantRotationModifier(new THREE.Vector3(0.1,1,0.1)))
+
+        var p = new BasePhysicalObject()
+        this.add(p)
         
         var m = new PlayerModifier()
-        o.modifiers.add(m)
+        p.modifiers.add(m)
 
-        var d = new VelocityDragModifier()
-        o.modifiers.add(d)
-
-        this.rendererCamera.position.z = 5
-        console.log(this)
+        var d = new VelocityDragModifier(0.9)
+        p.modifiers.add(d)
     }
 
     devRenderLoop() {

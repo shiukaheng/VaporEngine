@@ -6,7 +6,14 @@ class TestObject extends BasePhysicalObject{
         var geom = new THREE.BoxGeometry()
         var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
         this.obj = new THREE.Mesh(geom, mat)
+    }
+    load(viewer){
+        super.load(viewer)
         this.reference.add(this.obj)
+    }
+    unload(viewer){
+        super.unload(viewer)
+        this.reference.remove(this.obj)
     }
 }
 

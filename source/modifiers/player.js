@@ -1,9 +1,18 @@
 BaseModifier = require("./base_modifier")
+BasePhysicalObject = require("../objects/base_physical_object")
+
 class PlayerModifier extends BaseModifier{
     constructor() {
         super()
     }
     load(physical_object) {
+
+        if (!(physical_object instanceof BasePhysicalObject)) {
+            throw new TypeError("PlayerModifier must only be added to class that extends BasePhysicalObject")
+        }
+
+        // Parameters
+        this.mouseSensitivity = 0.001
 
         // Creating control object
 
@@ -32,6 +41,10 @@ class PlayerModifier extends BaseModifier{
         document.addEventListener('mozpointerlockchange', boundLockChangeAlert, false)
 
         // Keybinds
+
+        this.horizontal_helper = new THREE.Object3D()
+        this.controlObject.add(this.horizontal_helper)
+        this.horizontal_helper.rotation.y = Math.PI/2
         this.forward = false
         this.backward = false
         this.left = false
@@ -39,12 +52,30 @@ class PlayerModifier extends BaseModifier{
         this.up = false
         this.down = false
 
+        this.up_direction = new THREE.Vector3(0, 1, 0)
+
         var scope = this
 
         function keyHandler(keyCode, boolean) {
             switch(keyCode) {
                 case 87:
                     scope.forward = boolean
+                    break
+                case 83:
+                    scope.backward = boolean
+                    break
+                case 65:
+                    scope.left = boolean
+                    break
+                case 68:
+                    scope.right = boolean
+                    break
+                case 32:
+                    scope.up = boolean
+                    break
+                case 16:
+                    scope.down = boolean
+                    break
             }
         }
 
@@ -68,6 +99,12 @@ class PlayerModifier extends BaseModifier{
             document.removeEventListener('keyup', onKeyUp, false)
         }
 
+        // Create camera
+        this.camera = new THREE.PerspectiveCamera(35)
+        this.camera.rotation.y = Math.PI
+        this.object.reference.add(this.camera)
+
+        this.setAsActive()
     }
     unload(object) {
         this.canvas.onclick = NaN
@@ -75,6 +112,7 @@ class PlayerModifier extends BaseModifier{
         document.removeEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false)
         document.removeEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false)
         this.removeListeners()
+        this.object.reference.remove(this.camera)
     }
     lockChangeAlert() {
         if (document.pointerLockElement === this.canvas ||
@@ -88,8 +126,8 @@ class PlayerModifier extends BaseModifier{
     }
     updatePosition(e) {
         this.controlObject.setRotationFromQuaternion(this.object.reference.getWorldQuaternion(this._quaternion_container))
-        this.controlObject.rotation.x += e.movementY*0.01
-        this.controlObject.rotation.y -= e.movementX*0.01
+        this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
+        this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
         if (this.controlObject.rotation.x > Math.PI/2) {
             this.controlObject.rotation.x = Math.PI/2
         }
@@ -98,14 +136,34 @@ class PlayerModifier extends BaseModifier{
         }
         this.object.reference.setRotationFromQuaternion(this.controlObject.getWorldQuaternion(this._quaternion_container))
     }
-
     update(dt) {
         super.update(dt)
+        var front = this.object.reference.getWorldDirection(new THREE.Vector3())
+        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3())
         if (this.pointerlock) {
             if (this.forward) {
-                this.object.addVelocity(this.object.reference.getWorldDirection(new THREE.Vector3()))
+                this.object.addVelocity(front)
+            }
+            if (this.backward) {
+                this.object.addVelocity(front.clone().multiplyScalar(-1))
+            }
+            if (this.left) {
+                this.object.addVelocity(left)
+            }
+            if (this.right) {
+                this.object.addVelocity(left.clone().multiplyScalar(-1))
+            }
+            if (this.up) {
+                this.object.addVelocity(this.up_direction)
+            }
+            if (this.down) {
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1))
             }
         }
     }
+    setAsActive() {
+        this.object.viewer.rendererCamera = this.camera
+    }
+
 }
 module.exports = PlayerModifier
