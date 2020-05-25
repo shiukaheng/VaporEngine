@@ -1,4 +1,4 @@
-ModifierArray = require("../arrays/modifier_array")
+ModifierArray = require("../arrays/ModifierArray")
 class BaseModifier {
     constructor() {
         this.children = new ModifierArray()

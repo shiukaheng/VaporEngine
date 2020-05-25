@@ -1,4 +1,4 @@
 module.exports = {
-    ModifierArray: require("./arrays/modifier_array"),
-    ObjectArray: require("./arrays/object_array")
+    ModifierArray: require("./arrays/ModifierArray"),
+    ObjectArray: require("./arrays/ObjectArray")
 }

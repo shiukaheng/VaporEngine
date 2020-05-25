@@ -1,7 +1,7 @@
 module.exports = {
-    BaseModifier: require("./modifiers/base_modifier"),
-    ConstantRotationModifier: require("./modifiers/constant_rotation"),
-    LinearAccelerationModifier: require("./modifiers/linear_acceleration"),
-    PlayerModifier: require("./modifiers/player"),
-    VelocityDragModifier: require("./modifiers/velocity_drag")
+    BaseModifier: require("./modifiers/BaseModifier"),
+    ConstantRotationModifier: require("./modifiers/ConstantRotationModifier"),
+    LinearAccelerationModifier: require("./modifiers/LinearAccelerationModifier"),
+    PlayerModifier: require("./modifiers/PlayerModifier"),
+    VelocityDragModifier: require("./modifiers/VelocityDragModifier")
 }

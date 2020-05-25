@@ -1,3 +1,3 @@
 module.exports = {
-    Viewer: require("./viewers/viewer")
+    Viewer: require("./viewers/Viewer")
 }

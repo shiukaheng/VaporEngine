@@ -1,4 +1,4 @@
-BaseModifier = require("./base_modifier")
+BaseModifier = require("./BaseModifier")
 class VelocityDragModifier extends BaseModifier{
     constructor(coef=0.9) {
         super()

@@ -1,6 +1,6 @@
 module.exports = {
-    BaseObject: require("./objects/base_object"),
-    BasePhysicalObject: require("./objects/base_physical_object"),
-    PotreeObject: require("./objects/potree_object"),
-    TestObject: require("./objects/test_object")
+    BaseObject: require("./objects/BaseObject"),
+    BasePhysicalObject: require("./objects/BasePhysicalObject"),
+    PotreeObject: require("./objects/PotreeObject"),
+    TestObject: require("./objects/TestObject")
 }

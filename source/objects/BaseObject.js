@@ -1,5 +1,5 @@
 THREE = require("three")
-ModifierArray = require("../arrays/modifier_array")
+ModifierArray = require("../arrays/ModifierArray")
 
 class BaseObject {
     constructor() {

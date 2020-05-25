@@ -1,5 +1,5 @@
 THREE = require('three')
-BaseModifier = require("./base_modifier")
+BaseModifier = require("./BaseModifier")
 class LinearAccelerationModifier extends BaseModifier{
     constructor(direction=new THREE.Vector3(0, 0, 0)) {
         super()

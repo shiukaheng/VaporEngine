@@ -1,4 +1,4 @@
-BasePhysicalObject = require("./base_physical_object")
+BasePhysicalObject = require("./BasePhysicalObject")
 
 
 class TestObject extends BasePhysicalObject{

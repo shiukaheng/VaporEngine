@@ -1,7 +1,7 @@
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
-ObjectArray = require("../arrays/object_array")
+ObjectArray = require("../arrays/ObjectArray")
 
 require("./viewer.css")
 

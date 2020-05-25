@@ -1,5 +1,5 @@
-BaseModifier = require("./base_modifier")
-BasePhysicalObject = require("../objects/base_physical_object")
+BaseModifier = require("./BaseModifier")
+BasePhysicalObject = require("../objects/BasePhysicalObject")
 
 class PlayerModifier extends BaseModifier{
     constructor() {

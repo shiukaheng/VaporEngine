@@ -1,4 +1,4 @@
-BaseModifier = require("./base_modifier")
+BaseModifier = require("./BaseModifier")
 THREE = require("three")
 class ConstantRotationModifier extends BaseModifier {
     constructor(vector3=new THREE.Vector3(0, 0, 0)) {

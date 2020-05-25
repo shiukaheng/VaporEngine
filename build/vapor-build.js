@@ -51491,25 +51491,25 @@ module.exports = {
 
 },{}],5:[function(require,module,exports){
 module.exports = {
-    ModifierArray: require("./arrays/modifier_array"),
-    ObjectArray: require("./arrays/object_array")
+    ModifierArray: require("./arrays/ModifierArray"),
+    ObjectArray: require("./arrays/ObjectArray")
 }
-},{"./arrays/modifier_array":10,"./arrays/object_array":11}],6:[function(require,module,exports){
+},{"./arrays/ModifierArray":10,"./arrays/ObjectArray":11}],6:[function(require,module,exports){
 module.exports = {
-    BaseModifier: require("./modifiers/base_modifier"),
-    ConstantRotationModifier: require("./modifiers/constant_rotation"),
-    LinearAccelerationModifier: require("./modifiers/linear_acceleration"),
-    PlayerModifier: require("./modifiers/player"),
-    VelocityDragModifier: require("./modifiers/velocity_drag")
+    BaseModifier: require("./modifiers/BaseModifier"),
+    ConstantRotationModifier: require("./modifiers/ConstantRotationModifier"),
+    LinearAccelerationModifier: require("./modifiers/LinearAccelerationModifier"),
+    PlayerModifier: require("./modifiers/PlayerModifier"),
+    VelocityDragModifier: require("./modifiers/VelocityDragModifier")
 }
-},{"./modifiers/base_modifier":12,"./modifiers/constant_rotation":13,"./modifiers/linear_acceleration":14,"./modifiers/player":15,"./modifiers/velocity_drag":16}],7:[function(require,module,exports){
+},{"./modifiers/BaseModifier":12,"./modifiers/ConstantRotationModifier":13,"./modifiers/LinearAccelerationModifier":14,"./modifiers/PlayerModifier":15,"./modifiers/VelocityDragModifier":16}],7:[function(require,module,exports){
 module.exports = {
-    BaseObject: require("./objects/base_object"),
-    BasePhysicalObject: require("./objects/base_physical_object"),
-    PotreeObject: require("./objects/potree_object"),
-    TestObject: require("./objects/test_object")
+    BaseObject: require("./objects/BaseObject"),
+    BasePhysicalObject: require("./objects/BasePhysicalObject"),
+    PotreeObject: require("./objects/PotreeObject"),
+    TestObject: require("./objects/TestObject")
 }
-},{"./objects/base_object":17,"./objects/base_physical_object":18,"./objects/potree_object":19,"./objects/test_object":20}],8:[function(require,module,exports){
+},{"./objects/BaseObject":17,"./objects/BasePhysicalObject":18,"./objects/PotreeObject":19,"./objects/TestObject":20}],8:[function(require,module,exports){
 module.exports = {
     Arrays: require("./Arrays"),
     Modifiers: require("./Modifiers"),
@@ -51518,9 +51518,9 @@ module.exports = {
 }
 },{"./Arrays":5,"./Modifiers":6,"./Objects":7,"./Viewers":9}],9:[function(require,module,exports){
 module.exports = {
-    Viewer: require("./viewers/viewer")
+    Viewer: require("./viewers/Viewer")
 }
-},{"./viewers/viewer":22}],10:[function(require,module,exports){
+},{"./viewers/Viewer":21}],10:[function(require,module,exports){
 class ModifierArray {
     constructor(object, listOfModifiers=[]){
         this.object = object
@@ -51575,7 +51575,7 @@ class ObjectArray {
 
 module.exports = ObjectArray
 },{}],12:[function(require,module,exports){
-ModifierArray = require("../arrays/modifier_array")
+ModifierArray = require("../arrays/ModifierArray")
 class BaseModifier {
     constructor() {
         this.children = new ModifierArray()
@@ -51591,8 +51591,8 @@ class BaseModifier {
     }
 }
 module.exports = BaseModifier
-},{"../arrays/modifier_array":10}],13:[function(require,module,exports){
-BaseModifier = require("./base_modifier")
+},{"../arrays/ModifierArray":10}],13:[function(require,module,exports){
+BaseModifier = require("./BaseModifier")
 THREE = require("three")
 class ConstantRotationModifier extends BaseModifier {
     constructor(vector3=new THREE.Vector3(0, 0, 0)) {
@@ -51607,9 +51607,9 @@ class ConstantRotationModifier extends BaseModifier {
     }
 }
 module.exports = ConstantRotationModifier
-},{"./base_modifier":12,"three":4}],14:[function(require,module,exports){
+},{"./BaseModifier":12,"three":4}],14:[function(require,module,exports){
 THREE = require('three')
-BaseModifier = require("./base_modifier")
+BaseModifier = require("./BaseModifier")
 class LinearAccelerationModifier extends BaseModifier{
     constructor(direction=new THREE.Vector3(0, 0, 0)) {
         super()
@@ -51621,9 +51621,9 @@ class LinearAccelerationModifier extends BaseModifier{
     }
 }
 module.exports = LinearAccelerationModifier
-},{"./base_modifier":12,"three":4}],15:[function(require,module,exports){
-BaseModifier = require("./base_modifier")
-BasePhysicalObject = require("../objects/base_physical_object")
+},{"./BaseModifier":12,"three":4}],15:[function(require,module,exports){
+BaseModifier = require("./BaseModifier")
+BasePhysicalObject = require("../objects/BasePhysicalObject")
 
 class PlayerModifier extends BaseModifier{
     constructor() {
@@ -51791,8 +51791,8 @@ class PlayerModifier extends BaseModifier{
 
 }
 module.exports = PlayerModifier
-},{"../objects/base_physical_object":18,"./base_modifier":12}],16:[function(require,module,exports){
-BaseModifier = require("./base_modifier")
+},{"../objects/BasePhysicalObject":18,"./BaseModifier":12}],16:[function(require,module,exports){
+BaseModifier = require("./BaseModifier")
 class VelocityDragModifier extends BaseModifier{
     constructor(coef=0.9) {
         super()
@@ -51808,9 +51808,9 @@ class VelocityDragModifier extends BaseModifier{
     }
 }
 module.exports = VelocityDragModifier
-},{"./base_modifier":12}],17:[function(require,module,exports){
+},{"./BaseModifier":12}],17:[function(require,module,exports){
 THREE = require("three")
-ModifierArray = require("../arrays/modifier_array")
+ModifierArray = require("../arrays/ModifierArray")
 
 class BaseObject {
     constructor() {
@@ -51833,8 +51833,8 @@ class BaseObject {
 }
 
 module.exports = BaseObject
-},{"../arrays/modifier_array":10,"three":4}],18:[function(require,module,exports){
-BaseObject = require("./base_object")
+},{"../arrays/ModifierArray":10,"three":4}],18:[function(require,module,exports){
+BaseObject = require("./BaseObject")
 
 class BasePhysicalObject extends BaseObject{
     constructor(mass=1) {
@@ -51858,8 +51858,8 @@ class BasePhysicalObject extends BaseObject{
 }
 
 module.exports = BasePhysicalObject
-},{"./base_object":17}],19:[function(require,module,exports){
-BaseObject = require("./base_object")
+},{"./BaseObject":17}],19:[function(require,module,exports){
+BaseObject = require("./BaseObject")
 
 class PotreeObject extends BasePhysicalObject {
     constructor(fileName, baseUrl, pointShape=2) {
@@ -51894,8 +51894,8 @@ class PotreeObject extends BasePhysicalObject {
 }
 
 module.exports = PotreeObject
-},{"./base_object":17}],20:[function(require,module,exports){
-BasePhysicalObject = require("./base_physical_object")
+},{"./BaseObject":17}],20:[function(require,module,exports){
+BasePhysicalObject = require("./BasePhysicalObject")
 
 
 class TestObject extends BasePhysicalObject{
@@ -51916,13 +51916,11 @@ class TestObject extends BasePhysicalObject{
 }
 
 module.exports = TestObject
-},{"./base_physical_object":18}],21:[function(require,module,exports){
-var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":2}],22:[function(require,module,exports){
+},{"./BasePhysicalObject":18}],21:[function(require,module,exports){
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
-ObjectArray = require("../arrays/object_array")
+ObjectArray = require("../arrays/ObjectArray")
 
 require("./viewer.css")
 
@@ -52036,5 +52034,7 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../arrays/object_array":11,"./viewer.css":21,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":4}]},{},[8])(8)
+},{"../arrays/ObjectArray":11,"./viewer.css":22,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":4}],22:[function(require,module,exports){
+var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
+},{"browserify-css":2}]},{},[8])(8)
 });

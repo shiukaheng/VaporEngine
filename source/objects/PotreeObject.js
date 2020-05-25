@@ -1,4 +1,4 @@
-BaseObject = require("./base_object")
+BaseObject = require("./BaseObject")
 
 class PotreeObject extends BasePhysicalObject {
     constructor(fileName, baseUrl, pointShape=2) {

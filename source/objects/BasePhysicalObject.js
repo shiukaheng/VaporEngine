@@ -1,4 +1,4 @@
-BaseObject = require("./base_object")
+BaseObject = require("./BaseObject")
 
 class BasePhysicalObject extends BaseObject{
     constructor(mass=1) {
