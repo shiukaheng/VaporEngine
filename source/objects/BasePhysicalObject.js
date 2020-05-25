@@ -12,6 +12,9 @@ class BasePhysicalObject extends BaseObject{
     addVelocity(vector3) {
         this.velocity.add(vector3)
     }
+    reflectVelocity(vector3) {
+        this.velocity.reflect(vector3)
+    }
     addMomentum(vector3) {
         this.velocity.add(vector3.clone().multiplyScalar(this.mass))
     }

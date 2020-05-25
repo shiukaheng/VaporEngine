@@ -5,6 +5,7 @@ class BaseObject {
     constructor() {
         this.reference = new THREE.Object3D()
         this.modifiers = new ModifierArray(this)
+        this.ready = true
     }
     getDistanceFromReference() {
     }

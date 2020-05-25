@@ -5,6 +5,8 @@ class PlayerModifier extends BaseModifier{
     constructor() {
         super()
         this.speed = 5
+        this.bounceRadius = 10
+        this._reflectNormal = new THREE.Vector3()
     }
     load(physical_object) {
 
@@ -160,6 +162,23 @@ class PlayerModifier extends BaseModifier{
                 this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.speed))
             }
         }
+        this.object.viewer.collisionList.forEach(x => {
+            var all_normals = x.searchNormals(this.object.reference.position, this.bounceRadius)
+            var filtered_normals = []
+
+            all_normals.forEach(x => {
+                if (Math.abs(x.angleTo(this.object.velocity)) > Math.PI/2) {
+                    filtered_normals.push(x)
+                }
+            })
+            if (filtered_normals.length > 0) {
+                this._reflectNormal.set(0, 0, 0)
+                filtered_normals.forEach(x => {
+                    this._reflectNormal.add(x.divideScalar(filtered_normals.length))
+                })
+                this.object.reflectVelocity(this._reflectNormal)
+            }
+        })
     }
     setAsActive() {
         this.object.viewer.rendererCamera = this.camera

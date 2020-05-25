@@ -12,3 +12,9 @@ viewer.add(player)
 map = new Vapor.Objects.PotreeObject("cloud.js", "")
 viewer.add(map)
 map.reference.rotation.x = -0.08
+
+col = new Vapor.Objects.CollisionCloudObject("collision.pcd")
+viewer.add(col)
+col.reference.rotation.x = -0.08
+
+console.log(map)

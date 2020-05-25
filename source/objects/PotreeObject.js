@@ -1,18 +1,18 @@
 BaseObject = require("./BaseObject")
 
 class PotreeObject extends BasePhysicalObject {
-    constructor(fileName, baseUrl, pointShape=2) {
+    constructor(fileName, baseUrl="", pointShape=2) {
         super()
         this.fileName = fileName
         this.baseUrl = baseUrl
         this.pointShape = pointShape
-
     }
     load(viewer) {
         super.load(viewer)
         var promise = viewer.potree.loadPointCloud(this.fileName, url => `${this.baseUrl}${url}`)
         promise.then(
             pco => {
+                console.log(pco)
                 pco.material.shape = this.pointShape
                 this.reference.add(pco)
                 this.viewer.potreePointClouds.push(pco)

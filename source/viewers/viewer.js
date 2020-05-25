@@ -2,6 +2,7 @@ THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
 ObjectArray = require("../arrays/ObjectArray")
+// PCDLoader = require("../loaders/PCDLoader")
 
 require("./viewer.css")
 
@@ -28,6 +29,7 @@ class Viewer {
         this.rendererCamera = undefined
 
         this.objects = new ObjectArray(this)
+        this.collisionList = []
 
         var gl = this.renderer.domElement.getContext('webgl')
         gl.getExtension('EXT_frag_depth')
@@ -36,6 +38,8 @@ class Viewer {
 
         this.potree = new ThreeLoader.Potree()
         this.potreePointClouds = []
+
+        // this.PCDLoader = new PCDLoader()
 
         this.devInit()
         this.renderClock = new THREE.Clock()
