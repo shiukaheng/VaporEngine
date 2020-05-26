@@ -5,15 +5,14 @@ var createTree = require('yaot');
 class CollisionCloudObject extends BaseObject {
     constructor(pcdPath) {
         super(pcdPath)
-        // Save args
+        this.assetsLoaded = false
+
         this.pcdPath = pcdPath
-        this.ready = false
         this.inverseTransform = new THREE.Matrix4()
         this.searchLocalVec4 = new THREE.Vector4()
         this.rotationTransform = new THREE.Matrix4()
         this._workingVector4 = new THREE.Vector4()
         this._workingVector3 = new THREE.Vector3()
-        this.defferedLoads = []
 
         var loader = new PCDLoader();
         loader.load(
@@ -22,43 +21,21 @@ class CollisionCloudObject extends BaseObject {
                 this.geometry = mesh
                 this.tree = createTree()
                 this.tree.init(mesh.geometry.attributes.position.array)
-                this.ready = true
-                this.flushDefferedLoads()
+                this.assetsLoaded = true
+                this.declareAssetsLoaded()
             }
         )
     }
     load(viewer) {
-        if (this.ready) {
-            super.load(viewer)
-            this.reference.add(this.geometry)
-            viewer.collisionList.push(this)
-        } else {
-            this.defferedLoads.push(
-                (function() {
-                    this.load(viewer)
-                }).bind(this)
-            )
-        }
+        super.load(viewer)
+        // this.reference.add(this.geometry)
+        viewer.collisionList.push(this)
     }
     unload(viewer) {
-        if (this.ready) {
-            super.unload(viewer)
-            this.reference.remove(this.geometry)
-            viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
-        } else {
-            this.defferedLoads.push(
-                (function() {
-                    this.unload(viewer)
-                }).bind(this)
-            )
-        }
+        super.unload(viewer)
+        // this.reference.remove(this.geometry)
+        viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
     }
-    flushDefferedLoads() {
-        this.defferedLoads.forEach(x => {x()})
-    }
-    // update(dt) {
-    //     super.update(dt)
-    // }
     searchNormals(vec3, r) {
         if (this.viewer) {
             this.inverseTransform.getInverse(this.reference.matrixWorld);

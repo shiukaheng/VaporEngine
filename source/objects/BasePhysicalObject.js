@@ -3,7 +3,9 @@ BaseObject = require("./BaseObject")
 class BasePhysicalObject extends BaseObject{
     constructor(mass=1) {
         super()
-        this.mass=mass
+        if (this.constructor.name === BasePhysicalObject.name) {
+            this.declareAssetsLoaded()
+        }
     }
     load(viewer){
         this.velocity = new THREE.Vector3(0, 0, 0)

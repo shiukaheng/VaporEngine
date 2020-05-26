@@ -4,17 +4,20 @@ viewer = new Vapor.Viewers.Viewer(elem)
 viewer.potree.pointBudget = 1000000
 
 player = new Vapor.Objects.BasePhysicalObject()
-
-player.modifiers.add(new Vapor.Modifiers.PlayerModifier())
-player.modifiers.add(new Vapor.Modifiers.VelocityDragModifier())
 viewer.add(player)
+player.modifiers.add(new Vapor.Modifiers.PlayerModifier(viewer))
+player.modifiers.add(new Vapor.Modifiers.VelocityDragModifier())
+
 
 map = new Vapor.Objects.PotreeObject("cloud.js", "")
-viewer.add(map)
 map.reference.rotation.x = -0.08
+viewer.add(map)
 
 col = new Vapor.Objects.CollisionCloudObject("collision.pcd")
-viewer.add(col)
 col.reference.rotation.x = -0.08
+viewer.add(col)
 
-console.log(map)
+viewer.objects.waitUntilAllAssetsLoaded(function() {
+    console.log("All loaded!")
+    viewer.startRender()
+})

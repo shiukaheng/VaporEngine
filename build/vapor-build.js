@@ -51998,17 +51998,46 @@ class ObjectArray {
         this.viewer = viewer
         this._listOfObjects=listOfObjects
         this._listOfObjects.forEach(x => this.add(x))
+        this.allAssetsLoadedCallback = function() {}
     }
     add(object){
-        object.load(this.viewer)
+        object.objectArray = this
+        object.queueOnAssetLoaded(() => {
+            object.load(this.viewer)
+        })
         this._listOfObjects.push(object)
+        this.updateAssetLoaded
     }
     remove(object){
         object.unload(this.viewer)
+        object.objectArray = undefined
         this._listOfObjects.splice(this._listOfObjects.indexOf(object), 1)
     }
+    waitUntilAllAssetsLoaded(callback){
+        var scope = this
+        this.allAssetsLoadedCallback = function() {
+            callback()
+            scope.allAssetsLoadedCallback = function() {}
+        }
+        this.updateAssetLoaded()
+    }
+    updateAssetLoaded() {
+        var loadedList = []
+        this._listOfObjects.forEach(object => {
+            loadedList.push(object.assetsLoaded)
+        })
+        if (! loadedList.includes(false)) {
+            this.allAssetsLoadedCallback()
+        }
+        // console.log(this._listOfObjects)
+        // console.log(loadedList)
+    }
     update(dt){
-        this._listOfObjects.forEach(object => object.update(dt))
+        this._listOfObjects.forEach(object => {
+            if (object.assetsLoaded) {
+                object.update(dt)
+            }
+        })
     }
 }
 
@@ -52464,8 +52493,9 @@ BaseModifier = require("./BaseModifier")
 BasePhysicalObject = require("../objects/BasePhysicalObject")
 
 class PlayerModifier extends BaseModifier{
-    constructor() {
+    constructor(viewer) {
         super()
+        this.viewer = viewer
         this.speed = 5
         this.bounceRadius = 10
         this._reflectNormal = new THREE.Vector3()
@@ -52491,11 +52521,12 @@ class PlayerModifier extends BaseModifier{
         // Pointer lock
 
         this.pointerlock = false
-
-        this.canvas = physical_object.viewer.renderer.domElement
+        // console.log(physical_object)
+        this.canvas = this.viewer.renderer.domElement
         var scope = this
         this.canvas.onclick = function() {
             scope.canvas.requestPointerLock()
+            // navigator.xr.requestSession('immersive-ar')
         }
 
         var boundLockChangeAlert = this.lockChangeAlert.bind(this)
@@ -52643,7 +52674,7 @@ class PlayerModifier extends BaseModifier{
         })
     }
     setAsActive() {
-        this.object.viewer.rendererCamera = this.camera
+        this.viewer.rendererCamera = this.camera
     }
 
 }
@@ -52671,9 +52702,13 @@ ModifierArray = require("../arrays/ModifierArray")
 
 class BaseObject {
     constructor() {
+        this.onLoadedFunctionList = []
+        this.assetsLoaded = false
         this.reference = new THREE.Object3D()
         this.modifiers = new ModifierArray(this)
-        this.ready = true
+        if (this.constructor.name === BaseObject.name) {
+            this.declareAssetsLoaded()
+        }
     }
     getDistanceFromReference() {
     }
@@ -52688,6 +52723,22 @@ class BaseObject {
     update(dt) {
         this.modifiers.update(dt)
     }
+    declareAssetsLoaded() {
+        this.assetsLoaded = true
+        this.onLoadedFunctionList.forEach(x => {x()})
+        this.onLoadedFunctionList = []
+        if (this.objectArray) {
+            this.objectArray.updateAssetLoaded()
+        }
+        this.modifiers.flushDeferredLoads()
+    }
+    queueOnAssetLoaded(queuedFunction) {
+        if (this.assetsLoaded) {
+            queuedFunction()
+        } else {
+            this.onLoadedFunctionList.push(queuedFunction)
+        }
+    }
 }
 
 module.exports = BaseObject
@@ -52697,7 +52748,9 @@ BaseObject = require("./BaseObject")
 class BasePhysicalObject extends BaseObject{
     constructor(mass=1) {
         super()
-        this.mass=mass
+        if (this.constructor.name === BasePhysicalObject.name) {
+            this.declareAssetsLoaded()
+        }
     }
     load(viewer){
         this.velocity = new THREE.Vector3(0, 0, 0)
@@ -52727,15 +52780,14 @@ var createTree = require('yaot');
 class CollisionCloudObject extends BaseObject {
     constructor(pcdPath) {
         super(pcdPath)
-        // Save args
+        this.assetsLoaded = false
+
         this.pcdPath = pcdPath
-        this.ready = false
         this.inverseTransform = new THREE.Matrix4()
         this.searchLocalVec4 = new THREE.Vector4()
         this.rotationTransform = new THREE.Matrix4()
         this._workingVector4 = new THREE.Vector4()
         this._workingVector3 = new THREE.Vector3()
-        this.defferedLoads = []
 
         var loader = new PCDLoader();
         loader.load(
@@ -52744,43 +52796,21 @@ class CollisionCloudObject extends BaseObject {
                 this.geometry = mesh
                 this.tree = createTree()
                 this.tree.init(mesh.geometry.attributes.position.array)
-                this.ready = true
-                this.flushDefferedLoads()
+                this.assetsLoaded = true
+                this.declareAssetsLoaded()
             }
         )
     }
     load(viewer) {
-        if (this.ready) {
-            super.load(viewer)
-            this.reference.add(this.geometry)
-            viewer.collisionList.push(this)
-        } else {
-            this.defferedLoads.push(
-                (function() {
-                    this.load(viewer)
-                }).bind(this)
-            )
-        }
+        super.load(viewer)
+        // this.reference.add(this.geometry)
+        viewer.collisionList.push(this)
     }
     unload(viewer) {
-        if (this.ready) {
-            super.unload(viewer)
-            this.reference.remove(this.geometry)
-            viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
-        } else {
-            this.defferedLoads.push(
-                (function() {
-                    this.unload(viewer)
-                }).bind(this)
-            )
-        }
+        super.unload(viewer)
+        // this.reference.remove(this.geometry)
+        viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
     }
-    flushDefferedLoads() {
-        this.defferedLoads.forEach(x => {x()})
-    }
-    // update(dt) {
-    //     super.update(dt)
-    // }
     searchNormals(vec3, r) {
         if (this.viewer) {
             this.inverseTransform.getInverse(this.reference.matrixWorld);
@@ -52814,22 +52844,26 @@ class PotreeObject extends BasePhysicalObject {
         this.fileName = fileName
         this.baseUrl = baseUrl
         this.pointShape = pointShape
-    }
-    load(viewer) {
-        super.load(viewer)
         var promise = viewer.potree.loadPointCloud(this.fileName, url => `${this.baseUrl}${url}`)
         promise.then(
             pco => {
-                console.log(pco)
+                // console.log(pco)
                 pco.material.shape = this.pointShape
                 this.reference.add(pco)
-                this.viewer.potreePointClouds.push(pco)
                 this.pco = pco
+                // console.log("potree load assets")
+                this.declareAssetsLoaded()
             },
             function() {
                 console.log(`Failed to load point cloud ${this.fileName}`)
             }
         )
+    }
+    load(viewer) {
+        this.viewer = viewer
+        // console.log("potree added")
+        viewer.potreePointClouds.push(this.pco)
+        super.load(viewer)
     }
     unload(viewer) {
         super.unload(viewer)
@@ -52906,10 +52940,7 @@ class Viewer {
         this.potreePointClouds = []
 
         // this.PCDLoader = new PCDLoader()
-
-        this.devInit()
         this.renderClock = new THREE.Clock()
-        this.startRender()
     }
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
@@ -52945,7 +52976,6 @@ class Viewer {
                 this.skippedRender = true
             }
         }
-        this.devRenderLoop()
     }
 
     onContainerElementResize() {
@@ -52973,12 +53003,6 @@ class Viewer {
 
     remove(object) {
         this.objects.remove(object)
-    }
-
-    devInit() {       
-    }
-
-    devRenderLoop() {
     }
 }
 

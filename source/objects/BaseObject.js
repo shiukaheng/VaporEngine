@@ -3,9 +3,13 @@ ModifierArray = require("../arrays/ModifierArray")
 
 class BaseObject {
     constructor() {
+        this.onLoadedFunctionList = []
+        this.assetsLoaded = false
         this.reference = new THREE.Object3D()
         this.modifiers = new ModifierArray(this)
-        this.ready = true
+        if (this.constructor.name === BaseObject.name) {
+            this.declareAssetsLoaded()
+        }
     }
     getDistanceFromReference() {
     }
@@ -19,6 +23,22 @@ class BaseObject {
     }
     update(dt) {
         this.modifiers.update(dt)
+    }
+    declareAssetsLoaded() {
+        this.assetsLoaded = true
+        this.onLoadedFunctionList.forEach(x => {x()})
+        this.onLoadedFunctionList = []
+        if (this.objectArray) {
+            this.objectArray.updateAssetLoaded()
+        }
+        this.modifiers.flushDeferredLoads()
+    }
+    queueOnAssetLoaded(queuedFunction) {
+        if (this.assetsLoaded) {
+            queuedFunction()
+        } else {
+            this.onLoadedFunctionList.push(queuedFunction)
+        }
     }
 }
 

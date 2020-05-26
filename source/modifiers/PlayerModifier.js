@@ -2,8 +2,9 @@ BaseModifier = require("./BaseModifier")
 BasePhysicalObject = require("../objects/BasePhysicalObject")
 
 class PlayerModifier extends BaseModifier{
-    constructor() {
+    constructor(viewer) {
         super()
+        this.viewer = viewer
         this.speed = 5
         this.bounceRadius = 10
         this._reflectNormal = new THREE.Vector3()
@@ -29,11 +30,12 @@ class PlayerModifier extends BaseModifier{
         // Pointer lock
 
         this.pointerlock = false
-
-        this.canvas = physical_object.viewer.renderer.domElement
+        // console.log(physical_object)
+        this.canvas = this.viewer.renderer.domElement
         var scope = this
         this.canvas.onclick = function() {
             scope.canvas.requestPointerLock()
+            // navigator.xr.requestSession('immersive-ar')
         }
 
         var boundLockChangeAlert = this.lockChangeAlert.bind(this)
@@ -181,7 +183,7 @@ class PlayerModifier extends BaseModifier{
         })
     }
     setAsActive() {
-        this.object.viewer.rendererCamera = this.camera
+        this.viewer.rendererCamera = this.camera
     }
 
 }

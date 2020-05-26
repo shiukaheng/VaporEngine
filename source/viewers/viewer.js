@@ -40,10 +40,7 @@ class Viewer {
         this.potreePointClouds = []
 
         // this.PCDLoader = new PCDLoader()
-
-        this.devInit()
         this.renderClock = new THREE.Clock()
-        this.startRender()
     }
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
@@ -79,7 +76,6 @@ class Viewer {
                 this.skippedRender = true
             }
         }
-        this.devRenderLoop()
     }
 
     onContainerElementResize() {
@@ -107,12 +103,6 @@ class Viewer {
 
     remove(object) {
         this.objects.remove(object)
-    }
-
-    devInit() {       
-    }
-
-    devRenderLoop() {
     }
 }
 
