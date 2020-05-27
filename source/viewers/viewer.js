@@ -6,6 +6,11 @@ ObjectArray = require("../arrays/ObjectArray")
 
 require("./viewer.css")
 
+// InteractObject global constants
+MIN_SCREEN_POS_DISTANCE = 0.5
+MIN_SCREEN_POS_DISTANCE_SQUARED = MIN_SCREEN_POS_DISTANCE**2
+MIN_PHYSICAL_DISTANCE = 30
+
 /** Viewer class that binds to a container element */
 class Viewer {
     /**
@@ -31,6 +36,8 @@ class Viewer {
         this.objects = new ObjectArray(this)
         this.collisionList = []
 
+        this.nearestInteractObject = undefined
+
         var gl = this.renderer.domElement.getContext('webgl')
         gl.getExtension('EXT_frag_depth')
         gl.getExtension('WEBGL_depth_texture')
@@ -41,6 +48,36 @@ class Viewer {
 
         // this.PCDLoader = new PCDLoader()
         this.renderClock = new THREE.Clock()
+
+        this.interactObjects = []
+
+        this.keyPressed = {}
+        var scope = this
+        
+        // Keyboard input
+        function keyHandler(keyCode, boolean) {
+            scope.keyPressed[`key${keyCode}`] = boolean
+        }
+
+        function onKeyDown(e) {
+            e.preventDefault()
+            e.stopPropagation()
+            keyHandler(e.keyCode, true)
+        }
+
+        function onKeyUp(e) {
+            e.preventDefault()
+            e.stopPropagation()
+            keyHandler(e.keyCode, false)
+        }
+
+        document.addEventListener('keydown', onKeyDown, false)
+        document.addEventListener('keyup', onKeyUp, false)
+
+        this.removeListeners = function() {
+            document.removeEventListener('keydown', onKeyDown, false)
+            document.removeEventListener('keyup', onKeyUp, false)
+        }
     }
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
@@ -67,6 +104,7 @@ class Viewer {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
+            this.updateSelectedInteractObject()
             this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
             this.renderer.render(this.scene, this.rendererCamera)
             this.skippedRender = false
@@ -77,6 +115,14 @@ class Viewer {
             }
         }
     }
+
+    updateSelectedInteractObject() {
+        var inPhysicalRange = this.interactObjects.filter(i => {
+            return (i.reference.position.distanceTo(this.rendererCamera.parent.position) <= MIN_PHYSICAL_DISTANCE)
+        })
+        inPhysicalRange.sort((a, b) => a.screenRadiusSquared - b.screenRadiusSquared)
+        this.nearestInteractObject = inPhysicalRange[0]
+    } // selected item will be one frame behind!
 
     onContainerElementResize() {
         var width = this.containerElement.clientWidth
@@ -93,6 +139,14 @@ class Viewer {
             } else {
                 throw(error)
             }
+        }
+    }
+
+    getKeyState(keyCode) {
+        if (this.keyPressed[`key${keyCode}`]) {
+            return true
+        } else {
+            return false
         }
     }
 

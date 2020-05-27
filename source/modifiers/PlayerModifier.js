@@ -2,15 +2,14 @@ BaseModifier = require("./BaseModifier")
 BasePhysicalObject = require("../objects/BasePhysicalObject")
 
 class PlayerModifier extends BaseModifier{
-    constructor(viewer) {
+    constructor(speed=5, bounceRadius=10) {
         super()
-        this.viewer = viewer
-        this.speed = 5
-        this.bounceRadius = 10
+        this.speed = speed
+        this.bounceRadius = bounceRadius
         this._reflectNormal = new THREE.Vector3()
     }
     load(physical_object) {
-
+        this.viewer = physical_object.viewer
         if (!(physical_object instanceof BasePhysicalObject)) {
             throw new TypeError("PlayerModifier must only be added to class that extends BasePhysicalObject")
         }
@@ -60,49 +59,6 @@ class PlayerModifier extends BaseModifier{
 
         var scope = this
 
-        function keyHandler(keyCode, boolean) {
-            switch(keyCode) {
-                case 87:
-                    scope.forward = boolean
-                    break
-                case 83:
-                    scope.backward = boolean
-                    break
-                case 65:
-                    scope.left = boolean
-                    break
-                case 68:
-                    scope.right = boolean
-                    break
-                case 32:
-                    scope.up = boolean
-                    break
-                case 16:
-                    scope.down = boolean
-                    break
-            }
-        }
-
-        function onKeyDown(e) {
-            e.preventDefault()
-            e.stopPropagation()
-            keyHandler(e.keyCode, true)
-        }
-
-        function onKeyUp(e) {
-            e.preventDefault()
-            e.stopPropagation()
-            keyHandler(e.keyCode, false)
-        }
-
-        document.addEventListener('keydown', onKeyDown, false)
-        document.addEventListener('keyup', onKeyUp, false)
-
-        this.removeListeners = function() {
-            document.removeEventListener('keydown', onKeyDown, false)
-            document.removeEventListener('keyup', onKeyUp, false)
-        }
-
         // Create camera
         this.camera = new THREE.PerspectiveCamera(90)
         this.camera.rotation.y = Math.PI
@@ -111,7 +67,8 @@ class PlayerModifier extends BaseModifier{
         this.setAsActive()
     }
     unload(object) {
-        this.canvas.onclick = NaN
+        this.viewer = undefined
+        this.canvas.onclick = undefined
         document.removeEventListener("mousemove", this.updatePosition, false)
         document.removeEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false)
         document.removeEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false)
@@ -145,22 +102,22 @@ class PlayerModifier extends BaseModifier{
         var front = this.object.reference.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
         var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
         if (this.pointerlock) {
-            if (this.forward) {
+            if (this.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
             }
-            if (this.backward) {
+            if (this.viewer.getKeyState(83)) {
                 this.object.addVelocity(front.clone().multiplyScalar(-1))
             }
-            if (this.left) {
+            if (this.viewer.getKeyState(65)) {
                 this.object.addVelocity(left)
             }
-            if (this.right) {
+            if (this.viewer.getKeyState(68)) {
                 this.object.addVelocity(left.clone().multiplyScalar(-1))
             }
-            if (this.up) {
+            if (this.viewer.getKeyState(32)) {
                 this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.speed))
             }
-            if (this.down) {
+            if (this.viewer.getKeyState(16)) {
                 this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.speed))
             }
         }
