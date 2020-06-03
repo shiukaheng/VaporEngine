@@ -21,7 +21,7 @@ class BasePhysicalObject extends BaseObject{
         this.velocity.add(vector3.clone().multiplyScalar(this.mass))
     }
     update(dt) {
-        this.reference.position.add(this.velocity.clone().multiplyScalar(dt))
+        this.container.position.add(this.velocity.clone().multiplyScalar(dt))
         super.update(dt)
     }
 }

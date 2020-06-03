@@ -11,7 +11,7 @@ class PotreeObject extends BasePhysicalObject {
             pco => {
                 // console.log(pco)
                 pco.material.shape = this.pointShape
-                this.reference.add(pco)
+                this.container.add(pco)
                 this.pco = pco
                 // console.log("potree load assets")
                 this.declareAssetsLoaded()
@@ -31,7 +31,7 @@ class PotreeObject extends BasePhysicalObject {
         super.unload(viewer)
         if (this.pco) {
             this.viewer.potreePointClouds.splice(this.viewer.potreePointClouds.indexOf(this.pco), 1)
-            this.reference.remove(this.pco)
+            this.container.remove(this.pco)
         }
     }
 }

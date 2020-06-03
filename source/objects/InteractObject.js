@@ -22,20 +22,20 @@ class InteractObject extends BaseObject{
         this.innerCirc = new THREE.Mesh(geom, mat)
         this.innerCirc.rotation.x = Math.PI
 
-        this.reference.add(this.innerCirc)
+        this.container.add(this.innerCirc)
 
         var geom2 = new THREE.CircleGeometry(1.5, 30)
         var mat2 = new THREE.MeshBasicMaterial({color: 'white', transparent:true, opacity:0.5})
         this.outerCirc = new THREE.Mesh(geom2, mat2)
         this.outerCirc.rotation.x = Math.PI
 
-        this.reference.add(this.outerCirc)
+        this.container.add(this.outerCirc)
 
         this.declareAssetsLoaded()
     }
     update(dt) {
         super.update(dt)
-        var referenceWorldCoor = this.reference.getWorldPosition(this.projectedCoordinates)
+        var referenceWorldCoor = this.container.getWorldPosition(this.projectedCoordinates)
         var projectedPos = referenceWorldCoor.project(this.viewer.rendererCamera)
         this._screenPos.set(projectedPos.x*this.viewer.containerElement.clientWidth/this.viewer.containerElement.clientHeight, projectedPos.y)
         if (projectedPos.z <= 1) {
@@ -44,7 +44,7 @@ class InteractObject extends BaseObject{
             this.screenRadiusSquared = NaN
         }
 
-        this.worldRadius = referenceWorldCoor.distanceTo(this.reference.position)
+        this.worldRadius = referenceWorldCoor.distanceTo(this.container.position)
 
         var newKeyPressed = this.viewer.getKeyState(this.keyCode)
 
@@ -61,7 +61,7 @@ class InteractObject extends BaseObject{
                 TweenLite.to(this.outerCirc.scale, 0.1, {x: 1, y: 1, z: 1})
             }
         this.keyPressed = newKeyPressed
-        this.reference.setRotationFromQuaternion(this.viewer.rendererCamera.parent.quaternion)
+        this.container.setRotationFromQuaternion(this.viewer.rendererCamera.parent.quaternion)
     }
     activate() {
         console.log("activated")

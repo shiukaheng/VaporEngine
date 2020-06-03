@@ -62,7 +62,7 @@ class PlayerModifier extends BaseModifier{
         // Create camera
         this.camera = new THREE.PerspectiveCamera(90)
         this.camera.rotation.y = Math.PI
-        this.object.reference.add(this.camera)
+        this.object.container.add(this.camera)
 
         this.setAsActive()
     }
@@ -73,7 +73,7 @@ class PlayerModifier extends BaseModifier{
         document.removeEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false)
         document.removeEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false)
         this.removeListeners()
-        this.object.reference.remove(this.camera)
+        this.object.container.remove(this.camera)
     }
     lockChangeAlert() {
         if (document.pointerLockElement === this.canvas ||
@@ -86,7 +86,7 @@ class PlayerModifier extends BaseModifier{
         }
     }
     updatePosition(e) {
-        this.controlObject.setRotationFromQuaternion(this.object.reference.getWorldQuaternion(this._quaternion_container))
+        this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
         this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
         this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
         if (this.controlObject.rotation.x > Math.PI/2) {
@@ -95,11 +95,11 @@ class PlayerModifier extends BaseModifier{
         if (this.controlObject.rotation.x < -Math.PI/2) {
             this.controlObject.rotation.x = -Math.PI/2
         }
-        this.object.reference.setRotationFromQuaternion(this.controlObject.getWorldQuaternion(this._quaternion_container))
+        this.object.container.setRotationFromQuaternion(this.controlObject.getWorldQuaternion(this._quaternion_container))
     }
     update(dt) {
         super.update(dt)
-        var front = this.object.reference.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
+        var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
         var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
         if (this.pointerlock) {
             if (this.viewer.getKeyState(87)) {
@@ -122,7 +122,7 @@ class PlayerModifier extends BaseModifier{
             }
         }
         this.object.viewer.collisionList.forEach(x => {
-            var all_normals = x.searchNormals(this.object.reference.position, this.bounceRadius)
+            var all_normals = x.searchNormals(this.object.container.position, this.bounceRadius)
             var filtered_normals = []
 
             all_normals.forEach(x => {

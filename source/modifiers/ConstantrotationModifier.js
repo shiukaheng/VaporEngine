@@ -7,9 +7,9 @@ class ConstantRotationModifier extends BaseModifier {
     }
     update(object, dt) {
         super.update()
-        object.reference.rotation.x += this.rotation.x * dt
-        object.reference.rotation.y += this.rotation.y * dt
-        object.reference.rotation.z += this.rotation.z * dt
+        object.container.rotation.x += this.rotation.x * dt
+        object.container.rotation.y += this.rotation.y * dt
+        object.container.rotation.z += this.rotation.z * dt
     }
 }
 module.exports = ConstantRotationModifier

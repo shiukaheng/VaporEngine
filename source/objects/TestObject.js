@@ -10,11 +10,11 @@ class TestObject extends BasePhysicalObject{
     }
     load(viewer){
         super.load(viewer)
-        this.reference.add(this.obj)
+        this.container.add(this.obj)
     }
     unload(viewer){
         super.unload(viewer)
-        this.reference.remove(this.obj)
+        this.container.remove(this.obj)
     }
 }
 

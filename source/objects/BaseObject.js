@@ -5,7 +5,7 @@ class BaseObject {
     constructor() {
         this.onLoadedFunctionList = []
         this.assetsLoaded = false
-        this.reference = new THREE.Object3D()
+        this.container = new THREE.Object3D()
         this.modifiers = new ModifierArray(this)
         if (this.constructor.name === BaseObject.name) {
             this.declareAssetsLoaded()
@@ -15,11 +15,11 @@ class BaseObject {
     }
     load(viewer) {
         this.viewer = viewer
-        viewer.scene.add(this.reference)
+        viewer.scene.add(this.container)
     }
     unload(viewer) {
         this.viewer = undefined
-        viewer.scene.remove(this.reference)
+        viewer.scene.remove(this.container)
     }
     update(dt) {
         this.modifiers.update(dt)
