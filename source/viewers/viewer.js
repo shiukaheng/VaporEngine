@@ -6,11 +6,6 @@ ObjectArray = require("../arrays/ObjectArray")
 
 require("./viewer.css")
 
-// InteractObject global constants
-MIN_SCREEN_POS_DISTANCE = 0.5
-MIN_SCREEN_POS_DISTANCE_SQUARED = MIN_SCREEN_POS_DISTANCE**2
-MIN_PHYSICAL_DISTANCE = 30
-
 /** Viewer class that binds to a container element */
 class Viewer {
     /**
@@ -49,8 +44,6 @@ class Viewer {
         // this.PCDLoader = new PCDLoader()
         this.renderClock = new THREE.Clock()
 
-        this.interactObjects = []
-
         this.keyPressed = {}
         var scope = this
         
@@ -78,6 +71,20 @@ class Viewer {
             document.removeEventListener('keydown', onKeyDown, false)
             document.removeEventListener('keyup', onKeyUp, false)
         }
+
+        this.audioListener = new THREE.AudioListener()
+        this.firstInteraction = false
+        this.firstInteractionQueue = []
+
+        var events = ["click", "mousemove", "mouseover", "mousemove", "touchmove", "focus"]
+        events.forEach((eventName)=>{
+            window.addEventListener(eventName, ()=>{
+                if(!this.firstInteraction) {
+                    this.firstInteraction = true
+                    this.firstInteractionQueue.forEach(method => {method()})
+                }
+            })
+        })   
     }
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
@@ -104,7 +111,6 @@ class Viewer {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
-            this.updateSelectedInteractObject()
             this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
             this.renderer.render(this.scene, this.rendererCamera)
             this.skippedRender = false
@@ -115,14 +121,6 @@ class Viewer {
             }
         }
     }
-
-    updateSelectedInteractObject() {
-        var inPhysicalRange = this.interactObjects.filter(i => {
-            return (i.reference.position.distanceTo(this.rendererCamera.parent.position) <= MIN_PHYSICAL_DISTANCE)
-        })
-        inPhysicalRange.sort((a, b) => a.screenRadiusSquared - b.screenRadiusSquared)
-        this.nearestInteractObject = inPhysicalRange[0]
-    } // selected item will be one frame behind!
 
     onContainerElementResize() {
         var width = this.containerElement.clientWidth
@@ -157,6 +155,18 @@ class Viewer {
 
     remove(object) {
         this.objects.remove(object)
+    }
+
+    queueForFirstInteraction(method) {
+        if (this.firstInteraction) {
+            method()
+        } else {
+            this.firstInteractionQueue.push(method)
+        }
+    }
+
+    updateFirstInteraction() {
+
     }
 }
 

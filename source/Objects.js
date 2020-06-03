@@ -3,6 +3,5 @@ module.exports = {
     BasePhysicalObject: require("./objects/BasePhysicalObject"),
     PotreeObject: require("./objects/PotreeObject"),
     TestObject: require("./objects/TestObject"),
-    CollisionCloudObject: require("./objects/CollisionCloudObject"),
-    InteractObject: require("./objects/InteractObject")
+    CollisionCloudObject: require("./objects/CollisionCloudObject")
 }
