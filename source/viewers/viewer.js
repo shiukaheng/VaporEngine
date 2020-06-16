@@ -73,6 +73,7 @@ class Viewer {
         }
 
         this.audioListener = new THREE.AudioListener()
+        console.log("hello")
         this.firstInteraction = false
         this.firstInteractionQueue = []
 
