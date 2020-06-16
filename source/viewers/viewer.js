@@ -77,7 +77,7 @@ class Viewer {
         this.firstInteraction = false
         this.firstInteractionQueue = []
 
-        var events = ["click", "mousemove", "mouseover", "mousemove", "touchmove", "focus"]
+        var events = ["click", "mouseover", "mousemove", "touchmove", "focus"]
         events.forEach((eventName)=>{
             window.addEventListener(eventName, ()=>{
                 if(!this.firstInteraction) {

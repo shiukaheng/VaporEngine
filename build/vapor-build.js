@@ -52672,12 +52672,12 @@ class AudioSourceObject extends BasePhysicalObject {
         super()
         this.delayLoadUntilInteraction = true
         this.audioSourceURL = audioSourceURL
-        this.randomizeStart = true
-        this.loop = true
+        this.randomizeStart = false
+        this.loop = false
         this.autoStart = true
         this.refDistance = 1
         this.volume = 1
-        this.positional = false
+        this.positional = true
 
         this.setVolume = this._setVolume
 
@@ -52708,22 +52708,21 @@ class AudioSourceObject extends BasePhysicalObject {
         super.load(viewer)
         if (this.randomizeStart) {
             this.offset = this.audioBuffer.duration * Math.random()
+            this.audioObj.offset = this.offset
         }
         if (this.positional) {
             this.audioObj = new THREE.PositionalAudio(this.viewer.audioListener)
         } else {
             this.audioObj = new THREE.Audio(this.viewer.audioListener)
         }
-        
         this.audioObj.setBuffer(this.audioBuffer)
-        this.audioObj.offset = this.offset
+        
         this.setVolume = this.audioObj.setVolume
         this.container.add(this.audioObj)
 
         if (this.autoStart) {
             this.viewer.queueForFirstInteraction(() => {
                 this.audioObj.play()
-                console.log("hello i am playing")
             })
         }
     }
@@ -53026,7 +53025,7 @@ class Viewer {
         this.firstInteraction = false
         this.firstInteractionQueue = []
 
-        var events = ["click", "mousemove", "mouseover", "mousemove", "touchmove", "focus"]
+        var events = ["click", "mouseover", "mousemove", "touchmove", "focus"]
         events.forEach((eventName)=>{
             window.addEventListener(eventName, ()=>{
                 if(!this.firstInteraction) {
