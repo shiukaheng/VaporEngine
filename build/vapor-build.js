@@ -51946,9 +51946,10 @@ module.exports = {
     BasePhysicalObject: require("./objects/BasePhysicalObject"),
     PotreeObject: require("./objects/PotreeObject"),
     TestObject: require("./objects/TestObject"),
-    CollisionCloudObject: require("./objects/CollisionCloudObject")
+    CollisionCloudObject: require("./objects/CollisionCloudObject"),
+    AudioSourceObject: require("./objects/AudioSourceObject")
 }
-},{"./objects/BaseObject":22,"./objects/BasePhysicalObject":23,"./objects/CollisionCloudObject":24,"./objects/PotreeObject":25,"./objects/TestObject":26}],12:[function(require,module,exports){
+},{"./objects/AudioSourceObject":22,"./objects/BaseObject":23,"./objects/BasePhysicalObject":24,"./objects/CollisionCloudObject":25,"./objects/PotreeObject":26,"./objects/TestObject":27}],12:[function(require,module,exports){
 module.exports = {
     Arrays: require("./Arrays"),
     Modifiers: require("./Modifiers"),
@@ -51960,7 +51961,7 @@ module.exports = {
 module.exports = {
     Viewer: require("./viewers/Viewer")
 }
-},{"./viewers/Viewer":27}],14:[function(require,module,exports){
+},{"./viewers/Viewer":28}],14:[function(require,module,exports){
 class ModifierArray {
     constructor(object, listOfModifiers=[]){
         this.object = object
@@ -52642,7 +52643,7 @@ class PlayerModifier extends BaseModifier{
 
 }
 module.exports = PlayerModifier
-},{"../objects/BasePhysicalObject":23,"./BaseModifier":17}],21:[function(require,module,exports){
+},{"../objects/BasePhysicalObject":24,"./BaseModifier":17}],21:[function(require,module,exports){
 BaseModifier = require("./BaseModifier")
 class VelocityDragModifier extends BaseModifier{
     constructor(coef=0.9) {
@@ -52660,6 +52661,90 @@ class VelocityDragModifier extends BaseModifier{
 }
 module.exports = VelocityDragModifier
 },{"./BaseModifier":17}],22:[function(require,module,exports){
+BaseObject = require("./BaseObject")
+
+var audioLoader = new THREE.AudioLoader()
+
+
+
+class AudioSourceObject extends BasePhysicalObject {
+    constructor(audioSourceURL="", param) {
+        super()
+        this.delayLoadUntilInteraction = true
+        this.audioSourceURL = audioSourceURL
+        this.randomizeStart = false
+        this.loop = false
+        this.autoStart = true
+        this.refDistance = 1
+        this.volume = 1
+        this.positional = true
+
+        this.setVolume = this._setVolume
+
+        audioLoader.load(this.audioSourceURL, (audioBuffer)=>{
+            this.audioBuffer=audioBuffer
+            
+            if (this.constructor.name == AudioSourceObject.name) {
+                this.declareAssetsLoaded()
+            }
+        })
+
+        //this.assign(param)
+    }
+
+    _setVolume(volume) {
+        this.volume = volume
+    }
+
+    play() {
+        this.audioObj.play()
+    }
+
+    pause() {
+        this.audioObj.pause()
+    }
+
+    load(viewer) {
+        super.load(viewer)
+        if (this.randomizeStart) {
+            this.offset = this.audioBuffer.duration * Math.random()
+            this.audioObj.offset = this.offset
+        }
+        if (this.positional) {
+            this.audioObj = new THREE.PositionalAudio(this.viewer.audioListener)
+        } else {
+            this.audioObj = new THREE.Audio(this.viewer.audioListener)
+        }
+        this.audioObj.setBuffer(this.audioBuffer)
+        
+        this.setVolume = this.audioObj.setVolume
+        this.container.add(this.audioObj)
+
+        if (this.autoStart) {
+            this.viewer.queueForFirstInteraction(() => {
+                this.audioObj.play()
+            })
+        }
+    }
+
+
+    unload(viewer) {
+        super.unload(viewer)
+        this.setVolume = this._setVolume
+        this.container.remove(this.audioObj)
+    }
+
+    unload(viewer) {
+        super.unload(viewer)
+        if (this.pco) {
+            this.viewer.potreePointClouds.splice(this.viewer.potreePointClouds.indexOf(this.pco), 1)
+            this.container.remove(this.pco)
+        }
+    }
+}
+
+module.exports = AudioSourceObject
+},{"./BaseObject":23}],23:[function(require,module,exports){
 THREE = require("three")
 ModifierArray = require("../arrays/ModifierArray")
 
@@ -52705,7 +52790,7 @@ class BaseObject {
 }
 
 module.exports = BaseObject
-},{"../arrays/ModifierArray":14,"three":5}],23:[function(require,module,exports){
+},{"../arrays/ModifierArray":14,"three":5}],24:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 
 class BasePhysicalObject extends BaseObject{
@@ -52735,7 +52820,7 @@ class BasePhysicalObject extends BaseObject{
 }
 
 module.exports = BasePhysicalObject
-},{"./BaseObject":22}],24:[function(require,module,exports){
+},{"./BaseObject":23}],25:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -52798,7 +52883,7 @@ class CollisionCloudObject extends BaseObject {
 }
 
 module.exports = CollisionCloudObject
-},{"../loaders/PCDLoader":16,"./BaseObject":22,"yaot":6}],25:[function(require,module,exports){
+},{"../loaders/PCDLoader":16,"./BaseObject":23,"yaot":6}],26:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 
 class PotreeObject extends BasePhysicalObject {
@@ -52838,7 +52923,7 @@ class PotreeObject extends BasePhysicalObject {
 }
 
 module.exports = PotreeObject
-},{"./BaseObject":22}],26:[function(require,module,exports){
+},{"./BaseObject":23}],27:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 
 
@@ -52860,7 +52945,7 @@ class TestObject extends BasePhysicalObject{
 }
 
 module.exports = TestObject
-},{"./BasePhysicalObject":23}],27:[function(require,module,exports){
+},{"./BasePhysicalObject":24}],28:[function(require,module,exports){
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
@@ -52936,10 +53021,11 @@ class Viewer {
         }
 
         this.audioListener = new THREE.AudioListener()
+        console.log("hello")
         this.firstInteraction = false
         this.firstInteractionQueue = []
 
-        var events = ["click", "mousemove", "mouseover", "mousemove", "touchmove", "focus"]
+        var events = ["click", "mouseover", "mousemove", "touchmove", "focus"]
         events.forEach((eventName)=>{
             window.addEventListener(eventName, ()=>{
                 if(!this.firstInteraction) {
@@ -53036,7 +53122,7 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../arrays/ObjectArray":15,"./viewer.css":28,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],28:[function(require,module,exports){
+},{"../arrays/ObjectArray":15,"./viewer.css":29,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],29:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
 },{"browserify-css":2}]},{},[12])(12)
 });

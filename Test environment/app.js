@@ -1,12 +1,16 @@
 elem = document.getElementById("test_div")
 
 viewer = new Vapor.Viewers.Viewer(elem)
-viewer.potree.pointBudget = 1000000
+
+audioSourceObject = new Vapor.Objects.AudioSourceObject("01_Moderato_quasi_marcia.ogg", viewer)
+viewer.add(audioSourceObject)
 
 player = new Vapor.Objects.BasePhysicalObject()
 viewer.add(player)
 player.modifiers.add(new Vapor.Modifiers.PlayerModifier(0.5))
 player.modifiers.add(new Vapor.Modifiers.VelocityDragModifier())
+player.modifiers.add(new Vapor.Modifiers.LinearAccelerationModifier(new THREE.Vector3(0, 0, 0)))
+
 
 
 map = new Vapor.Objects.PotreeObject("cloud.js", "glasses_clean/")
