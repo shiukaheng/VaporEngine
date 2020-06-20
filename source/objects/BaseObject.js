@@ -2,7 +2,7 @@ THREE = require("three")
 ModifierArray = require("../arrays/ModifierArray")
 
 class BaseObject {
-    constructor() {
+    constructor() { // All assets are supposed to be loaded during object construction in async, and when its done, this.declareAssetsLoaded must be called
         this.onLoadedFunctionList = []
         this.assetsLoaded = false
         this.container = new THREE.Object3D()
@@ -13,7 +13,7 @@ class BaseObject {
     }
     getDistanceFromReference() {
     }
-    load(viewer) {
+    load(viewer) { // How to add itself into the viewer
         this.viewer = viewer
         viewer.scene.add(this.container)
     }
