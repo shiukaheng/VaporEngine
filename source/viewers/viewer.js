@@ -73,16 +73,18 @@ class Viewer {
         }
 
         this.audioListener = new THREE.AudioListener()
-        console.log("hello")
         this.firstInteraction = false
         this.firstInteractionQueue = []
 
-        var events = ["click", "mouseover", "mousemove", "touchmove", "focus"]
+        var events = ["click"]
         events.forEach((eventName)=>{
             window.addEventListener(eventName, ()=>{
                 if(!this.firstInteraction) {
                     this.firstInteraction = true
                     this.firstInteractionQueue.forEach(method => {method()})
+                    if (this.audioListener) {
+                        this.audioListener.context.resume()
+                    }
                 }
             })
         })   
@@ -167,7 +169,16 @@ class Viewer {
     }
 
     updateFirstInteraction() {
+    }
 
+    changeCamera(camera) {
+        this.rendererCamera = camera
+        this.onContainerElementResize()
+        var audioListener = this.audioListener
+        if (this.audioListener.parent) {
+            this.audioListener.parent.remove(this.viewer.audioListener)
+        }
+        camera.add(audioListener)
     }
 }
 

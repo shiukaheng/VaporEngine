@@ -140,12 +140,7 @@ class PlayerModifier extends BaseModifier{
         })
     }
     setAsActive() {
-        this.viewer.rendererCamera = this.camera
-        var audioListener = this.viewer.audioListener
-        if (this.viewer.audioListener.parent) {
-            this.viewer.audioListener.parent.remove(this.viewer.audioListener)
-        }
-        this.camera.add(audioListener)
+        this.viewer.changeCamera(this.camera)
     }
 
 }

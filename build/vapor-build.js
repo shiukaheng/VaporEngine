@@ -52633,12 +52633,7 @@ class PlayerModifier extends BaseModifier{
         })
     }
     setAsActive() {
-        this.viewer.rendererCamera = this.camera
-        var audioListener = this.viewer.audioListener
-        if (this.viewer.audioListener.parent) {
-            this.viewer.audioListener.parent.remove(this.viewer.audioListener)
-        }
-        this.camera.add(audioListener)
+        this.viewer.changeCamera(this.camera)
     }
 
 }
@@ -52665,22 +52660,40 @@ BaseObject = require("./BaseObject")
 
 var audioLoader = new THREE.AudioLoader()
 
-
+/**
+ * Convenience function to handle setters of AudioSourceObject class properties
+ * @param {*} input Input when user sets variable
+ * @param {THREE.Audio, THREE.PositionalAudio} audioObject Audio object to check if its exists (to see if the AudioSourceObject has been loaded / initialized)
+ * @param {*} storageVar Variable used to store property when the audioObj has not been initialized
+ * @param {*} setFunction Function that sets audioObj property
+ */
+function setWrapper(input, audioObject, storageVar, setFunction) {
+    if (audioObject) {
+        storageVar = input
+        setFunction(input)
+    } else {
+        storageVar = input
+    }
+}
 
 class AudioSourceObject extends BasePhysicalObject {
     constructor(audioSourceURL="", param) {
         super()
+
+        // Variables that cant be changed after initialization
         this.delayLoadUntilInteraction = true
         this.audioSourceURL = audioSourceURL
         this.randomizeStart = false
-        this.loop = false
         this.autoStart = true
-        this.refDistance = 1
-        this.volume = 1
         this.positional = true
 
-        this.setVolume = this._setVolume
+        // Variables that CAN be changed after initialization
+        this._loop = true
+        this._volume = 1
+        this._refDistance = 1
+        this._rolloffFactor = 1
 
+        // Load audio data from URL
         audioLoader.load(this.audioSourceURL, (audioBuffer)=>{
             this.audioBuffer=audioBuffer
             
@@ -52692,9 +52705,40 @@ class AudioSourceObject extends BasePhysicalObject {
         //this.assign(param)
     }
 
-    _setVolume(volume) {
-        this.volume = volume
+    // Getters and setters for variables that can be changed after initialization
+
+    set loop(loop) {
+        setWrapper(loop, this.audioObj, this._loop, (x)=>{this.audioObj.setLoop(x)})
     }
+
+    get loop() {
+        return this._loop
+    }
+
+    set volume(volume) {
+        setWrapper(volume, this.audioObj, this._volume, (x)=>{this.audioObj.setVolume(x)})
+    }
+
+    get volume() {
+        return this._volume
+    }
+
+    set rolloffFactor(rolloffFactor) {
+        setWrapper(rolloffFactor, this.audioObj, this._rolloffFactor, (x)=>{this.audioObj.setRolloffFactor(x)})
+    }
+
+    get rolloffFactor() {
+        return this._rolloffFactor
+    }
+
+    set refDistance(refDistance) {
+        setWrapper(refDistance, this.audioObj, this._refDistance, (x)=>{this.audioObj.setRefDistance(x)})
+    }
+
+    get refDistance() {
+        return this._refDistance
+    }
+
 
     play() {
         this.audioObj.play()
@@ -52706,20 +52750,31 @@ class AudioSourceObject extends BasePhysicalObject {
 
     load(viewer) {
         super.load(viewer)
+
+        // Create an offset to start the audio recording with if this.randomizeStart is true
         if (this.randomizeStart) {
             this.offset = this.audioBuffer.duration * Math.random()
             this.audioObj.offset = this.offset
         }
+
+        // Initialize the THREE.Audio / THREE.PositionalAudio object, depending on this.positional
         if (this.positional) {
             this.audioObj = new THREE.PositionalAudio(this.viewer.audioListener)
+            this.audioObj.setRefDistance(this._refDistance)
+            this.audioObj.setRolloffFactor(this._rolloffFactor)
         } else {
             this.audioObj = new THREE.Audio(this.viewer.audioListener)
         }
+
+        // Set audio type agnostic properties
+        this.audioObj.setVolume(this._volume)
+        this.audioObj.setLoop(this._loop)
         this.audioObj.setBuffer(this.audioBuffer)
         
-        this.setVolume = this.audioObj.setVolume
+        // Add the audio object to the container
         this.container.add(this.audioObj)
 
+        // Queue the audio to be played when the user first interacts with the page if autoplay is set to true
         if (this.autoStart) {
             this.viewer.queueForFirstInteraction(() => {
                 this.audioObj.play()
@@ -52730,16 +52785,7 @@ class AudioSourceObject extends BasePhysicalObject {
 
     unload(viewer) {
         super.unload(viewer)
-        this.setVolume = this._setVolume
         this.container.remove(this.audioObj)
-    }
-
-    unload(viewer) {
-        super.unload(viewer)
-        if (this.pco) {
-            this.viewer.potreePointClouds.splice(this.viewer.potreePointClouds.indexOf(this.pco), 1)
-            this.container.remove(this.pco)
-        }
     }
 }
 
@@ -52749,7 +52795,7 @@ THREE = require("three")
 ModifierArray = require("../arrays/ModifierArray")
 
 class BaseObject {
-    constructor() {
+    constructor() { // All assets are supposed to be loaded during object construction in async, and when its done, this.declareAssetsLoaded must be called
         this.onLoadedFunctionList = []
         this.assetsLoaded = false
         this.container = new THREE.Object3D()
@@ -52760,7 +52806,7 @@ class BaseObject {
     }
     getDistanceFromReference() {
     }
-    load(viewer) {
+    load(viewer) { // How to add itself into the viewer
         this.viewer = viewer
         viewer.scene.add(this.container)
     }
@@ -52884,7 +52930,7 @@ class CollisionCloudObject extends BaseObject {
 
 module.exports = CollisionCloudObject
 },{"../loaders/PCDLoader":16,"./BaseObject":23,"yaot":6}],26:[function(require,module,exports){
-BaseObject = require("./BaseObject")
+
 
 class PotreeObject extends BasePhysicalObject {
     constructor(fileName, baseUrl="", pointShape=2) {
@@ -52923,7 +52969,7 @@ class PotreeObject extends BasePhysicalObject {
 }
 
 module.exports = PotreeObject
-},{"./BaseObject":23}],27:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 
 
@@ -53021,16 +53067,18 @@ class Viewer {
         }
 
         this.audioListener = new THREE.AudioListener()
-        console.log("hello")
         this.firstInteraction = false
         this.firstInteractionQueue = []
 
-        var events = ["click", "mouseover", "mousemove", "touchmove", "focus"]
+        var events = ["click"]
         events.forEach((eventName)=>{
             window.addEventListener(eventName, ()=>{
                 if(!this.firstInteraction) {
                     this.firstInteraction = true
                     this.firstInteractionQueue.forEach(method => {method()})
+                    if (this.audioListener) {
+                        this.audioListener.context.resume()
+                    }
                 }
             })
         })   
@@ -53115,7 +53163,16 @@ class Viewer {
     }
 
     updateFirstInteraction() {
+    }
 
+    changeCamera(camera) {
+        this.rendererCamera = camera
+        this.onContainerElementResize()
+        var audioListener = this.audioListener
+        if (this.audioListener.parent) {
+            this.audioListener.parent.remove(this.viewer.audioListener)
+        }
+        camera.add(audioListener)
     }
 }
 
