@@ -4,6 +4,8 @@ ThreeLoader = require('@pnext/three-loader')
 ObjectArray = require("../arrays/ObjectArray")
 // PCDLoader = require("../loaders/PCDLoader")
 
+Stats = require('stats.js')
+
 require("./viewer.css")
 
 /** Viewer class that binds to a container element */
@@ -13,6 +15,13 @@ class Viewer {
      * @param {Element} containerElement [Canvas element that the viewer will render to]
      */
     constructor(containerElement) {
+        this.stats = new Stats()
+        this.stats.showPanel(0)
+
+        this.stats.dom.style.pointerEvents = "none" 
+        document.body.appendChild(this.stats.dom)
+    
+
         this.pauseRenderFlag = false
         this.skippedRender = false
         this.containerElement = containerElement
@@ -88,6 +97,7 @@ class Viewer {
                 }
             })
         })   
+
     }
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
@@ -108,6 +118,7 @@ class Viewer {
     
     /** Render loop */
     renderLoop() {
+        this.stats.begin()
         var dt = this.renderClock.getDelta()
         this.objects.update(dt)
         if (this.rendererCamera) {
@@ -123,6 +134,7 @@ class Viewer {
                 this.skippedRender = true
             }
         }
+        this.stats.end()
     }
 
     onContainerElementResize() {

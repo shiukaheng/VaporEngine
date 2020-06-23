@@ -1,7 +1,7 @@
 
 
 class PotreeObject extends BasePhysicalObject {
-    constructor(fileName, baseUrl="", pointShape=2) {
+    constructor(fileName, baseUrl="", pointShape=0) {
         super()
         this.fileName = fileName
         this.baseUrl = baseUrl

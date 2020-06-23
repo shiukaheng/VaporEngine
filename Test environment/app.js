@@ -23,9 +23,10 @@ viewer.objects.waitUntilAllAssetsLoaded(function() {
     map.container.rotation.z = -0.08
     player.modifiers.add(new Vapor.Modifiers.PlayerModifier(0.5))
     player.modifiers.add(new Vapor.Modifiers.VelocityDragModifier())
-    player.modifiers.add(new Vapor.Modifiers.LinearAccelerationModifier(new THREE.Vector3(0, 0, 0)))
+    // player.modifiers.add(new Vapor.Modifiers.LinearAccelerationModifier(new THREE.Vector3(-0.5, -0.1, -0.1)))
 
     // Start experience
     console.log("All loaded!")
     viewer.startRender()
 })
+
