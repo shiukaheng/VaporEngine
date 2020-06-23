@@ -1,8 +1,16 @@
+const { Geometry, Material } = require("three")
+
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
 ObjectArray = require("../arrays/ObjectArray")
 // PCDLoader = require("../loaders/PCDLoader")
+
+// VRButton = require('three/examples/jsm/webxr/VRButton.js')
+
+VRButton = require('../utils/VRButton')
+
+// import { VRButton } from 'three/examples/jsm/webxr/VRButton.js'
 
 Stats = require('stats.js')
 
@@ -15,12 +23,7 @@ class Viewer {
      * @param {Element} containerElement [Canvas element that the viewer will render to]
      */
     constructor(containerElement) {
-        this.stats = new Stats()
-        this.stats.showPanel(0)
 
-        this.stats.dom.style.pointerEvents = "none" 
-        document.body.appendChild(this.stats.dom)
-    
 
         this.pauseRenderFlag = false
         this.skippedRender = false
@@ -49,6 +52,7 @@ class Viewer {
 
         this.potree = new ThreeLoader.Potree()
         this.potreePointClouds = []
+
 
         // this.PCDLoader = new PCDLoader()
         this.renderClock = new THREE.Clock()
@@ -97,6 +101,18 @@ class Viewer {
                 }
             })
         })   
+        
+        //FPS & WebXR
+
+        this.stats = new Stats()
+        this.stats.showPanel(0)
+
+        this.stats.dom.style.pointerEvents = "none" 
+        document.body.appendChild(this.stats.dom)
+        document.body.appendChild(VRButton.createButton(this.renderer))
+        
+
+        this.renderer.xr.enabled = true;
 
     }
 
@@ -104,11 +120,14 @@ class Viewer {
     startRender() {
         var scope = this
         if (!this.pauseRenderFlag) {
-            requestAnimationFrame(function() {scope.startRender();})
+            requestAnimationFrame(function() {
+                scope.startRender();
+            })
         } else {
             scope.pauseRenderFlag = false
         }
         this.renderLoop()
+
     }
 
     /** Pauses rendering loop */

@@ -7,11 +7,12 @@ viewer = new Vapor.Viewers.Viewer(elem)
 player = new Vapor.Objects.BasePhysicalObject()
 map = new Vapor.Objects.PotreeObject("cloud.js", "glasses_clean/")
 audioSourceObject = new Vapor.Objects.AudioSourceObject("01_Moderato_quasi_marcia.ogg", viewer)
-
+test = new Vapor.Objects.TestObject()
 // Add all objects to the viewer
 viewer.add(player)
 viewer.add(map)
 viewer.add(audioSourceObject)
+viewer.add(test)
 
 viewer.objects.waitUntilAllAssetsLoaded(function() {
     // Configure objects after all is loaded (just in case if some references require assets to be loaded)
