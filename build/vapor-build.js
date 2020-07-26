@@ -51932,7 +51932,7 @@ module.exports = {
     ModifierArray: require("./arrays/ModifierArray"),
     ObjectArray: require("./arrays/ObjectArray")
 }
-},{"./arrays/ModifierArray":14,"./arrays/ObjectArray":15}],10:[function(require,module,exports){
+},{"./arrays/ModifierArray":15,"./arrays/ObjectArray":16}],10:[function(require,module,exports){
 module.exports = {
     BaseModifier: require("./modifiers/BaseModifier"),
     ConstantRotationModifier: require("./modifiers/ConstantRotationModifier"),
@@ -51940,7 +51940,7 @@ module.exports = {
     PlayerModifier: require("./modifiers/PlayerModifier"),
     VelocityDragModifier: require("./modifiers/VelocityDragModifier")
 }
-},{"./modifiers/BaseModifier":17,"./modifiers/ConstantRotationModifier":18,"./modifiers/LinearAccelerationModifier":19,"./modifiers/PlayerModifier":20,"./modifiers/VelocityDragModifier":21}],11:[function(require,module,exports){
+},{"./modifiers/BaseModifier":18,"./modifiers/ConstantRotationModifier":19,"./modifiers/LinearAccelerationModifier":20,"./modifiers/PlayerModifier":21,"./modifiers/VelocityDragModifier":22}],11:[function(require,module,exports){
 module.exports = {
     BaseObject: require("./objects/BaseObject"),
     BasePhysicalObject: require("./objects/BasePhysicalObject"),
@@ -51949,19 +51949,24 @@ module.exports = {
     CollisionCloudObject: require("./objects/CollisionCloudObject"),
     AudioSourceObject: require("./objects/AudioSourceObject")
 }
-},{"./objects/AudioSourceObject":22,"./objects/BaseObject":23,"./objects/BasePhysicalObject":24,"./objects/CollisionCloudObject":25,"./objects/PotreeObject":26,"./objects/TestObject":27}],12:[function(require,module,exports){
+},{"./objects/AudioSourceObject":23,"./objects/BaseObject":24,"./objects/BasePhysicalObject":25,"./objects/CollisionCloudObject":26,"./objects/PotreeObject":27,"./objects/TestObject":28}],12:[function(require,module,exports){
+module.exports = {
+    Subscription: require("./utils/Subscription")
+}
+},{"./utils/Subscription":29}],13:[function(require,module,exports){
 module.exports = {
     Arrays: require("./Arrays"),
     Modifiers: require("./Modifiers"),
     Objects: require("./Objects"),
-    Viewers: require("./Viewers")
+    Viewers: require("./Viewers"),
+    Utils: require("./Utils")
 }
 
-},{"./Arrays":9,"./Modifiers":10,"./Objects":11,"./Viewers":13}],13:[function(require,module,exports){
+},{"./Arrays":9,"./Modifiers":10,"./Objects":11,"./Utils":12,"./Viewers":14}],14:[function(require,module,exports){
 module.exports = {
     Viewer: require("./viewers/Viewer")
 }
-},{"./viewers/Viewer":28}],14:[function(require,module,exports){
+},{"./viewers/Viewer":30}],15:[function(require,module,exports){
 class ModifierArray {
     constructor(object, listOfModifiers=[]){
         this.object = object
@@ -51994,7 +51999,7 @@ class ModifierArray {
     }
 }
 module.exports = ModifierArray
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 class ObjectArray {
     constructor(viewer, listOfObjects=[]){
         this.viewer = viewer
@@ -52044,7 +52049,7 @@ class ObjectArray {
 }
 
 module.exports = ObjectArray
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 // Modified!
 /**
  * @author Filipe Caixeta / http://filipecaixeta.com.br
@@ -52443,7 +52448,7 @@ PCDLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
 } );
 
 module.exports = PCDLoader
-},{"three":5}],17:[function(require,module,exports){
+},{"three":5}],18:[function(require,module,exports){
 ModifierArray = require("../arrays/ModifierArray")
 class BaseModifier {
     constructor() {
@@ -52460,7 +52465,7 @@ class BaseModifier {
     }
 }
 module.exports = BaseModifier
-},{"../arrays/ModifierArray":14}],18:[function(require,module,exports){
+},{"../arrays/ModifierArray":15}],19:[function(require,module,exports){
 BaseModifier = require("./BaseModifier")
 THREE = require("three")
 class ConstantRotationModifier extends BaseModifier {
@@ -52476,7 +52481,7 @@ class ConstantRotationModifier extends BaseModifier {
     }
 }
 module.exports = ConstantRotationModifier
-},{"./BaseModifier":17,"three":5}],19:[function(require,module,exports){
+},{"./BaseModifier":18,"three":5}],20:[function(require,module,exports){
 THREE = require('three')
 BaseModifier = require("./BaseModifier")
 class LinearAccelerationModifier extends BaseModifier{
@@ -52490,7 +52495,7 @@ class LinearAccelerationModifier extends BaseModifier{
     }
 }
 module.exports = LinearAccelerationModifier
-},{"./BaseModifier":17,"three":5}],20:[function(require,module,exports){
+},{"./BaseModifier":18,"three":5}],21:[function(require,module,exports){
 BaseModifier = require("./BaseModifier")
 BasePhysicalObject = require("../objects/BasePhysicalObject")
 
@@ -52503,41 +52508,24 @@ class PlayerModifier extends BaseModifier{
     }
     load(physical_object) {
         this.viewer = physical_object.viewer
+        this.updatePosition = this.updatePosition.bind(this)
         if (!(physical_object instanceof BasePhysicalObject)) {
             throw new TypeError("PlayerModifier must only be added to class that extends BasePhysicalObject")
         }
-
         // Parameters
         this.mouseSensitivity = 0.001
 
         // Creating control object
-
         this._quaternion_container = new THREE.Quaternion()
         this.object = physical_object
-
         this.controlObject = new THREE.Object3D()
         this.controlObject.rotation.order = 'YZX'
 
-
         // Pointer lock
-
-        this.pointerlock = false
-        // console.log(physical_object)
-        this.canvas = this.viewer.renderer.domElement
-        var scope = this
-        this.canvas.onclick = function() {
-            scope.canvas.requestPointerLock()
-            // navigator.xr.requestSession('immersive-ar')
-        }
-
-        var boundLockChangeAlert = this.lockChangeAlert.bind(this)
-        this.boundUpdatePosition = this.updatePosition.bind(this)
-        
-        document.addEventListener('pointerlockchange', boundLockChangeAlert, false)
-        document.addEventListener('mozpointerlockchange', boundLockChangeAlert, false)
+        this.boundPointerControlHandler = this.updatePosition.bind(this)
+        this.viewer.pointerControlSubscription.subscribe(this.updatePosition.bind(this.boundPointerControlHandler))
 
         // Keybinds
-
         this.horizontal_helper = new THREE.Object3D()
         this.controlObject.add(this.horizontal_helper)
         this.horizontal_helper.rotation.y = Math.PI/2
@@ -52547,9 +52535,7 @@ class PlayerModifier extends BaseModifier{
         this.right = false
         this.up = false
         this.down = false
-
         this.up_direction = new THREE.Vector3(0, 1, 0)
-
         var scope = this
 
         // Create camera
@@ -52561,22 +52547,8 @@ class PlayerModifier extends BaseModifier{
     }
     unload(object) {
         this.viewer = undefined
-        this.canvas.onclick = undefined
-        document.removeEventListener("mousemove", this.updatePosition, false)
-        document.removeEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false)
-        document.removeEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false)
-        this.removeListeners()
+        this.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
         this.object.container.remove(this.camera)
-    }
-    lockChangeAlert() {
-        if (document.pointerLockElement === this.canvas ||
-            document.mozPointerLockElement === this.canvas) {
-          this.pointerlock=true
-          document.addEventListener("mousemove", this.boundUpdatePosition, false)
-        } else {
-          this.pointerlock=false
-          document.removeEventListener("mousemove", this.boundUpdatePosition, false)
-        }
     }
     updatePosition(e) {
         this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
@@ -52592,9 +52564,10 @@ class PlayerModifier extends BaseModifier{
     }
     update(dt) {
         super.update(dt)
+        // console.log(this.object.container.position)
         var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
         var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
-        if (this.pointerlock) {
+        if (this.viewer.hasPointerLock) {
             if (this.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
             }
@@ -52638,7 +52611,7 @@ class PlayerModifier extends BaseModifier{
 
 }
 module.exports = PlayerModifier
-},{"../objects/BasePhysicalObject":24,"./BaseModifier":17}],21:[function(require,module,exports){
+},{"../objects/BasePhysicalObject":25,"./BaseModifier":18}],22:[function(require,module,exports){
 BaseModifier = require("./BaseModifier")
 class VelocityDragModifier extends BaseModifier{
     constructor(coef=0.9) {
@@ -52655,7 +52628,7 @@ class VelocityDragModifier extends BaseModifier{
     }
 }
 module.exports = VelocityDragModifier
-},{"./BaseModifier":17}],22:[function(require,module,exports){
+},{"./BaseModifier":18}],23:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 
 var audioLoader = new THREE.AudioLoader()
@@ -52790,7 +52763,7 @@ class AudioSourceObject extends BasePhysicalObject {
 }
 
 module.exports = AudioSourceObject
-},{"./BaseObject":23}],23:[function(require,module,exports){
+},{"./BaseObject":24}],24:[function(require,module,exports){
 THREE = require("three")
 ModifierArray = require("../arrays/ModifierArray")
 
@@ -52836,7 +52809,7 @@ class BaseObject {
 }
 
 module.exports = BaseObject
-},{"../arrays/ModifierArray":14,"three":5}],24:[function(require,module,exports){
+},{"../arrays/ModifierArray":15,"three":5}],25:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 
 class BasePhysicalObject extends BaseObject{
@@ -52866,7 +52839,7 @@ class BasePhysicalObject extends BaseObject{
 }
 
 module.exports = BasePhysicalObject
-},{"./BaseObject":23}],25:[function(require,module,exports){
+},{"./BaseObject":24}],26:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -52929,7 +52902,7 @@ class CollisionCloudObject extends BaseObject {
 }
 
 module.exports = CollisionCloudObject
-},{"../loaders/PCDLoader":16,"./BaseObject":23,"yaot":6}],26:[function(require,module,exports){
+},{"../loaders/PCDLoader":17,"./BaseObject":24,"yaot":6}],27:[function(require,module,exports){
 
 
 class PotreeObject extends BasePhysicalObject {
@@ -52969,7 +52942,7 @@ class PotreeObject extends BasePhysicalObject {
 }
 
 module.exports = PotreeObject
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 
 
@@ -52991,11 +52964,31 @@ class TestObject extends BasePhysicalObject{
 }
 
 module.exports = TestObject
-},{"./BasePhysicalObject":24}],28:[function(require,module,exports){
+},{"./BasePhysicalObject":25}],29:[function(require,module,exports){
+class Subscription {
+    constructor() {
+        this.subscribers = new Set()
+        this.update = this.update.bind(this)
+    }
+    subscribe(func) {
+        this.subscribers.add(func)
+    }
+    unsubscribe(func) {
+        this.subscribers.delete(func)
+    }
+    update(data) {
+        this.subscribers.forEach(x => {
+            x(data)
+        })
+    }
+}
+module.exports = Subscription
+},{}],30:[function(require,module,exports){
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
 ObjectArray = require("../arrays/ObjectArray")
+Subscription = require("../utils/Subscription")
 // PCDLoader = require("../loaders/PCDLoader")
 
 require("./viewer.css")
@@ -53007,69 +53000,98 @@ class Viewer {
      * @param {Element} containerElement [Canvas element that the viewer will render to]
      */
     constructor(containerElement) {
+        // Set default variables for renderer
         this.pauseRenderFlag = false
         this.skippedRender = false
         this.containerElement = containerElement
 
+        // Initialize renderer
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.domElement.className += "vaporViewer"
         this.containerElement.appendChild(this.renderer.domElement)
         this.renderer.setSize(this.containerElement.scrollWidth, this.containerElement.scrollHeight)
-
         var onContainerElementResizeBound = this.onContainerElementResize.bind(this)
         this.containerElementResizeListener = new ResizeSensor(containerElement, onContainerElementResizeBound)
+        this.renderClock = new THREE.Clock() // clock to calculate time between frames, used for modifiers
 
+        // Get required WebGL extensions
+        var gl = this.renderer.domElement.getContext('webgl')
+        Object.defineProperty(this, "splatCapable", {
+            value: (gl.getExtension('EXT_frag_depth')&&gl.getExtension('WEBGL_depth_texture')&&gl.getExtension('OES_vertex_array_object')),
+            writable: false
+        })        
+
+        // Initialize scene, renderer camera, object array, collision detection, interact object variables
+        // TODO: Move collision detection, interact object processing to global modifiers
         this.scene = new THREE.Scene()
         this.rendererCamera = undefined
-
         this.objects = new ObjectArray(this)
         this.collisionList = []
-
         this.nearestInteractObject = undefined
 
-        var gl = this.renderer.domElement.getContext('webgl')
-        gl.getExtension('EXT_frag_depth')
-        gl.getExtension('WEBGL_depth_texture')
-        gl.getExtension('OES_vertex_array_object')
-
+        // Initialize Potree (used to cull point clouds)
         this.potree = new ThreeLoader.Potree()
         this.potreePointClouds = []
 
         // this.PCDLoader = new PCDLoader()
-        this.renderClock = new THREE.Clock()
 
+        // Keyboard input initialization
         this.keyPressed = {}
         var scope = this
-        
-        // Keyboard input
         function keyHandler(keyCode, boolean) {
             scope.keyPressed[`key${keyCode}`] = boolean
         }
-
         function onKeyDown(e) {
             e.preventDefault()
             e.stopPropagation()
             keyHandler(e.keyCode, true)
         }
-
         function onKeyUp(e) {
             e.preventDefault()
             e.stopPropagation()
             keyHandler(e.keyCode, false)
         }
-
         document.addEventListener('keydown', onKeyDown, false)
         document.addEventListener('keyup', onKeyUp, false)
-
         this.removeListeners = function() {
             document.removeEventListener('keydown', onKeyDown, false)
             document.removeEventListener('keyup', onKeyUp, false)
         }
 
+        // Point controls input initialization
+        this.pointerlock = false
+        var scope = this
+        this.renderer.domElement.onclick = function() {
+            scope.renderer.domElement.requestPointerLock()
+        }
+
+        // this.pointerControlsSubscribers = []
+        // this.pointerControlsStateSubscribers = []
+
+        this.pointerControlSubscription = new Subscription()
+        this.pointerControlStateSubscription = new Subscription()
+
+        var lockChangeAlert = function() {
+            if (document.pointerLockElement === this.renderer.domElement ||
+                document.mozPointerLockElement === this.renderer.domElement) {
+              this.hasPointerLock=true
+              document.addEventListener("mousemove", this.pointerControlSubscription.update, false)
+            } else {
+              this.hasPointerLock=false
+              document.removeEventListener("mousemove", this.pointerControlSubscription.update, false)
+            }
+            this.pointerControlStateSubscription.update(this.pointerlock)
+        }.bind(this)
+
+        document.addEventListener('pointerlockchange', lockChangeAlert, false)
+        document.addEventListener('mozpointerlockchange', lockChangeAlert, false)
+
+        // Positional audio initialization
         this.audioListener = new THREE.AudioListener()
+
+        // Page interaction checking initialization, used for starting objects with audio. Unreliable for that purpose though!
         this.firstInteraction = false
         this.firstInteractionQueue = []
-
         var events = ["click"]
         events.forEach((eventName)=>{
             window.addEventListener(eventName, ()=>{
@@ -53179,7 +53201,7 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../arrays/ObjectArray":15,"./viewer.css":29,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],29:[function(require,module,exports){
+},{"../arrays/ObjectArray":16,"../utils/Subscription":29,"./viewer.css":31,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],31:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":2}]},{},[12])(12)
+},{"browserify-css":2}]},{},[13])(13)
 });

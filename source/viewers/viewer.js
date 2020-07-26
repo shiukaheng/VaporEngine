@@ -2,6 +2,7 @@ THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
 ObjectArray = require("../arrays/ObjectArray")
+Subscription = require("../utils/Subscription")
 // PCDLoader = require("../loaders/PCDLoader")
 
 require("./viewer.css")
@@ -13,69 +14,98 @@ class Viewer {
      * @param {Element} containerElement [Canvas element that the viewer will render to]
      */
     constructor(containerElement) {
+        // Set default variables for renderer
         this.pauseRenderFlag = false
         this.skippedRender = false
         this.containerElement = containerElement
 
+        // Initialize renderer
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.domElement.className += "vaporViewer"
         this.containerElement.appendChild(this.renderer.domElement)
         this.renderer.setSize(this.containerElement.scrollWidth, this.containerElement.scrollHeight)
-
         var onContainerElementResizeBound = this.onContainerElementResize.bind(this)
         this.containerElementResizeListener = new ResizeSensor(containerElement, onContainerElementResizeBound)
+        this.renderClock = new THREE.Clock() // clock to calculate time between frames, used for modifiers
 
+        // Get required WebGL extensions
+        var gl = this.renderer.domElement.getContext('webgl')
+        Object.defineProperty(this, "splatCapable", {
+            value: (gl.getExtension('EXT_frag_depth')&&gl.getExtension('WEBGL_depth_texture')&&gl.getExtension('OES_vertex_array_object')),
+            writable: false
+        })        
+
+        // Initialize scene, renderer camera, object array, collision detection, interact object variables
+        // TODO: Move collision detection, interact object processing to global modifiers
         this.scene = new THREE.Scene()
         this.rendererCamera = undefined
-
         this.objects = new ObjectArray(this)
         this.collisionList = []
-
         this.nearestInteractObject = undefined
 
-        var gl = this.renderer.domElement.getContext('webgl')
-        gl.getExtension('EXT_frag_depth')
-        gl.getExtension('WEBGL_depth_texture')
-        gl.getExtension('OES_vertex_array_object')
-
+        // Initialize Potree (used to cull point clouds)
         this.potree = new ThreeLoader.Potree()
         this.potreePointClouds = []
 
         // this.PCDLoader = new PCDLoader()
-        this.renderClock = new THREE.Clock()
 
+        // Keyboard input initialization
         this.keyPressed = {}
         var scope = this
-        
-        // Keyboard input
         function keyHandler(keyCode, boolean) {
             scope.keyPressed[`key${keyCode}`] = boolean
         }
-
         function onKeyDown(e) {
             e.preventDefault()
             e.stopPropagation()
             keyHandler(e.keyCode, true)
         }
-
         function onKeyUp(e) {
             e.preventDefault()
             e.stopPropagation()
             keyHandler(e.keyCode, false)
         }
-
         document.addEventListener('keydown', onKeyDown, false)
         document.addEventListener('keyup', onKeyUp, false)
-
         this.removeListeners = function() {
             document.removeEventListener('keydown', onKeyDown, false)
             document.removeEventListener('keyup', onKeyUp, false)
         }
 
+        // Point controls input initialization
+        this.pointerlock = false
+        var scope = this
+        this.renderer.domElement.onclick = function() {
+            scope.renderer.domElement.requestPointerLock()
+        }
+
+        // this.pointerControlsSubscribers = []
+        // this.pointerControlsStateSubscribers = []
+
+        this.pointerControlSubscription = new Subscription()
+        this.pointerControlStateSubscription = new Subscription()
+
+        var lockChangeAlert = function() {
+            if (document.pointerLockElement === this.renderer.domElement ||
+                document.mozPointerLockElement === this.renderer.domElement) {
+              this.hasPointerLock=true
+              document.addEventListener("mousemove", this.pointerControlSubscription.update, false)
+            } else {
+              this.hasPointerLock=false
+              document.removeEventListener("mousemove", this.pointerControlSubscription.update, false)
+            }
+            this.pointerControlStateSubscription.update(this.pointerlock)
+        }.bind(this)
+
+        document.addEventListener('pointerlockchange', lockChangeAlert, false)
+        document.addEventListener('mozpointerlockchange', lockChangeAlert, false)
+
+        // Positional audio initialization
         this.audioListener = new THREE.AudioListener()
+
+        // Page interaction checking initialization, used for starting objects with audio. Unreliable for that purpose though!
         this.firstInteraction = false
         this.firstInteractionQueue = []
-
         var events = ["click"]
         events.forEach((eventName)=>{
             window.addEventListener(eventName, ()=>{

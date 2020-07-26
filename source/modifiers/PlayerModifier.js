@@ -10,41 +10,24 @@ class PlayerModifier extends BaseModifier{
     }
     load(physical_object) {
         this.viewer = physical_object.viewer
+        this.updatePosition = this.updatePosition.bind(this)
         if (!(physical_object instanceof BasePhysicalObject)) {
             throw new TypeError("PlayerModifier must only be added to class that extends BasePhysicalObject")
         }
-
         // Parameters
         this.mouseSensitivity = 0.001
 
         // Creating control object
-
         this._quaternion_container = new THREE.Quaternion()
         this.object = physical_object
-
         this.controlObject = new THREE.Object3D()
         this.controlObject.rotation.order = 'YZX'
 
-
         // Pointer lock
-
-        this.pointerlock = false
-        // console.log(physical_object)
-        this.canvas = this.viewer.renderer.domElement
-        var scope = this
-        this.canvas.onclick = function() {
-            scope.canvas.requestPointerLock()
-            // navigator.xr.requestSession('immersive-ar')
-        }
-
-        var boundLockChangeAlert = this.lockChangeAlert.bind(this)
-        this.boundUpdatePosition = this.updatePosition.bind(this)
-        
-        document.addEventListener('pointerlockchange', boundLockChangeAlert, false)
-        document.addEventListener('mozpointerlockchange', boundLockChangeAlert, false)
+        this.boundPointerControlHandler = this.updatePosition.bind(this)
+        this.viewer.pointerControlSubscription.subscribe(this.updatePosition.bind(this.boundPointerControlHandler))
 
         // Keybinds
-
         this.horizontal_helper = new THREE.Object3D()
         this.controlObject.add(this.horizontal_helper)
         this.horizontal_helper.rotation.y = Math.PI/2
@@ -54,9 +37,7 @@ class PlayerModifier extends BaseModifier{
         this.right = false
         this.up = false
         this.down = false
-
         this.up_direction = new THREE.Vector3(0, 1, 0)
-
         var scope = this
 
         // Create camera
@@ -68,22 +49,8 @@ class PlayerModifier extends BaseModifier{
     }
     unload(object) {
         this.viewer = undefined
-        this.canvas.onclick = undefined
-        document.removeEventListener("mousemove", this.updatePosition, false)
-        document.removeEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false)
-        document.removeEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false)
-        this.removeListeners()
+        this.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
         this.object.container.remove(this.camera)
-    }
-    lockChangeAlert() {
-        if (document.pointerLockElement === this.canvas ||
-            document.mozPointerLockElement === this.canvas) {
-          this.pointerlock=true
-          document.addEventListener("mousemove", this.boundUpdatePosition, false)
-        } else {
-          this.pointerlock=false
-          document.removeEventListener("mousemove", this.boundUpdatePosition, false)
-        }
     }
     updatePosition(e) {
         this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
@@ -99,9 +66,10 @@ class PlayerModifier extends BaseModifier{
     }
     update(dt) {
         super.update(dt)
+        // console.log(this.object.container.position)
         var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
         var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
-        if (this.pointerlock) {
+        if (this.viewer.hasPointerLock) {
             if (this.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
             }
