@@ -4,8 +4,8 @@ elem = document.getElementById("test_div")
 viewer = new Vapor.Viewers.Viewer(elem)
 
 // Initialize all objects
-player = new Vapor.Objects.PlayerObject(1, 0)
-window.player = player
+player = new Vapor.Objects.PlayerObject()
+// window.player = player
 map = new Vapor.Objects.PotreeObject("cloud.js", "InternalUpper/", 2)
 // audioSourceObject = new Vapor.Objects.AudioSourceObject("01_Moderato_quasi_marcia.ogg", viewer)
 

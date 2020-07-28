@@ -53,7 +53,9 @@ class Viewer {
         this.keyPressed = {}
         var scope = this
         function keyHandler(keyCode, boolean) {
-            scope.keyPressed[`key${keyCode}`] = boolean
+            if (scope._allowUserControl) {
+                scope.keyPressed[`key${keyCode}`] = boolean
+            }
         }
         function onKeyDown(e) {
             e.preventDefault()
@@ -94,7 +96,9 @@ class Viewer {
               this.hasPointerLock=false
               document.removeEventListener("mousemove", this.pointerControlSubscription.update, false)
             }
-            this.pointerControlStateSubscription.update(this.pointerlock)
+            if (this._allowUserControl) {
+                this.pointerControlStateSubscription.update(this.pointerlock)
+            }
         }.bind(this)
 
         document.addEventListener('pointerlockchange', lockChangeAlert, false)
@@ -117,7 +121,12 @@ class Viewer {
                     }
                 }
             })
-        })   
+        })
+
+        // Some extra flags
+        this._allowUserControl = true
+        
+        
     }
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
@@ -210,6 +219,16 @@ class Viewer {
         }
         camera.add(audioListener)
     }
+
+    set allowUserControl(bool) {
+        this._allowUserControl = bool
+        this.keyPressed = {}
+    }
+
+    get allowUserControl() {
+        return this._allowUserControl
+    }
+
 }
 
 

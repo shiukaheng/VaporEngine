@@ -2,6 +2,19 @@ var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
 
+function peek(x) {
+    console.log(x)
+    return x
+}
+
+//source: https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
+function randn_bm() {
+    var u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+}
+
 class PlayerObject extends BasePhysicalObject {
     constructor(mass=1, drag=0.9, acceleration=7, bounceRadius=1) {
         super(mass)
@@ -13,13 +26,14 @@ class PlayerObject extends BasePhysicalObject {
             this._direction = new THREE.Vector3()
             this.__direction = new THREE.Vector3()
             this._bezierAnimClock = new THREE.Clock(false)
+            this._demoLookTo = undefined
             this.playerModifier = new PlayerModifier(acceleration, bounceRadius)
             this.velocityDragModifier = new VelocityDragModifier(drag)
             this.declareAssetsLoaded()
         }
     }
-    lookAt(vector) {
-        this.container.lookAt(vector)
+    lookAt(pos) {
+        this.container.lookAt(pos)
     }
     load(viewer) {
         super.load(viewer)
@@ -38,6 +52,13 @@ class PlayerObject extends BasePhysicalObject {
             this._bezierHelper.update((pos, vel) => {
                 this.position.copy(pos)
                 this.velocity.copy(vel)
+                if (this._demoLookTo) {
+                    this.lookAt(this._demoLookTo)
+                } else {
+                    if (this.velocity.length()>0) {
+                        this.lookAt(this.position.clone().add(this.velocity))
+                    }
+                }
             })
         }
         this._direction = this.__direction.copy(this.playerModifier.camera.position).addScaledVector(this._lastCam.position, -1).normalize()
@@ -45,17 +66,17 @@ class PlayerObject extends BasePhysicalObject {
 
     }
     get pan() {
-         return -this.playerModifier.controlObject.rotation.x
+         return -this.playerModifier.controlObject.rotation.y
     }
     set pan(pan) {
-        this.playerModifier.controlObject.rotation.x = -pan
+        this.playerModifier.controlObject.rotation.y = -pan
         this.playerModifier.updateRotationFromControlObject()
     }
     get tilt() {
-        return -this.playerModifier.controlObject.rotation.y
+        return -this.playerModifier.controlObject.rotation.x
     }
     set tilt(tilt) {
-        this.playerModifier.controlObject.rotation.y = -tilt
+        this.playerModifier.controlObject.rotation.x = -tilt
         this.playerModifier.updateRotationFromControlObject()
     }
     get row() {
@@ -77,7 +98,7 @@ class PlayerObject extends BasePhysicalObject {
     set drag(drag) {
         this.velocityDragModifier.coef = drag
     }
-    bezierFlyTo(destCamera=camB, duration=20, segments=500, endVel=0) {
+    bezierFlyTo(destCamera=camB, duration=10, segments=500, endVel=1, onEnd=()=>{}) {
         var startPos = this.playerModifier.camera.getWorldPosition(new THREE.Vector3())
         if (this.velocity.length() == 0) {
             var startDir = this.playerModifier.camera.getWorldDirection(new THREE.Vector3())
@@ -90,13 +111,34 @@ class PlayerObject extends BasePhysicalObject {
         var destScalarVel = endVel
         this._bezierHelper = new BezierPathAnimation(startPos, startDir, startVel, destPos, destDir, destScalarVel, duration, segments, ()=>{
             this._bezierHelper=undefined
-            this.velocity=new THREE.Vector3(0, 0, 0)})
+            onEnd()
+        })
+    }
+    demoMode(center=new THREE.Vector3(0,0,0), radius=30, radiusVariance=1, donutConstant=10, perPointTime=20, _destCamera=new THREE.PerspectiveCamera()) {
+        this.viewer.allowUserControl = false
+        if (donutConstant<0) {
+            throw "Donut constant must be larger than 0!"
+        }
+        var pos = new THREE.Vector3(randn_bm(), randn_bm()/(1+donutConstant), randn_bm()).normalize()
+        pos.multiplyScalar(radius+randn_bm()*radiusVariance).add(center)
+        _destCamera.position.copy(pos)
+        _destCamera.lookAt(center)
+        this.bezierFlyTo(_destCamera, perPointTime, 500, 0, ()=>{
+            this.demoMode(center, radius, radiusVariance, donutConstant, perPointTime, _destCamera)
+        })
+        this._demoLookTo = center.clone()
+    }
+    exitDemoMode() {
+        this._bezierHelper = undefined
+        this._demoLookTo = undefined
+        this.allowUserControl = true
     }
 }
 
 class BezierPathAnimation{
     constructor(startPos=new THREE.Vector3(0, 0, 0), startDir=new THREE.Vector3(1, 0, 0), startVel=new THREE.Vector3(1, 0, 0), destPos=new THREE.Vector3(3, 3, 0), destDir=new THREE.Vector3(1, 0, 0), destScalarVel=0, duration=5, segments=100, endCallback, impossibleParamCompensation=true) {
-
+        this.startPos = startPos
+        this.destPos = destPos
         this._lerpVector = new THREE.Vector3()
         this.duration = duration
         this.startVel = startVel
@@ -112,9 +154,9 @@ class BezierPathAnimation{
         var bc_offset = a.distanceTo(d)/2
         var b
         if (!startVel < 1) {
-            b = a.clone().add(startDir.multiplyScalar(bc_offset+bc_offset/this.startScalarVel**2))
+            b = a.clone().add(startDir.multiplyScalar(bc_offset+(-1/(bc_offset*this.startScalarVel**2+1))))
         } else {
-            b = a.clone().add(this._direction.clone().multiplyScalar(bc_offset+bc_offset/this.destScalarVel**2))
+            b = a.clone().add(this._direction.clone().multiplyScalar(bc_offset+(-1/(bc_offset*this.startScalarVel**2+1))))
         }
         var c = d.clone().addScaledVector(destDir, -bc_offset)
         this.bezierPath = new THREE.CubicBezierCurve3(a, b, c ,d)
@@ -135,7 +177,7 @@ class BezierPathAnimation{
         }
         this._halfTimeDistance = (this.duration/2)**2*(this._w-this.startScalarVel)/this.duration + (this.duration/2)*this.startScalarVel
         this._halfTimeDistanceB = (this.duration/2)*(this.duration*(2*this._w-this.destScalarVel)+(this.duration/2)*(this.destScalarVel-this._w))/this.duration
-
+        // console.log(this)
         this.update = this.update.bind(this)
     }
     update(updateCallback) {
@@ -167,7 +209,11 @@ class BezierPathAnimation{
             var p1 = p2-1
             posVec = this._lerpVector.lerpVectors(this.sampledBezierPath[p1], this.sampledBezierPath[p2], fuzzyIndex-p1)
         }
-        this.velocity.subVectors(posVec, this._lastPos).divideScalar(delta_time)
+        if (delta_time==0) {
+            this.velocity.copy(this.startVel)
+        } else {
+            this.velocity.subVectors(posVec, this._lastPos).divideScalar(delta_time)
+        }
         updateCallback(posVec, this.velocity)
         this._lastPos.copy(posVec)
     }
