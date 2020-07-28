@@ -64,10 +64,11 @@ class PlayerModifier extends BaseModifier{
         }
         this.object.container.setRotationFromQuaternion(this.controlObject.getWorldQuaternion(this._quaternion_container))
     }
-    update(object, dt) {
+    update(dt) {
         super.update(dt)
-        var front = this.object.container.getWorldDirection(new THREE.Vector3()).multiplyScalar(this.speed*dt)
-        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).multiplyScalar(this.speed*dt)
+        // console.log(this.object.container.position)
+        var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
+        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
         if (this.viewer.hasPointerLock) {
             if (this.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
@@ -82,10 +83,10 @@ class PlayerModifier extends BaseModifier{
                 this.object.addVelocity(left.clone().multiplyScalar(-1))
             }
             if (this.viewer.getKeyState(32)) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.speed*dt))
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.speed))
             }
             if (this.viewer.getKeyState(16)) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.speed*dt))
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.speed))
             }
         }
         this.object.viewer.collisionList.forEach(x => {

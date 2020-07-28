@@ -24,12 +24,6 @@ class BasePhysicalObject extends BaseObject{
         this.container.position.add(this.velocity.clone().multiplyScalar(dt))
         super.update(dt)
     }
-    get position() {
-        return this.container.position
-    }
-    set position(pos) {
-        this.constructor.position.copy(pos)
-    }
 }
 
 module.exports = BasePhysicalObject
