@@ -1,17 +1,31 @@
 BaseModifier = require("./BaseModifier")
 BasePhysicalObject = require("../objects/BasePhysicalObject")
 
+function event_based_modifier_method(target, name, descriptor) {
+    const original = descriptor.value;
+    if (typeof original === 'function') {
+            descriptor.value = function(...args) {
+                if (target.enabled||!target.object.bypassModifiers) {
+                    const result = original.apply(this, args)
+                    return result
+                }
+            }
+    }
+}
 class PlayerModifier extends BaseModifier{
-    constructor(speed=5, bounceRadius=10) {
+    constructor(acceleration=7, bounceRadius=1) {
         super()
-        this.speed = speed
+        this.acceleration = acceleration
         this.bounceRadius = bounceRadius
         this._reflectNormal = new THREE.Vector3()
     }
-    load(physical_object) {
-        this.viewer = physical_object.viewer
-        this.updatePosition = this.updatePosition.bind(this)
-        if (!(physical_object instanceof BasePhysicalObject)) {
+    load(object) {
+        super.load(object)
+        this.viewer = object.viewer
+        this.pointerControlsUpdate = this.pointerControlsUpdate.bind(this)
+        // this.updateRotationFromControlObject = this.updateRotationFromControlObject.bind(this)
+
+        if (!(object instanceof BasePhysicalObject)) {
             throw new TypeError("PlayerModifier must only be added to class that extends BasePhysicalObject")
         }
         // Parameters
@@ -19,18 +33,16 @@ class PlayerModifier extends BaseModifier{
 
         // Creating control object
         this._quaternion_container = new THREE.Quaternion()
-        this.object = physical_object
         this.controlObject = new THREE.Object3D()
         this.controlObject.rotation.order = 'YZX'
+        this.direction_helper = new THREE.Object3D()
+        this.direction_helper.rotation.order = 'YZX'
 
         // Pointer lock
-        this.boundPointerControlHandler = this.updatePosition.bind(this)
-        this.viewer.pointerControlSubscription.subscribe(this.updatePosition.bind(this.boundPointerControlHandler))
+        this.boundPointerControlHandler = this.pointerControlsUpdate
+        this.viewer.pointerControlSubscription.subscribe(this.pointerControlsUpdate)
 
         // Keybinds
-        this.horizontal_helper = new THREE.Object3D()
-        this.controlObject.add(this.horizontal_helper)
-        this.horizontal_helper.rotation.y = Math.PI/2
         this.forward = false
         this.backward = false
         this.left = false
@@ -52,10 +64,16 @@ class PlayerModifier extends BaseModifier{
         this.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
         this.object.container.remove(this.camera)
     }
-    updatePosition(e) {
-        this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
-        this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
-        this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
+    // @event_based_modifier_method TODO: Migrate to ES6 with babel
+    pointerControlsUpdate(e) {
+        if (this.enabled&&!this.object.bypassModifiers) {
+            this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
+            this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
+            this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
+            this.updateRotationFromControlObject()
+        }
+    }
+    updateRotationFromControlObject() {
         if (this.controlObject.rotation.x > Math.PI/2) {
             this.controlObject.rotation.x = Math.PI/2
         }
@@ -64,11 +82,12 @@ class PlayerModifier extends BaseModifier{
         }
         this.object.container.setRotationFromQuaternion(this.controlObject.getWorldQuaternion(this._quaternion_container))
     }
-    update(dt) {
-        super.update(dt)
-        // console.log(this.object.container.position)
-        var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
-        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
+    update(object, dt) {
+        super.update(object, dt)
+        this.direction_helper.rotation.y = this.controlObject.rotation.y
+        var front = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.acceleration*dt)
+        this.direction_helper.rotation.y = this.controlObject.rotation.y + Math.PI/2
+        var left = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.acceleration*dt)
         if (this.viewer.hasPointerLock) {
             if (this.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
@@ -83,10 +102,10 @@ class PlayerModifier extends BaseModifier{
                 this.object.addVelocity(left.clone().multiplyScalar(-1))
             }
             if (this.viewer.getKeyState(32)) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.speed))
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.acceleration*dt))
             }
             if (this.viewer.getKeyState(16)) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.speed))
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.acceleration*dt))
             }
         }
         this.object.viewer.collisionList.forEach(x => {
@@ -110,6 +129,5 @@ class PlayerModifier extends BaseModifier{
     setAsActive() {
         this.viewer.changeCamera(this.camera)
     }
-
 }
 module.exports = PlayerModifier

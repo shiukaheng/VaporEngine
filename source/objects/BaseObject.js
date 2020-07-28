@@ -7,6 +7,7 @@ class BaseObject {
         this.assetsLoaded = false
         this.container = new THREE.Object3D()
         this.modifiers = new ModifierArray(this)
+        this.bypassModifiers = false
         if (this.constructor.name === BaseObject.name) {
             this.declareAssetsLoaded()
         }
@@ -22,7 +23,9 @@ class BaseObject {
         viewer.scene.remove(this.container)
     }
     update(dt) {
-        this.modifiers.update(dt)
+        if (!this.bypassModifiers) {
+            this.modifiers.update(dt)
+        }
     }
     declareAssetsLoaded() {
         this.assetsLoaded = true
@@ -39,6 +42,18 @@ class BaseObject {
         } else {
             this.onLoadedFunctionList.push(queuedFunction)
         }
+    }
+    set position(position) {
+        this.container.position = position
+    }
+    get position() {
+        return this.container.position
+    }
+    set rotation(rotation) {
+        this.container.rotation = rotation
+    }
+    get rotation() {
+        return this.container.rotation
     }
 }
 
