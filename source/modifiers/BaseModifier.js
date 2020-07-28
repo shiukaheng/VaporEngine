@@ -1,16 +1,16 @@
 ModifierArray = require("../arrays/ModifierArray")
 class BaseModifier {
     constructor() {
-        this.enabled = true
+        this.children = new ModifierArray()
     }
     update(object, dt) {
+        this.children.update(dt)
     }
     load(object) {
-        this.object = object
+        this.children.object = object
     }
     unload(object) {
-        this.object = undefined
-
+        this.children.object = undefined
     }
 }
 module.exports = BaseModifier

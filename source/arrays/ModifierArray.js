@@ -21,11 +21,7 @@ class ModifierArray {
         this._listOfModifiers.splice(this._listOfModifiers.indexOf(modifier), 1)
     }
     update(dt){
-        this._listOfModifiers.forEach(modifier => {
-            if (modifier.enabled) {
-                modifier.update(this.object, dt)
-            }
-        })
+        this._listOfModifiers.forEach(modifier => modifier.update(this.object, dt))
     }
     flushDeferredLoads() {
         this.deferredLoads.forEach(deferredLoad => {
