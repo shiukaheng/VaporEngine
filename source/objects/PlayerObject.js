@@ -1,6 +1,7 @@
 var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
+var argsProc = require("../utils/argumentProcessor")
 
 function peek(x) {
     console.log(x)
@@ -16,8 +17,8 @@ function randn_bm() {
 }
 
 class PlayerObject extends BasePhysicalObject {
-    constructor(mass=1, drag=0.9, acceleration=7, bounceRadius=1) {
-        super(mass)
+    constructor(args={}) {
+        super(argsProc({"drag":0.9, "acceleration":7, "bounceRadius":1}, args))
         if (this.constructor.name === PlayerObject.name) {
             this._bezierFlyToMode = false
             this._bezierHelper = undefined
@@ -27,8 +28,8 @@ class PlayerObject extends BasePhysicalObject {
             this.__direction = new THREE.Vector3()
             this._bezierAnimClock = new THREE.Clock(false)
             this._demoLookTo = undefined
-            this.playerModifier = new PlayerModifier(acceleration, bounceRadius)
-            this.velocityDragModifier = new VelocityDragModifier(drag)
+            this.playerModifier = new PlayerModifier({"acceleration":this.args.acceleration, "bounceRadius":this.args.bounceRadius, "ignore":true})
+            this.velocityDragModifier = new VelocityDragModifier({"coef":this.args.drag, "ignore":true})
             this.declareAssetsLoaded()
         }
     }
@@ -132,6 +133,12 @@ class PlayerObject extends BasePhysicalObject {
         this._bezierHelper = undefined
         this._demoLookTo = undefined
         this.allowUserControl = true
+    }
+    serialize() {
+        this.drag = this.velocityDragModifier.coef
+        this.args.acceleration = this.playerModifier.acceleration
+        this.args.bounceRadius = this.playerModifier.bounceRadius
+        return super.serialize()
     }
 }
 

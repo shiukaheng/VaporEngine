@@ -1,5 +1,6 @@
 BaseModifier = require("./BaseModifier")
 BasePhysicalObject = require("../objects/BasePhysicalObject")
+argsProc = require("../utils/argumentProcessor")
 
 function event_based_modifier_method(target, name, descriptor) {
     const original = descriptor.value;
@@ -13,10 +14,11 @@ function event_based_modifier_method(target, name, descriptor) {
     }
 }
 class PlayerModifier extends BaseModifier{
-    constructor(acceleration=7, bounceRadius=1) {
-        super()
-        this.acceleration = acceleration
-        this.bounceRadius = bounceRadius
+    constructor(args={}) {
+        super(argsProc({"acceleration":7, "bounceRadius":1}, args))
+        this.acceleration = this.args.acceleration
+        this.bounceRadius = this.args.bounceRadius
+
         this._reflectNormal = new THREE.Vector3()
     }
     load(object) {
@@ -128,6 +130,11 @@ class PlayerModifier extends BaseModifier{
     }
     setAsActive() {
         this.viewer.changeCamera(this.camera)
+    }
+    serialize() {
+        this.args.acceleration = this.acceleration
+        this.args.bounceRadius = this.bounceRadius
+        return super.serialize()
     }
 }
 module.exports = PlayerModifier

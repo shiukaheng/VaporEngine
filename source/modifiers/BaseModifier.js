@@ -1,7 +1,13 @@
 ModifierArray = require("../arrays/ModifierArray")
-class BaseModifier {
-    constructor() {
-        this.enabled = true
+Serializable = require("../Serializable")
+argsProc = require("../utils/argumentProcessor")
+
+class BaseModifier extends Serializable {
+    constructor(args={}) {
+        var defaultArgs = {"enabled": true}
+        var newArgs = argsProc(defaultArgs, args)
+        super(newArgs)
+        this.enabled = this.args.enabled
     }
     update(object, dt) {
     }
@@ -10,7 +16,10 @@ class BaseModifier {
     }
     unload(object) {
         this.object = undefined
-
+    }
+    serialize() {
+        this.args.enabled = this.enabled
+        return super.serialize()
     }
 }
 module.exports = BaseModifier

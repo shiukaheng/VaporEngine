@@ -1,8 +1,10 @@
 BaseObject = require("./BaseObject")
+argsProc = require("../utils/argumentProcessor")
 
 class BasePhysicalObject extends BaseObject{
-    constructor(mass=1) {
-        super()
+    constructor(args={}) {
+        super(argsProc({"mass":1}, args))
+        this.mass = this.args.mass
         if (this.constructor.name === BasePhysicalObject.name) {
             this.declareAssetsLoaded()
         }
@@ -23,6 +25,10 @@ class BasePhysicalObject extends BaseObject{
     update(dt) {
         this.container.position.add(this.velocity.clone().multiplyScalar(dt))
         super.update(dt)
+    }
+    serialize() {
+        this.args.mass = this.mass
+        return super.serialize()
     }
 }
 
