@@ -1,9 +1,14 @@
 class ModifierArray {
-    constructor(object, listOfModifiers=[]){
+    constructor(object, serializedModifiers){
         this.object = object
-        this._listOfModifiers=listOfModifiers
+        this._listOfModifiers=[]
         this._listOfModifiers.forEach(x => this.add(x))
         this.deferredLoads = []
+        if (!serializedModifiers==undefined) {
+            serializedModifiers.forEach(
+                this.add()
+            )
+        }
     }
     add(modifier){
         if (this.object.viewer) {
@@ -31,6 +36,15 @@ class ModifierArray {
         this.deferredLoads.forEach(deferredLoad => {
             deferredLoad()
         })
+    }
+    serialize() {
+        var serializedModifiers = []
+        this._listOfModifiers.forEach(modifier => {
+            if (!modifier.args.ignore) {
+                serializedModifiers.push(modifier.serialize())
+            }
+        })
+        return serializedModifiers
     }
 }
 module.exports = ModifierArray

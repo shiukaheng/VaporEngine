@@ -18,7 +18,7 @@ class VelocityDragModifier extends BaseModifier{
     }
     serialize() {
         this.args.coef = this.coef
-        super.serialize()
+        return super.serialize()
     }
 }
 module.exports = VelocityDragModifier

@@ -107,7 +107,7 @@ class BaseObject extends Serializable {
             "z": this.container.scale.z
         }
         this.args.bypassModifiers = this.bypassModifiers
-        // this.modifiers = this.ModifierArray.serialize()
+        this.args.modifiers = this.modifiers.serialize()
         return super.serialize()
     }
 }

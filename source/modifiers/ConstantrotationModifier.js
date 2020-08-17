@@ -25,7 +25,7 @@ class ConstantRotationModifier extends BaseModifier {
             "y": this.rotation.y,
             "z": this.rotation.z
         }
-        super.serialize()
+        return super.serialize()
     }
 }
 module.exports = ConstantRotationModifier
