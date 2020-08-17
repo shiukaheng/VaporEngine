@@ -1,7 +1,7 @@
-THREE = require("three")
-ModifierArray = require("../arrays/ModifierArray")
-Serializable = require("../Serializable")
-argsProc = require("../utils/argumentProcessor")
+var THREE = require("three")
+var ModifierArray = require("../arrays/ModifierArray")
+var Serializable = require("../Serializable")
+var argsProc = require("../utils/argumentProcessor")
 
 class BaseObject extends Serializable {
     constructor(args={}) { // All assets are supposed to be loaded during object construction in async, and when its done, this.declareAssetsLoaded must be called
@@ -39,7 +39,6 @@ class BaseObject extends Serializable {
         this.container.scale.x = this.args.scale.x
         this.container.scale.y = this.args.scale.y
         this.container.scale.z = this.args.scale.z
-
         this.modifiers = new ModifierArray(this)
         this.bypassModifiers = false
         if (this.constructor.name === BaseObject.name) {

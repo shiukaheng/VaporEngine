@@ -13,8 +13,7 @@ class Serializable {
     }
     serialize() {
         return this.args
-    }
-    
+    }   
 }
 
 module.exports = Serializable

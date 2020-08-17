@@ -1,14 +1,14 @@
+var deserialize = require("../utils/deserialize")
+
 class ModifierArray {
-    constructor(object, serializedModifiers){
+    constructor(object, serializedModifiers=[]){
         this.object = object
         this._listOfModifiers=[]
         this._listOfModifiers.forEach(x => this.add(x))
         this.deferredLoads = []
-        if (!serializedModifiers==undefined) {
-            serializedModifiers.forEach(
-                this.add()
-            )
-        }
+        serializedModifiers.forEach(serializedModifier => {
+            this.add(deserialize(serializedModifiers))
+        })
     }
     add(modifier){
         if (this.object.viewer) {

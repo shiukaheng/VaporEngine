@@ -54631,8 +54631,7 @@ class Serializable {
     }
     serialize() {
         return this.args
-    }
-    
+    }   
 }
 
 module.exports = Serializable
@@ -54641,9 +54640,10 @@ const argumentProcessor = require("./utils/ArgumentProcessor");
 
 module.exports = {
     Subscription: require("./utils/Subscription"),
-    argumentProcessor: require("./utils/argumentProcessor")
+    argumentProcessor: require("./utils/argumentProcessor"),
+    deserialize: require("./utils/deserialize")
 }
-},{"./utils/ArgumentProcessor":47,"./utils/Subscription":48,"./utils/argumentProcessor":49}],30:[function(require,module,exports){
+},{"./utils/ArgumentProcessor":47,"./utils/Subscription":48,"./utils/argumentProcessor":49,"./utils/deserialize":50}],30:[function(require,module,exports){
 module.exports = {
     Arrays: require("./Arrays"),
     Modifiers: require("./Modifiers"),
@@ -54656,18 +54656,18 @@ module.exports = {
 module.exports = {
     Viewer: require("./viewers/Viewer")
 }
-},{"./viewers/Viewer":50}],32:[function(require,module,exports){
+},{"./viewers/Viewer":51}],32:[function(require,module,exports){
+var deserialize = require("../utils/deserialize")
+
 class ModifierArray {
-    constructor(object, serializedModifiers){
+    constructor(object, serializedModifiers=[]){
         this.object = object
         this._listOfModifiers=[]
         this._listOfModifiers.forEach(x => this.add(x))
         this.deferredLoads = []
-        if (!serializedModifiers==undefined) {
-            serializedModifiers.forEach(
-                this.add()
-            )
-        }
+        serializedModifiers.forEach(serializedModifier => {
+            this.add(deserialize(serializedModifiers))
+        })
     }
     add(modifier){
         if (this.object.viewer) {
@@ -54707,7 +54707,7 @@ class ModifierArray {
     }
 }
 module.exports = ModifierArray
-},{}],33:[function(require,module,exports){
+},{"../utils/deserialize":50}],33:[function(require,module,exports){
 class ObjectArray {
     constructor(viewer, listOfObjects=[]){
         this.viewer = viewer
@@ -55548,10 +55548,10 @@ class AudioSourceObject extends BasePhysicalObject {
 
 module.exports = AudioSourceObject
 },{"./BaseObject":41}],41:[function(require,module,exports){
-THREE = require("three")
-ModifierArray = require("../arrays/ModifierArray")
-Serializable = require("../Serializable")
-argsProc = require("../utils/argumentProcessor")
+var THREE = require("three")
+var ModifierArray = require("../arrays/ModifierArray")
+var Serializable = require("../Serializable")
+var argsProc = require("../utils/argumentProcessor")
 
 class BaseObject extends Serializable {
     constructor(args={}) { // All assets are supposed to be loaded during object construction in async, and when its done, this.declareAssetsLoaded must be called
@@ -55589,7 +55589,6 @@ class BaseObject extends Serializable {
         this.container.scale.x = this.args.scale.x
         this.container.scale.y = this.args.scale.y
         this.container.scale.z = this.args.scale.z
-
         this.modifiers = new ModifierArray(this)
         this.bypassModifiers = false
         if (this.constructor.name === BaseObject.name) {
@@ -56098,6 +56097,18 @@ module.exports = Subscription
 },{}],49:[function(require,module,exports){
 arguments[4][47][0].apply(exports,arguments)
 },{"dup":47,"underscore":6}],50:[function(require,module,exports){
+var argsProc = require("./argumentProcessor")
+
+var test = require("../modifiers/PlayerModifier") // WHAT?! HOW?? CIRCULAR DEPENDENCIES ARE SHIT
+console.log(test)
+
+
+function deserialize(entry) {
+    // return new serializableObjects[entry.className](entry)
+}
+
+module.exports = deserialize
+},{"../modifiers/PlayerModifier":38,"./argumentProcessor":49}],51:[function(require,module,exports){
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
@@ -56334,7 +56345,7 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../arrays/ObjectArray":33,"../utils/Subscription":48,"./viewer.css":51,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],51:[function(require,module,exports){
+},{"../arrays/ObjectArray":33,"../utils/Subscription":48,"./viewer.css":52,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],52:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
 },{"browserify-css":2}]},{},[30])(30)
 });
