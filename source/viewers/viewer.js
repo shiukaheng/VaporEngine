@@ -220,8 +220,6 @@ class Viewer {
         camera.add(audioListener)
     }
 
-    loadConfig(config)
-
     set allowUserControl(bool) {
         this._allowUserControl = bool
         this.keyPressed = {}
