@@ -1,11 +1,18 @@
-
+var argsProc = require("../utils/argumentProcessor")
+var Serializable = require("../Serializable")
 
 class PotreeObject extends BasePhysicalObject {
-    constructor(fileName, baseUrl="", pointShape=2) {
-        super()
-        this.fileName = fileName
-        this.baseUrl = baseUrl
-        this.pointShape = pointShape
+    constructor(args={}) {
+        super(argsProc(
+                {"fileName": "",
+                "baseUrl":"", 
+                "pointShape":2},
+                args
+             )
+        )
+        this.fileName = this.args.fileName
+        this.baseUrl = this.args.baseUrl
+        this.pointShape = this.args.pointShape
         var promise = viewer.potree.loadPointCloud(this.fileName, url => `${this.baseUrl}${url}`)
         promise.then(
             pco => {
@@ -34,6 +41,14 @@ class PotreeObject extends BasePhysicalObject {
             this.container.remove(this.pco)
         }
     }
+    serialize() {
+        this.args.fileName = this.fileName
+        this.args.baseUrl = this.baseUrl
+        this.args.pointShape = this.pointShape
+        return super.serialize()
+    }
 }
+
+Serializable.registerClass(PotreeObject)
 
 module.exports = PotreeObject

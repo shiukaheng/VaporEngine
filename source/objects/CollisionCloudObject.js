@@ -1,13 +1,18 @@
-BaseObject = require("./BaseObject")
-PCDLoader = require("../loaders/PCDLoader")
+var BaseObject = require("./BaseObject")
+var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
+var argsProc = require("../utils/argumentProcessor")
+var Serializable = require("../Serializable")
 
 class CollisionCloudObject extends BaseObject {
-    constructor(pcdPath) {
-        super(pcdPath)
+    constructor(args={}) {
+        var defaultArgs = {
+            "pcdPath": ""
+        }
+        super(argsProc(defaultArgs, args))
         this.assetsLoaded = false
 
-        this.pcdPath = pcdPath
+        this.pcdPath = this.args.pcdPath
         this.inverseTransform = new THREE.Matrix4()
         this.searchLocalVec4 = new THREE.Vector4()
         this.rotationTransform = new THREE.Matrix4()
@@ -57,6 +62,10 @@ class CollisionCloudObject extends BaseObject {
             return []
         }
     }
+    serialize() {
+        this.args.pcdPath = this.pcdPath
+        return super.serialize()
+    }
 }
-
+Serializable.registerClass(CollisionCloudObject)
 module.exports = CollisionCloudObject

@@ -22,7 +22,8 @@ class BaseObject extends Serializable {
                 "y": 1,
                 "z": 1
             },
-            "bypassModifiers": false
+            "bypassModifiers": false,
+            "modifiers": new Array()
         }
         var newArgs = argsProc(defaultArgs, args)
         super(newArgs)
@@ -41,6 +42,7 @@ class BaseObject extends Serializable {
         this.container.scale.z = this.args.scale.z
         this.modifiers = new ModifierArray(this)
         this.bypassModifiers = false
+        this.modifiers.deserialize(this.args.modifiers)
         if (this.constructor.name === BaseObject.name) {
             this.declareAssetsLoaded()
         }
@@ -52,8 +54,8 @@ class BaseObject extends Serializable {
         viewer.scene.add(this.container)
     }
     unload(viewer) {
-        this.viewer = undefined
         viewer.scene.remove(this.container)
+        this.viewer = undefined
     }
     update(dt) {
         if (!this.bypassModifiers) {
@@ -68,7 +70,7 @@ class BaseObject extends Serializable {
             this.objectArray.updateAssetLoaded()
         }
         this.modifiers.flushDeferredLoads()
-    }
+    } // Todo: Make it so that there is an option to block user input + load screen while loading, or load async.
     queueOnAssetLoaded(queuedFunction) {
         if (this.assetsLoaded) {
             queuedFunction()
@@ -110,5 +112,7 @@ class BaseObject extends Serializable {
         return super.serialize()
     }
 }
+
+Serializable.registerClass(BaseObject)
 
 module.exports = BaseObject

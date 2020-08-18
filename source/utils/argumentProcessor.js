@@ -5,11 +5,11 @@ function argumentProcessor(defaultArgs, args) {
   let keysUnion = _.union(Object.keys(newArgs), Object.keys(args));
   keysUnion.forEach(function (x) {
     if (args[x]!=undefined &&
-      !(args[x] instanceof Object) &&
-      !(newArgs[x] instanceof Object)) {
+      !(args[x].constructor == Object)) {
       newArgs[x] = args[x];
+
     }
-    if (args[x]!=undefined && args[x] instanceof Object) {
+    if (args[x]!=undefined && args[x].constructor == Object) {
       newArgs[x] = argumentProcessor(newArgs[x], args[x]);
     }
   });

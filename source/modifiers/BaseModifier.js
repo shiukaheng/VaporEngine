@@ -22,4 +22,7 @@ class BaseModifier extends Serializable {
         return super.serialize()
     }
 }
+
+Serializable.registerClass(BaseModifier)
+
 module.exports = BaseModifier

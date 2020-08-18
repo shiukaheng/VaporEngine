@@ -215,7 +215,7 @@ class Viewer {
         this.onContainerElementResize()
         var audioListener = this.audioListener
         if (this.audioListener.parent) {
-            this.audioListener.parent.remove(this.viewer.audioListener)
+            this.audioListener.parent.remove(this.audioListener)
         }
         camera.add(audioListener)
     }

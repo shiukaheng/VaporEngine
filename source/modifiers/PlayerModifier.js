@@ -1,6 +1,7 @@
 BaseModifier = require("./BaseModifier")
 BasePhysicalObject = require("../objects/BasePhysicalObject")
 argsProc = require("../utils/argumentProcessor")
+Serializable = require("../Serializable")
 
 function event_based_modifier_method(target, name, descriptor) {
     const original = descriptor.value;
@@ -62,9 +63,9 @@ class PlayerModifier extends BaseModifier{
         this.setAsActive()
     }
     unload(object) {
-        this.viewer = undefined
         this.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
         this.object.container.remove(this.camera)
+        this.viewer = undefined
     }
     // @event_based_modifier_method TODO: Migrate to ES6 with babel
     pointerControlsUpdate(e) {
@@ -137,4 +138,6 @@ class PlayerModifier extends BaseModifier{
         return super.serialize()
     }
 }
+
+Serializable.registerClass(PlayerModifier)
 module.exports = PlayerModifier

@@ -1,5 +1,6 @@
 BaseModifier = require("./BaseModifier")
 argsProc = require("../utils/argumentProcessor")
+Serializable = require("../Serializable")
 
 class VelocityDragModifier extends BaseModifier{
     constructor(args={}) {
@@ -21,4 +22,5 @@ class VelocityDragModifier extends BaseModifier{
         return super.serialize()
     }
 }
+Serializable.registerClass(VelocityDragModifier)
 module.exports = VelocityDragModifier

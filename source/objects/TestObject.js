@@ -1,5 +1,5 @@
 BasePhysicalObject = require("./BasePhysicalObject")
-
+var Serializable = require("../Serializable")
 
 class TestObject extends BasePhysicalObject{
     constructor() {
@@ -17,5 +17,7 @@ class TestObject extends BasePhysicalObject{
         this.container.remove(this.obj)
     }
 }
+
+Serializable.registerClass(TestObject)
 
 module.exports = TestObject

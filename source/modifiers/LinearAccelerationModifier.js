@@ -1,6 +1,7 @@
 THREE = require('three')
 BaseModifier = require("./BaseModifier")
 argsProc = require("../utils/argumentProcessor")
+Serializable = require("../Serializable")
 
 class LinearAccelerationModifier extends BaseModifier{
     constructor(args={}) {
@@ -28,4 +29,5 @@ class LinearAccelerationModifier extends BaseModifier{
         return super.serialize()
     }
 }
+Serializable.registerClass(LinearAccelerationModifier)
 module.exports = LinearAccelerationModifier

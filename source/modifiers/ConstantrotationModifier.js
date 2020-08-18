@@ -1,6 +1,7 @@
 BaseModifier = require("./BaseModifier")
 THREE = require("three")
 argsProc = require("../utils/argumentProcessor")
+Serializable = require("../Serializable")
 
 class ConstantRotationModifier extends BaseModifier {
     constructor(args={}) {
@@ -28,4 +29,5 @@ class ConstantRotationModifier extends BaseModifier {
         return super.serialize()
     }
 }
+Serializable.registerClass(ConstantRotationModifier)
 module.exports = ConstantRotationModifier

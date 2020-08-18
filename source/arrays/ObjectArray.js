@@ -1,3 +1,4 @@
+var Serializable = require("../Serializable")
 class ObjectArray {
     constructor(viewer, listOfObjects=[]){
         this.viewer = viewer
@@ -34,14 +35,29 @@ class ObjectArray {
         if (! loadedList.includes(false)) {
             this.allAssetsLoadedCallback()
         }
-        // console.log(this._listOfObjects)
-        // console.log(loadedList)
     }
     update(dt){
         this._listOfObjects.forEach(object => {
             if (object.assetsLoaded) {
                 object.update(dt)
             }
+        })
+    }
+    serialize() {
+        var output = []
+        this._listOfObjects.forEach(object => {
+            output.push(object.serialize())
+        })
+        return output
+    }
+    deserialize(object, clear=true) {
+        if (clear) {
+            this._listOfObjects.forEach(object => {
+                this.remove(object)
+            })
+        }
+        object.forEach(serializedObject => {
+            this.add(Serializable.deserialize(serializedObject))
         })
     }
 }

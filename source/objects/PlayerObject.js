@@ -2,6 +2,7 @@ var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
 var argsProc = require("../utils/argumentProcessor")
+var Serializable = require("../Serializable")
 
 function peek(x) {
     console.log(x)
@@ -135,12 +136,14 @@ class PlayerObject extends BasePhysicalObject {
         this.allowUserControl = true
     }
     serialize() {
-        this.drag = this.velocityDragModifier.coef
+        this.args.drag = this.velocityDragModifier.coef
         this.args.acceleration = this.playerModifier.acceleration
         this.args.bounceRadius = this.playerModifier.bounceRadius
         return super.serialize()
     }
 }
+
+Serializable.registerClass(PlayerObject)
 
 class BezierPathAnimation{
     constructor(startPos=new THREE.Vector3(0, 0, 0), startDir=new THREE.Vector3(1, 0, 0), startVel=new THREE.Vector3(1, 0, 0), destPos=new THREE.Vector3(3, 3, 0), destDir=new THREE.Vector3(1, 0, 0), destScalarVel=0, duration=5, segments=100, endCallback, impossibleParamCompensation=true) {

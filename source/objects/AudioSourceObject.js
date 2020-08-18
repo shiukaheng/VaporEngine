@@ -1,5 +1,6 @@
 BaseObject = require("./BaseObject")
-
+Serializable = require("../Serializable")
+argsProc = require("../utils/argumentProcessor")
 var audioLoader = new THREE.AudioLoader()
 
 /**
@@ -19,21 +20,32 @@ function setWrapper(input, audioObject, storageVar, setFunction) {
 }
 
 class AudioSourceObject extends BasePhysicalObject {
-    constructor(audioSourceURL="", param) {
-        super()
+    constructor(args={}) {
+        var defaultArgs = {
+            "audioSourceURL":"",
+            "delayLoadUntilInteraction": true,
+            "randomizeStart": false,
+            "autoStart": true,
+            "positional": true,
+            "loop": true,
+            "volume": 1,
+            "refDistance": 1,
+            "rolloffFactor": 1
+        }
+        super(argsProc(defaultArgs, args))
 
         // Variables that cant be changed after initialization
-        this.delayLoadUntilInteraction = true
-        this.audioSourceURL = audioSourceURL
-        this.randomizeStart = false
-        this.autoStart = true
-        this.positional = true
+        this.delayLoadUntilInteraction = this.args.delayLoadUntilInteraction
+        this.audioSourceURL = this.args.audioSourceURL
+        this.randomizeStart = this.args.randomizeStart
+        this.autoStart = this.args.autoStart
+        this.positional = this.args.positional
 
         // Variables that CAN be changed after initialization
-        this._loop = true
-        this._volume = 1
-        this._refDistance = 1
-        this._rolloffFactor = 1
+        this._loop = this.args.loop
+        this._volume = this.args.volume
+        this._refDistance = this.args.refDistance
+        this._rolloffFactor = this.args.rolloffFactor
 
         // Load audio data from URL
         audioLoader.load(this.audioSourceURL, (audioBuffer)=>{
@@ -124,11 +136,25 @@ class AudioSourceObject extends BasePhysicalObject {
         }
     }
 
-
     unload(viewer) {
         super.unload(viewer)
         this.container.remove(this.audioObj)
     }
-}
 
+    serialize() {
+        this.args.delayLoadUntilInteraction = this.delayLoadUntilInteraction
+        this.args.audioSourceURL = this.audioSourceURL
+        this.args.randomizeStart = this.randomizeStart
+        this.args.autoStart = this.autoStart
+        this.args.positional = this.positional
+
+        // Variables that CAN be changed after initialization
+        this.args.loop = this.loop
+        this.args.volume = this.volume
+        this.args.refDistance = this.refDistance
+        this.args.rolloffFactor = this.rolloffFactor
+        return super.serialize()
+    }
+}
+Serializable.registerClass(AudioSourceObject)
 module.exports = AudioSourceObject

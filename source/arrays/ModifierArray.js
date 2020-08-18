@@ -1,4 +1,4 @@
-var deserialize = require("../utils/deserialize")
+Serializable = require("../Serializable")
 
 class ModifierArray {
     constructor(object, serializedModifiers=[]){
@@ -46,5 +46,11 @@ class ModifierArray {
         })
         return serializedModifiers
     }
+    deserialize(list) {
+        list.forEach(modifierObj => {
+            this.add(Serializable.deserialize(modifierObj))
+        })
+    }
 }
+
 module.exports = ModifierArray
