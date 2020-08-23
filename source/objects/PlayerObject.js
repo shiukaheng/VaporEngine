@@ -37,7 +37,16 @@ class PlayerObject extends Serializable.createConstructor(
         if (scope.constructor.name === PlayerObject.name) {
             scope.declareAssetsLoaded()
         }
-    }
+    },
+    {
+        "drag": Serializable.numberHandler(),
+        "acceleration": Serializable.numberHandler(),
+        "bounceRadius": Serializable.numberHandler(0)
+    },
+    function(scope) {
+
+    },
+    BasePhysicalObject
 ) {
     load(viewer) {
         super.load(viewer)

@@ -55088,6 +55088,21 @@ class Serializable {
             }
         }
     }
+    static readOnlyHandler() { // You only write once! That is, when the Serializable is initialized with its inital arguments.
+        return {
+            "set": function(scope, val, argName) {
+                if (scope._argWritten===undefined) {
+                    scope._argWritten==={}
+                }
+                if (scope._argWritten[val]===true) {
+                    throw Error(argName+" is a read only argument")
+                } else {
+                    scope._argWritten[val] = true
+                }
+            }
+        }
+    }
+    // Todo: Handler combiner!
 }
 
 Serializable.registerConstructor()
@@ -56413,6 +56428,9 @@ class BasePhysicalObject extends Serializable.createConstructor(
         "mass": Serializable.numberHandler(),
         "velocity": vec3ShadowHandler(Serializable.encodeTraversal().velocity)
     },
+    function(scope) {
+        
+    },
     // Inherits from
     BaseObject
 ) {
@@ -56475,6 +56493,9 @@ class CollisionCloudObject extends Serializable.createConstructor(
     },
     {
         "visible": Serializable.boolHandler()
+    },
+    function(scope) {
+
     },
     BaseObject
 ) {
@@ -56553,7 +56574,16 @@ class PlayerObject extends Serializable.createConstructor(
         if (scope.constructor.name === PlayerObject.name) {
             scope.declareAssetsLoaded()
         }
-    }
+    },
+    {
+        "drag": Serializable.numberHandler(),
+        "acceleration": Serializable.numberHandler(),
+        "bounceRadius": Serializable.numberHandler(0)
+    },
+    function(scope) {
+
+    },
+    BasePhysicalObject
 ) {
     load(viewer) {
         super.load(viewer)
@@ -56886,24 +56916,40 @@ class PotreeObject extends Serializable.createConstructor(
         "pointShape":2
     },
     function(scope) {
-        var promise = viewer.potree.loadPointCloud(this.fileName, url => `${this.baseUrl}${url}`)
+    },
+    {
+        "fileName": Serializable.readOnlyHandler(),
+        "baseUrl": Serializable.readOnlyHandler(),
+        "pointShape": Serializable.readOnlyHandler()
+    },
+    function(scope) {
+    },
+    BasePhysicalObject
+) {
+    load(viewer) {
+        super.load(viewer)
+        var promise = this.viewer.potree.loadPointCloud(this.args.fileName, url => `${this.args.baseUrl}${url}`)
         promise.then(
             pco => {
-                // console.log(pco)
-                pco.material.shape = this.pointShape
+                pco.material.shape = this.args.pointShape
                 this.container.add(pco)
                 this.pco = pco
-                // console.log("potree load assets")
-                this.declareAssetsLoaded()
             },
             function() {
-                console.log(`Failed to load point cloud ${this.fileName}`)
+                console.warn(`Failed to load point cloud ${this.fileName}`)
             }
         )
+        this.viewer.potreePointClouds.push(this.pco)
     }
-) {
-    
+    unload() {
+        if (this.pco!==undefined) {
+            this.viewer.potreePointClouds.splice(this.viewer.potreePointClouds.indexOf(this.pco), 1)
+            this.container.remove(this.pco)
+        }
+        super.unload()
+    }
 }
+PotreeObject.registerConstructor()
 
 class OldPotreeObject extends BasePhysicalObject {
     constructor(args={}) {

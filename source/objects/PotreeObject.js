@@ -9,24 +9,40 @@ class PotreeObject extends Serializable.createConstructor(
         "pointShape":2
     },
     function(scope) {
-        var promise = viewer.potree.loadPointCloud(this.fileName, url => `${this.baseUrl}${url}`)
+    },
+    {
+        "fileName": Serializable.readOnlyHandler(),
+        "baseUrl": Serializable.readOnlyHandler(),
+        "pointShape": Serializable.readOnlyHandler()
+    },
+    function(scope) {
+    },
+    BasePhysicalObject
+) {
+    load(viewer) {
+        super.load(viewer)
+        var promise = this.viewer.potree.loadPointCloud(this.args.fileName, url => `${this.args.baseUrl}${url}`)
         promise.then(
             pco => {
-                // console.log(pco)
-                pco.material.shape = this.pointShape
+                pco.material.shape = this.args.pointShape
                 this.container.add(pco)
                 this.pco = pco
-                // console.log("potree load assets")
-                this.declareAssetsLoaded()
             },
             function() {
-                console.log(`Failed to load point cloud ${this.fileName}`)
+                console.warn(`Failed to load point cloud ${this.fileName}`)
             }
         )
+        this.viewer.potreePointClouds.push(this.pco)
     }
-) {
-    
+    unload() {
+        if (this.pco!==undefined) {
+            this.viewer.potreePointClouds.splice(this.viewer.potreePointClouds.indexOf(this.pco), 1)
+            this.container.remove(this.pco)
+        }
+        super.unload()
+    }
 }
+PotreeObject.registerConstructor()
 
 class OldPotreeObject extends BasePhysicalObject {
     constructor(args={}) {

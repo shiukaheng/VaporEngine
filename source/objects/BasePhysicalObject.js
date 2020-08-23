@@ -25,6 +25,9 @@ class BasePhysicalObject extends Serializable.createConstructor(
         "mass": Serializable.numberHandler(),
         "velocity": vec3ShadowHandler(Serializable.encodeTraversal().velocity)
     },
+    function(scope) {
+        
+    },
     // Inherits from
     BaseObject
 ) {

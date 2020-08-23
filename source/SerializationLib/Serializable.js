@@ -257,6 +257,21 @@ class Serializable {
             }
         }
     }
+    static readOnlyHandler() { // You only write once! That is, when the Serializable is initialized with its inital arguments.
+        return {
+            "set": function(scope, val, argName) {
+                if (scope._argWritten===undefined) {
+                    scope._argWritten==={}
+                }
+                if (scope._argWritten[val]===true) {
+                    throw Error(argName+" is a read only argument")
+                } else {
+                    scope._argWritten[val] = true
+                }
+            }
+        }
+    }
+    // Todo: Handler combiner!
 }
 
 Serializable.registerConstructor()

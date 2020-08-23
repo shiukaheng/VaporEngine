@@ -31,6 +31,9 @@ class CollisionCloudObject extends Serializable.createConstructor(
     {
         "visible": Serializable.boolHandler()
     },
+    function(scope) {
+
+    },
     BaseObject
 ) {
     load(viewer) {
