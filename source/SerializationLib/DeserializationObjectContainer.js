@@ -1,5 +1,24 @@
 
 // Keeps track of deserialized objects and its dependencies!
+function isUuidProxyArgsObj(elem) {
+    return ((elem.constructor === Object) && (elem["className"] === "uuidProxy"))
+}
+function isSerializableArgsObj(elem) {
+    return ((elem.constructor === Object) && (elem["className"] !== undefined))
+}
+function isObject(elem) {
+    return (elem.constructor === Object)
+}
+function isArray(elem) {
+    return (elem.constructor === Array)
+}
+function isLiteral(elem) {
+    return (Object(elem)!==elem)
+}
+function isUuidProxy(elem) {
+    return elem.isProxy
+}
+
 class DeserializationObjectContainer{
     constructor(serializableClassesManager) {
         this.serializableClassesManager = serializableClassesManager
@@ -36,6 +55,9 @@ class DeserializationObjectContainer{
         }
     }
     deserializeSerializable(serializable) {
+        if(serializable["serialize"]===false) {
+            return null
+        }
         var relinked = {}
         for (const [key, value] of Object.entries(serializable)) {
             relinked[key] = this.deserialize(value)
@@ -48,18 +70,24 @@ class DeserializationObjectContainer{
         var returnVar
         if (elem.isProxy) {
             returnVar = elem
-        } else if (Object(elem)!==elem) {
+        } else if (isLiteral(elem)) {
             returnVar = elem
-        } else if (elem.constructor === Array) {
+        } else if (isArray(elem)) {
             returnVar = []
             elem.forEach(value => {
-                returnVar.push(this.deserialize(value))
+                if (isSerializableArgsObj(value)) {
+                    if (value["serialize"]===true) {
+                        returnVar.push(this.deserialize(value))
+                    }
+                } else {
+                    returnVar.push(this.deserialize(value))
+                }
             })
-        } else if ((elem.constructor === Object) && (elem["className"] === "uuidProxy")) {
+        } else if (isUuidProxyArgsObj(elem)) {
             returnVar = this.getUuidPlaceholder(elem["uuid"])
-        } else if ((elem.constructor === Object) && (elem["className"] !== undefined)) {
+        } else if (isSerializableArgsObj(elem)) {
             returnVar = this.deserializeSerializable(elem)
-        } else if (elem.constructor === Object) {
+        } else if (isObject(elem)) {
             var returnVar = {}
             for (const [key, value] of Object.entries(elem)) {
                 returnVar[key] = this.deserialize(value)

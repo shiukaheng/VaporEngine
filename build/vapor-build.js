@@ -54677,6 +54677,25 @@ module.exports = {
 },{"./SerializationLib/DeserializationObjectContainer":30,"./SerializationLib/Serializable":31}],30:[function(require,module,exports){
 
 // Keeps track of deserialized objects and its dependencies!
+function isUuidProxyArgsObj(elem) {
+    return ((elem.constructor === Object) && (elem["className"] === "uuidProxy"))
+}
+function isSerializableArgsObj(elem) {
+    return ((elem.constructor === Object) && (elem["className"] !== undefined))
+}
+function isObject(elem) {
+    return (elem.constructor === Object)
+}
+function isArray(elem) {
+    return (elem.constructor === Array)
+}
+function isLiteral(elem) {
+    return (Object(elem)!==elem)
+}
+function isUuidProxy(elem) {
+    return elem.isProxy
+}
+
 class DeserializationObjectContainer{
     constructor(serializableClassesManager) {
         this.serializableClassesManager = serializableClassesManager
@@ -54713,6 +54732,9 @@ class DeserializationObjectContainer{
         }
     }
     deserializeSerializable(serializable) {
+        if(serializable["serialize"]===false) {
+            return null
+        }
         var relinked = {}
         for (const [key, value] of Object.entries(serializable)) {
             relinked[key] = this.deserialize(value)
@@ -54725,18 +54747,24 @@ class DeserializationObjectContainer{
         var returnVar
         if (elem.isProxy) {
             returnVar = elem
-        } else if (Object(elem)!==elem) {
+        } else if (isLiteral(elem)) {
             returnVar = elem
-        } else if (elem.constructor === Array) {
+        } else if (isArray(elem)) {
             returnVar = []
             elem.forEach(value => {
-                returnVar.push(this.deserialize(value))
+                if (isSerializableArgsObj(value)) {
+                    if (value["serialize"]===true) {
+                        returnVar.push(this.deserialize(value))
+                    }
+                } else {
+                    returnVar.push(this.deserialize(value))
+                }
             })
-        } else if ((elem.constructor === Object) && (elem["className"] === "uuidProxy")) {
+        } else if (isUuidProxyArgsObj(elem)) {
             returnVar = this.getUuidPlaceholder(elem["uuid"])
-        } else if ((elem.constructor === Object) && (elem["className"] !== undefined)) {
+        } else if (isSerializableArgsObj(elem)) {
             returnVar = this.deserializeSerializable(elem)
-        } else if (elem.constructor === Object) {
+        } else if (isObject(elem)) {
             var returnVar = {}
             for (const [key, value] of Object.entries(elem)) {
                 returnVar[key] = this.deserialize(value)
@@ -54885,7 +54913,7 @@ class Serializable {
         this.args = this.getArgObjectProxy()
         // Run initialization code
         initFunc(this)
-        // Set arguments, triggering necessary argHandlers (must happend after initialization, setting container variables etc)
+        // Set arguments, triggering necessary argHandlers (must happen after initialization, setting container variables etc)
         applyArgs(this.args, Serializable.argsProcessor(defaultArgs, args))
         this.getSelf = this.getSelf.bind(this)
     }
@@ -55109,8 +55137,10 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
     } else if (elem.constructor === Array) {
         var returnVar = []
         elem.forEach(value => {
-            var processedValue = serializeElement(value, false, _dependencies)
-            returnVar.push(processedValue.serialized)
+            if (!(value instanceof Serializable && value.args.serialize===false)) { // If value marked as serialize = false, then dont add to array
+                var processedValue = serializeElement(value, false, _dependencies)
+                returnVar.push(processedValue.serialized)
+            }
         })
         serialized = returnVar  
     } else if (elem.constructor === Object) {
@@ -55125,21 +55155,24 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
             throw new Error("UUID not found")
         }
         elem.updateArgs()
-        if (_dependencies.has(elem.args)) {
-            serialized = {
-                "className": "uuidProxy",
-                "uuid": elem.args.uuid
-            }
+        if (elem.args.serialize===false) {
+            serialized = null
         } else {
-            _dependencies.reserve(elem.args.uuid)
-            var processedValue = serializeElement(elem.args, false, _dependencies)
-            serialized = {
-                "className": "uuidProxy",
-                "uuid": elem.args.uuid
+            if (_dependencies.has(elem.args)) {
+                serialized = {
+                    "className": "uuidProxy",
+                    "uuid": elem.args.uuid
+                }
+            } else {
+                _dependencies.reserve(elem.args.uuid)
+                var processedValue = serializeElement(elem.args, false, _dependencies)
+                serialized = {
+                    "className": "uuidProxy",
+                    "uuid": elem.args.uuid
+                }
+                _dependencies.add(processedValue.serialized)  
             }
-            _dependencies.add(processedValue.serialized)  
         }
-        
     } else {
         console.warn("Unhandled data type for ",elem)
     }
@@ -56488,7 +56521,8 @@ var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
 var argsProc = require("../utils/argumentProcessor")
-var Serializable = require("../Serializable")
+// var Serializable = require("../Serializable")
+var {Serializable} = require("../Serialization")
 
 function peek(x) {
     console.log(x)
@@ -56503,7 +56537,132 @@ function randn_bm() {
     return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
 }
 
-class PlayerObject extends BasePhysicalObject {
+class PlayerObject extends Serializable.createConstructor(
+    {
+        "drag": 0.9,
+        "acceleration": 7,
+        "bounceRadius": 1
+    },
+    function(scope) {
+        scope._bezierFlyToMode = false
+        scope._bezierHelper = undefined
+        scope._sampledBezierPath = undefined
+        scope._lastCam = new THREE.PerspectiveCamera()
+        scope._direction = new THREE.Vector3()
+        scope.__direction = new THREE.Vector3()
+        scope._bezierAnimClock = new THREE.Clock(false)
+        scope._demoLookTo = undefined
+        
+        if (scope.constructor.name === PlayerObject.name) {
+            scope.declareAssetsLoaded()
+        }
+    }
+) {
+    load(viewer) {
+        super.load(viewer)
+        this.playerModifier = new PlayerModifier({"acceleration":this.args.acceleration, "bounceRadius":this.args.bounceRadius, "serialize":false})
+        this.velocityDragModifier = new VelocityDragModifier({"coef":this.args.drag, "serialize":false})
+        this.modifiers.add(this.playerModifier)
+        this.modifiers.add(this.velocityDragModifier)
+    }
+    unload(viewer){
+        super.unload(viewer)
+        this.modifiers.remove(this.playerModifier)
+        this.modifiers.remove(this.velocityDragModifier)
+    }
+    update(dt) {
+        super.update(dt)
+        if (this._bezierHelper) {
+            this._bezierHelper.update((pos, vel) => {
+                this.position.copy(pos)
+                this.velocity.copy(vel)
+                if (this._demoLookTo) {
+                    this.lookAt(this._demoLookTo)
+                } else {
+                    if (this.velocity.length()>0) {
+                        this.lookAt(this.position.clone().add(this.velocity))
+                    }
+                }
+            })
+        }
+        this._direction = this.__direction.copy(this.playerModifier.camera.position).addScaledVector(this._lastCam.position, -1).normalize()
+        this._lastCam.copy(this.playerModifier.camera) 
+    }
+    lookAt(pos) {
+        this.container.lookAt(pos)
+    }
+    bezierFlyTo(destCamera=camB, duration=10, segments=500, endVel=1, onEnd=()=>{}) {
+        var startPos = this.playerModifier.camera.getWorldPosition(new THREE.Vector3())
+        if (this.velocity.length() == 0) {
+            var startDir = this.playerModifier.camera.getWorldDirection(new THREE.Vector3())
+        } else {
+            var startDir = this.velocity.clone().normalize()
+        }
+        var startVel = this.velocity
+        var destPos = destCamera.getWorldPosition(new THREE.Vector3())
+        var destDir = destCamera.getWorldDirection(new THREE.Vector3())
+        var destScalarVel = endVel
+        this._bezierHelper = new BezierPathAnimation(startPos, startDir, startVel, destPos, destDir, destScalarVel, duration, segments, ()=>{
+            this._bezierHelper=undefined
+            onEnd()
+        })
+    }
+    demoMode(center=new THREE.Vector3(0,0,0), radius=30, radiusVariance=1, donutConstant=10, perPointTime=20, _destCamera=new THREE.PerspectiveCamera()) {
+        this.viewer.allowUserControl = false
+        if (donutConstant<0) {
+            throw "Donut constant must be larger than 0!"
+        }
+        var pos = new THREE.Vector3(randn_bm(), randn_bm()/(1+donutConstant), randn_bm()).normalize()
+        pos.multiplyScalar(radius+randn_bm()*radiusVariance).add(center)
+        _destCamera.position.copy(pos)
+        _destCamera.lookAt(center)
+        this.bezierFlyTo(_destCamera, perPointTime, 500, 0, ()=>{
+            this.demoMode(center, radius, radiusVariance, donutConstant, perPointTime, _destCamera)
+        })
+        this._demoLookTo = center.clone()
+    }
+    exitDemoMode() {
+        this._bezierHelper = undefined
+        this._demoLookTo = undefined
+        this.allowUserControl = true
+    }
+    get pan() {
+        return -this.playerModifier.controlObject.rotation.y
+    }
+    set pan(pan) {
+        this.playerModifier.controlObject.rotation.y = -pan
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get tilt() {
+        return -this.playerModifier.controlObject.rotation.x
+    }
+    set tilt(tilt) {
+        this.playerModifier.controlObject.rotation.x = -tilt
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get row() {
+        return -this.playerModifier.controlObject.rotation.z
+    }
+    set row(row) {
+        this.playerModifier.controlObject.rotation.z = -row
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get speed() {
+        return this.playerModifier.acceleration
+    }
+    set speed(speed) {
+        this.playerModifier.acceleration = speed
+    }
+    get drag() {
+        return this.velocityDragModifier.coef
+    }
+    set drag(drag) {
+        this.velocityDragModifier.coef = drag
+    }
+}
+PlayerObject.registerConstructor()
+
+class OldPlayerObject extends BasePhysicalObject {
     constructor(args={}) {
         super(argsProc({"drag":0.9, "acceleration":7, "bounceRadius":1}, args))
         if (this.constructor.name === PlayerObject.name) {
@@ -56718,7 +56877,7 @@ class BezierPathAnimation{
 window.BezierPathAnimation = BezierPathAnimation;
 
 module.exports = PlayerObject
-},{"../Serializable":28,"../modifiers/PlayerModifier":42,"../modifiers/VelocityDragModifier":43,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],49:[function(require,module,exports){
+},{"../Serialization":29,"../modifiers/PlayerModifier":42,"../modifiers/VelocityDragModifier":43,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],49:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var Serializable = require("../Serializable")
 var BasePhysicalObject = require("./BasePhysicalObject")

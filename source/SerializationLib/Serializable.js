@@ -82,7 +82,7 @@ class Serializable {
         this.args = this.getArgObjectProxy()
         // Run initialization code
         initFunc(this)
-        // Set arguments, triggering necessary argHandlers (must happend after initialization, setting container variables etc)
+        // Set arguments, triggering necessary argHandlers (must happen after initialization, setting container variables etc)
         applyArgs(this.args, Serializable.argsProcessor(defaultArgs, args))
         this.getSelf = this.getSelf.bind(this)
     }
@@ -306,8 +306,10 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
     } else if (elem.constructor === Array) {
         var returnVar = []
         elem.forEach(value => {
-            var processedValue = serializeElement(value, false, _dependencies)
-            returnVar.push(processedValue.serialized)
+            if (!(value instanceof Serializable && value.args.serialize===false)) { // If value marked as serialize = false, then dont add to array
+                var processedValue = serializeElement(value, false, _dependencies)
+                returnVar.push(processedValue.serialized)
+            }
         })
         serialized = returnVar  
     } else if (elem.constructor === Object) {
@@ -322,21 +324,24 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
             throw new Error("UUID not found")
         }
         elem.updateArgs()
-        if (_dependencies.has(elem.args)) {
-            serialized = {
-                "className": "uuidProxy",
-                "uuid": elem.args.uuid
-            }
+        if (elem.args.serialize===false) {
+            serialized = null
         } else {
-            _dependencies.reserve(elem.args.uuid)
-            var processedValue = serializeElement(elem.args, false, _dependencies)
-            serialized = {
-                "className": "uuidProxy",
-                "uuid": elem.args.uuid
+            if (_dependencies.has(elem.args)) {
+                serialized = {
+                    "className": "uuidProxy",
+                    "uuid": elem.args.uuid
+                }
+            } else {
+                _dependencies.reserve(elem.args.uuid)
+                var processedValue = serializeElement(elem.args, false, _dependencies)
+                serialized = {
+                    "className": "uuidProxy",
+                    "uuid": elem.args.uuid
+                }
+                _dependencies.add(processedValue.serialized)  
             }
-            _dependencies.add(processedValue.serialized)  
         }
-        
     } else {
         console.warn("Unhandled data type for ",elem)
     }
