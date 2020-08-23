@@ -55054,6 +55054,15 @@ class Serializable {
             }
         }
     }
+    static boolHandler() {
+        return {
+            "set": function(scope, val, argName) {
+                if (typeof val !== "boolean") {
+                    throw TypeError(argName+" must be a boolean")
+                }
+            }
+        }
+    }
 }
 
 Serializable.registerConstructor()
@@ -56408,43 +56417,45 @@ var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
 var argsProc = require("../utils/argumentProcessor")
-var Serializable = require("../Serializable")
+var {Serializable} = require("../Serialization")
 
-class CollisionCloudObject extends BaseObject {
-    constructor(args={}) {
-        var defaultArgs = {
-            "pcdPath": ""
-        }
-        super(argsProc(defaultArgs, args))
-        this.assetsLoaded = false
-
-        this.pcdPath = this.args.pcdPath
-        this.inverseTransform = new THREE.Matrix4()
-        this.searchLocalVec4 = new THREE.Vector4()
-        this.rotationTransform = new THREE.Matrix4()
-        this._workingVector4 = new THREE.Vector4()
-        this._workingVector3 = new THREE.Vector3()
-
+class CollisionCloudObject extends Serializable.createConstructor(
+    {
+        "pcdPath": "",
+        "visible": false
+    },
+    function(scope) {
+        scope.assetsLoaded = false,
+        scope.inverseTransform = new THREE.Matrix4(),
+        scope.searchLocalVec4 = new THREE.Vector4()
+        scope.rotationTransform = new THREE.Matrix4()
+        scope._workingVector4 = new THREE.Vector4()
+        scope._workingVector3 = new THREE.Vector3()
         var loader = new PCDLoader();
         loader.load(
             pcdPath,
             mesh => {
-                this.geometry = mesh
-                this.tree = createTree()
-                this.tree.init(mesh.geometry.attributes.position.array)
-                this.assetsLoaded = true
-                this.declareAssetsLoaded()
+                scope.cloud = mesh
+                scope.tree = createTree()
+                scope.tree.init(mesh.geometry.attributes.position.array)
+                scope.assetsLoaded = true
+                scope.declareAssetsLoaded()
             }
         )
-    }
+    },
+    {
+        "visible": Serializable.boolHandler()
+    },
+    BaseObject
+) {
     load(viewer) {
         super.load(viewer)
-        // this.container.add(this.geometry)
+        // this.container.add(this.cloud)
         viewer.collisionList.push(this)
     }
     unload(viewer) {
         super.unload(viewer)
-        // this.container.remove(this.geometry)
+        // this.container.remove(this.cloud)
         viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
     }
     searchNormals(vec3, r) {
@@ -56453,10 +56464,10 @@ class CollisionCloudObject extends BaseObject {
             this.searchLocalVec4.set(vec3.x, vec3.y, vec3.z, 1)
             this.searchLocalVec4.applyMatrix4(this.inverseTransform)
             var matches = this.tree.intersectSphere(this.searchLocalVec4.x, this.searchLocalVec4.y, this.searchLocalVec4.z, r)
-            // console.log(this.geometry.geometry.attributes)
+            // console.log(this.cloud.geometry.attributes)
             var listOfMatches = []
             matches.forEach(x => {
-                var arr = this.geometry.geometry.attributes.normal.array.slice(x, x+3)
+                var arr = this.cloud.geometry.attributes.normal.array.slice(x, x+3)
                 this._workingVector4.set(arr[0], arr[1], arr[2], 1)
                 this.rotationTransform.extractRotation(this.container.matrixWorld)
                 this._workingVector4.applyMatrix4(this.rotationTransform)
@@ -56468,14 +56479,11 @@ class CollisionCloudObject extends BaseObject {
             return []
         }
     }
-    serialize() {
-        this.args.pcdPath = this.pcdPath
-        return super.serialize()
-    }
 }
-// Serializable.registerClass(CollisionCloudObject)
+CollisionCloudObject.registerConstructor()
+
 module.exports = CollisionCloudObject
-},{"../Serializable":28,"../loaders/PCDLoader":38,"../utils/argumentProcessor":53,"./BaseObject":45,"yaot":22}],48:[function(require,module,exports){
+},{"../Serialization":29,"../loaders/PCDLoader":38,"../utils/argumentProcessor":53,"./BaseObject":45,"yaot":22}],48:[function(require,module,exports){
 var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")

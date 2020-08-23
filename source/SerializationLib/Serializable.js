@@ -251,6 +251,15 @@ class Serializable {
             }
         }
     }
+    static boolHandler() {
+        return {
+            "set": function(scope, val, argName) {
+                if (typeof val !== "boolean") {
+                    throw TypeError(argName+" must be a boolean")
+                }
+            }
+        }
+    }
 }
 
 Serializable.registerConstructor()
