@@ -21,6 +21,7 @@ class NewModifier extends Vapor.Serialization.Serializable.createConstructor(
         console.log("Constructed!", scope)
     },
     {},
+    undefined,
     Vapor.Modifiers.BaseModifier
 ) {
     foo(arg) {
