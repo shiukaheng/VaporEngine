@@ -56434,9 +56434,6 @@ class BasePhysicalObject extends Serializable.createConstructor(
     // Inherits from
     BaseObject
 ) {
-    load(viewer){
-        super.load(viewer)
-    }
     addVelocity(normal) {
         this.velocity.add(normal)
     }
@@ -56492,7 +56489,7 @@ class CollisionCloudObject extends Serializable.createConstructor(
         )
     },
     {
-        "visible": Serializable.boolHandler()
+        "visible": Serializable.readOnlyHandler()
     },
     function(scope) {
 
@@ -56501,12 +56498,17 @@ class CollisionCloudObject extends Serializable.createConstructor(
 ) {
     load(viewer) {
         super.load(viewer)
-        // this.container.add(this.cloud)
+        if (this.args.visible===true) {
+            this.container.add(this.cloud)
+        }
+
         viewer.collisionList.push(this)
     }
     unload(viewer) {
         super.unload(viewer)
-        // this.container.remove(this.cloud)
+        if (this.args.visible===true) {
+            this.container.remove(this.cloud)
+        }
         viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
     }
     searchNormals(vec3, r) {
@@ -56592,10 +56594,10 @@ class PlayerObject extends Serializable.createConstructor(
         this.modifiers.add(this.playerModifier)
         this.modifiers.add(this.velocityDragModifier)
     }
-    unload(viewer){
-        super.unload(viewer)
+    unload(){
         this.modifiers.remove(this.playerModifier)
         this.modifiers.remove(this.velocityDragModifier)
+        super.unload()
     }
     update(dt) {
         super.update(dt)
@@ -57004,29 +57006,34 @@ class OldPotreeObject extends BasePhysicalObject {
 module.exports = PotreeObject
 },{"../Serialization":29,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],50:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
-var Serializable = require("../Serializable")
+var {Serializable} = require("../Serialization")
 
-class TestObject extends BasePhysicalObject{
-    constructor() {
-        super()
+class TestObject extends Serializable.createConstructor(
+    {
+        "color": "green"
+    },
+    undefined,
+    undefined,
+    function(scope) {
         var geom = new THREE.BoxGeometry()
         var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
-        this.obj = new THREE.Mesh(geom, mat)
-    }
+        scope.obj = new THREE.Mesh(geom, mat)
+    },
+    BasePhysicalObject
+) {
     load(viewer){
         super.load(viewer)
         this.container.add(this.obj)
     }
-    unload(viewer){
-        super.unload(viewer)
+    unload(){
         this.container.remove(this.obj)
+        super.unload(viewer)
     }
 }
-
-// Serializable.registerClass(TestObject)
+TestObject.registerConstructor()
 
 module.exports = TestObject
-},{"../Serializable":28,"./BasePhysicalObject":46}],51:[function(require,module,exports){
+},{"../Serialization":29,"./BasePhysicalObject":46}],51:[function(require,module,exports){
 const _ = require("underscore")
 
 function argumentProcessor(defaultArgs, args) {

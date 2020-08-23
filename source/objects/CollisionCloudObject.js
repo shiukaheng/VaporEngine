@@ -29,7 +29,7 @@ class CollisionCloudObject extends Serializable.createConstructor(
         )
     },
     {
-        "visible": Serializable.boolHandler()
+        "visible": Serializable.readOnlyHandler()
     },
     function(scope) {
 
@@ -38,12 +38,17 @@ class CollisionCloudObject extends Serializable.createConstructor(
 ) {
     load(viewer) {
         super.load(viewer)
-        // this.container.add(this.cloud)
+        if (this.args.visible===true) {
+            this.container.add(this.cloud)
+        }
+
         viewer.collisionList.push(this)
     }
     unload(viewer) {
         super.unload(viewer)
-        // this.container.remove(this.cloud)
+        if (this.args.visible===true) {
+            this.container.remove(this.cloud)
+        }
         viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
     }
     searchNormals(vec3, r) {

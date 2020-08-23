@@ -1,23 +1,28 @@
 BasePhysicalObject = require("./BasePhysicalObject")
-var Serializable = require("../Serializable")
+var {Serializable} = require("../Serialization")
 
-class TestObject extends BasePhysicalObject{
-    constructor() {
-        super()
+class TestObject extends Serializable.createConstructor(
+    {
+        "color": "green"
+    },
+    undefined,
+    undefined,
+    function(scope) {
         var geom = new THREE.BoxGeometry()
         var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
-        this.obj = new THREE.Mesh(geom, mat)
-    }
+        scope.obj = new THREE.Mesh(geom, mat)
+    },
+    BasePhysicalObject
+) {
     load(viewer){
         super.load(viewer)
         this.container.add(this.obj)
     }
-    unload(viewer){
-        super.unload(viewer)
+    unload(){
         this.container.remove(this.obj)
+        super.unload(viewer)
     }
 }
-
-// Serializable.registerClass(TestObject)
+TestObject.registerConstructor()
 
 module.exports = TestObject

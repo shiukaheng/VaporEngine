@@ -55,10 +55,10 @@ class PlayerObject extends Serializable.createConstructor(
         this.modifiers.add(this.playerModifier)
         this.modifiers.add(this.velocityDragModifier)
     }
-    unload(viewer){
-        super.unload(viewer)
+    unload(){
         this.modifiers.remove(this.playerModifier)
         this.modifiers.remove(this.velocityDragModifier)
+        super.unload()
     }
     update(dt) {
         super.update(dt)

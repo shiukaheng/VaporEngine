@@ -31,9 +31,6 @@ class BasePhysicalObject extends Serializable.createConstructor(
     // Inherits from
     BaseObject
 ) {
-    load(viewer){
-        super.load(viewer)
-    }
     addVelocity(normal) {
         this.velocity.add(normal)
     }
