@@ -1,6 +1,7 @@
 BaseObject = require("./BaseObject")
 Serializable = require("../Serializable")
 argsProc = require("../utils/argumentProcessor")
+var THREE = require("three")
 var audioLoader = new THREE.AudioLoader()
 
 /**
@@ -156,5 +157,5 @@ class AudioSourceObject extends BasePhysicalObject {
         return super.serialize()
     }
 }
-Serializable.registerClass(AudioSourceObject)
+// Serializable.registerClass(AudioSourceObject)
 module.exports = AudioSourceObject

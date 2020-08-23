@@ -1,7 +1,7 @@
-BaseModifier = require("./BaseModifier")
-BasePhysicalObject = require("../objects/BasePhysicalObject")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+const { Serializable } = require("../Serialization");
+
+var BaseModifier = require("./BaseModifier")
+var BasePhysicalObject = require("../objects/BasePhysicalObject")
 
 function event_based_modifier_method(target, name, descriptor) {
     const original = descriptor.value;
@@ -15,16 +15,30 @@ function event_based_modifier_method(target, name, descriptor) {
     }
 }
 class PlayerModifier extends BaseModifier{
-    constructor(args={}) {
-        super(argsProc({"acceleration":7, "bounceRadius":1}, args))
-        this.acceleration = this.args.acceleration
-        this.bounceRadius = this.args.bounceRadius
-
-        this._reflectNormal = new THREE.Vector3()
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serializable.argsProcessor({
+            // Default arguments:
+            "acceleration": 7,
+            "bounceRadius": 1
+        }, args), 
+        Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+                scope._reflectNormal = new THREE.Vector3()
+            }, initFunc),
+        Serializable.argHandProcessor({
+            // Argument handlers:
+            "acceleration": Serializable.predicateHandler((elem)=>{
+                return (typeof elem === "number")
+            }, "TypeError: acceleration arg must be number"),
+            "bounceRadius": Serializable.predicateHandler((elem)=>{
+                return (typeof elem === "number")
+            }, "TypeError: bounceRadius arg must be number")
+        }, argHandlers))
     }
-    load(object) {
+    load(object) { // Only when object and viewer exists. When object exists in isolation, no point in updating modifiers.
         super.load(object)
-        this.viewer = object.viewer
         this.pointerControlsUpdate = this.pointerControlsUpdate.bind(this)
         // this.updateRotationFromControlObject = this.updateRotationFromControlObject.bind(this)
 
@@ -43,7 +57,7 @@ class PlayerModifier extends BaseModifier{
 
         // Pointer lock
         this.boundPointerControlHandler = this.pointerControlsUpdate
-        this.viewer.pointerControlSubscription.subscribe(this.pointerControlsUpdate)
+        this.object.viewer.pointerControlSubscription.subscribe(this.pointerControlsUpdate)
 
         // Keybinds
         this.forward = false
@@ -62,10 +76,10 @@ class PlayerModifier extends BaseModifier{
 
         this.setAsActive()
     }
-    unload(object) {
-        this.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
+    unload() {
+        this.object.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
         this.object.container.remove(this.camera)
-        this.viewer = undefined
+        super.unload()
     }
     // @event_based_modifier_method TODO: Migrate to ES6 with babel
     pointerControlsUpdate(e) {
@@ -85,34 +99,34 @@ class PlayerModifier extends BaseModifier{
         }
         this.object.container.setRotationFromQuaternion(this.controlObject.getWorldQuaternion(this._quaternion_container))
     }
-    update(object, dt) {
-        super.update(object, dt)
+    update(dt) {
+        super.update(dt)
         this.direction_helper.rotation.y = this.controlObject.rotation.y
-        var front = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.acceleration*dt)
+        var front = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.args.acceleration*dt)
         this.direction_helper.rotation.y = this.controlObject.rotation.y + Math.PI/2
-        var left = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.acceleration*dt)
-        if (this.viewer.hasPointerLock) {
-            if (this.viewer.getKeyState(87)) {
+        var left = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.args.acceleration*dt)
+        if (this.object.viewer.hasPointerLock) {
+            if (this.object.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
             }
-            if (this.viewer.getKeyState(83)) {
+            if (this.object.viewer.getKeyState(83)) {
                 this.object.addVelocity(front.clone().multiplyScalar(-1))
             }
-            if (this.viewer.getKeyState(65)) {
+            if (this.object.viewer.getKeyState(65)) {
                 this.object.addVelocity(left)
             }
-            if (this.viewer.getKeyState(68)) {
+            if (this.object.viewer.getKeyState(68)) {
                 this.object.addVelocity(left.clone().multiplyScalar(-1))
             }
-            if (this.viewer.getKeyState(32)) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.acceleration*dt))
+            if (this.object.viewer.getKeyState(32)) {
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.args.acceleration*dt))
             }
-            if (this.viewer.getKeyState(16)) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.acceleration*dt))
+            if (this.object.viewer.getKeyState(16)) {
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.args.acceleration*dt))
             }
         }
         this.object.viewer.collisionList.forEach(x => {
-            var all_normals = x.searchNormals(this.object.container.position, this.bounceRadius)
+            var all_normals = x.searchNormals(this.object.container.position, this.args.bounceRadius)
             var filtered_normals = []
 
             all_normals.forEach(x => {
@@ -130,14 +144,10 @@ class PlayerModifier extends BaseModifier{
         })
     }
     setAsActive() {
-        this.viewer.changeCamera(this.camera)
-    }
-    serialize() {
-        this.args.acceleration = this.acceleration
-        this.args.bounceRadius = this.bounceRadius
-        return super.serialize()
+        this.object.viewer.changeCamera(this.camera)
     }
 }
+PlayerModifier.registerConstructor()
 
-Serializable.registerClass(PlayerModifier)
+// Serializable.registerClass(PlayerModifier)
 module.exports = PlayerModifier

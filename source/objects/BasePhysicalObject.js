@@ -44,5 +44,5 @@ class BasePhysicalObject extends BaseObject{
         return super.serialize()
     }
 }
-Serializable.registerClass(BasePhysicalObject)
+// Serializable.registerClass(BasePhysicalObject)
 module.exports = BasePhysicalObject

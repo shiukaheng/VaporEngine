@@ -1,5 +1,6 @@
 var argsProc = require("../utils/argumentProcessor")
 var Serializable = require("../Serializable")
+var BasePhysicalObject = require("./BasePhysicalObject")
 
 class PotreeObject extends BasePhysicalObject {
     constructor(args={}) {
@@ -49,6 +50,6 @@ class PotreeObject extends BasePhysicalObject {
     }
 }
 
-Serializable.registerClass(PotreeObject)
+// Serializable.registerClass(PotreeObject)
 
 module.exports = PotreeObject

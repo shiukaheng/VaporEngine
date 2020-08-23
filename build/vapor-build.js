@@ -54597,7 +54597,7 @@ module.exports = {
     ModifierArray: require("./arrays/ModifierArray"),
     ObjectArray: require("./arrays/ObjectArray")
 }
-},{"./arrays/ModifierArray":32,"./arrays/ObjectArray":33}],26:[function(require,module,exports){
+},{"./arrays/ModifierArray":36,"./arrays/ObjectArray":37}],26:[function(require,module,exports){
 module.exports = {
     BaseModifier: require("./modifiers/BaseModifier"),
     ConstantRotationModifier: require("./modifiers/ConstantRotationModifier"),
@@ -54605,7 +54605,7 @@ module.exports = {
     PlayerModifier: require("./modifiers/PlayerModifier"),
     VelocityDragModifier: require("./modifiers/VelocityDragModifier")
 }
-},{"./modifiers/BaseModifier":35,"./modifiers/ConstantRotationModifier":36,"./modifiers/LinearAccelerationModifier":37,"./modifiers/PlayerModifier":38,"./modifiers/VelocityDragModifier":39}],27:[function(require,module,exports){
+},{"./modifiers/BaseModifier":39,"./modifiers/ConstantRotationModifier":40,"./modifiers/LinearAccelerationModifier":41,"./modifiers/PlayerModifier":42,"./modifiers/VelocityDragModifier":43}],27:[function(require,module,exports){
 module.exports = {
     BaseObject: require("./objects/BaseObject"),
     BasePhysicalObject: require("./objects/BasePhysicalObject"),
@@ -54615,7 +54615,7 @@ module.exports = {
     AudioSourceObject: require("./objects/AudioSourceObject"),
     PlayerObject: require("./objects/PlayerObject")
 }
-},{"./objects/AudioSourceObject":40,"./objects/BaseObject":41,"./objects/BasePhysicalObject":42,"./objects/CollisionCloudObject":43,"./objects/PlayerObject":44,"./objects/PotreeObject":45,"./objects/TestObject":46}],28:[function(require,module,exports){
+},{"./objects/AudioSourceObject":44,"./objects/BaseObject":45,"./objects/BasePhysicalObject":46,"./objects/CollisionCloudObject":47,"./objects/PlayerObject":48,"./objects/PotreeObject":49,"./objects/TestObject":50}],28:[function(require,module,exports){
 const uuid = require("uuid")
 const _ = require("underscore")
 const argsProc = require("./utils/argumentProcessor")
@@ -54669,14 +54669,496 @@ class SerializableClassesManager {
 var manager = new SerializableClassesManager()
 
 module.exports = Serializable
-},{"./utils/argumentProcessor":49,"underscore":6,"uuid":7}],29:[function(require,module,exports){
+},{"./utils/argumentProcessor":53,"underscore":6,"uuid":7}],29:[function(require,module,exports){
+module.exports = {
+    Serializable: require("./SerializationLib/Serializable"),
+    DeserializationObjectContainer: require("./SerializationLib/DeserializationObjectContainer")
+}
+},{"./SerializationLib/DeserializationObjectContainer":30,"./SerializationLib/Serializable":31}],30:[function(require,module,exports){
+
+// Keeps track of deserialized objects and its dependencies!
+class DeserializationObjectContainer{
+    constructor(serializableClassesManager) {
+        this.serializableClassesManager = serializableClassesManager
+        this.unfulfilledDependencies={}
+        this.serializableInstances={}
+        this.bufferedVirtualInstances={}
+        this.requestResolveDependency = this.requestResolveDependency.bind(this)
+        this.getUuidPlaceholder = this.getUuidPlaceholder.bind(this)
+                
+    }
+    requestResolveDependency(uuid, callback) {
+        if (this.serializableInstances[uuid]===undefined) {
+            if (this.unfulfilledDependencies[uuid]===undefined) {
+                this.unfulfilledDependencies[uuid] = [callback]
+            } else if (this.unfulfilledDependencies[uuid].constructor==Array) {
+                this.unfulfilledDependencies[uuid].push(callback)
+            } else {
+                throw new Error("unfulfilledDependencies corruption")
+            }
+        } else {
+            callback(this.serializableInstances[uuid])
+        }
+
+    }
+    registerSerializableInstance(serializable) {
+        if (this.serializableInstances[serializable.args.uuid] !== undefined) {
+            throw new Error("attempt to register existing uuid")
+        }
+        this.serializableInstances[serializable.args.uuid] = serializable
+        if (this.unfulfilledDependencies[serializable.args.uuid]!==undefined) {
+            this.unfulfilledDependencies[serializable.args.uuid].forEach(callback => {
+                callback(serializable)
+            })
+        }
+    }
+    deserializeSerializable(serializable) {
+        var relinked = {}
+        for (const [key, value] of Object.entries(serializable)) {
+            relinked[key] = this.deserialize(value)
+        }
+        var returnVar = this.reconstruct(relinked)
+        this.registerSerializableInstance(returnVar)
+        return returnVar
+    }
+    deserialize(elem) { // Can deserialize any arbitrary structure as long as follows JSON compatible structured object, and that a serialized object only exists once.
+        var returnVar
+        if (elem.isProxy) {
+            returnVar = elem
+        } else if (Object(elem)!==elem) {
+            returnVar = elem
+        } else if (elem.constructor === Array) {
+            returnVar = []
+            elem.forEach(value => {
+                returnVar.push(this.deserialize(value))
+            })
+        } else if ((elem.constructor === Object) && (elem["className"] === "uuidProxy")) {
+            returnVar = this.getUuidPlaceholder(elem["uuid"])
+        } else if ((elem.constructor === Object) && (elem["className"] !== undefined)) {
+            returnVar = this.deserializeSerializable(elem)
+        } else if (elem.constructor === Object) {
+            var returnVar = {}
+            for (const [key, value] of Object.entries(elem)) {
+                returnVar[key] = this.deserialize(value)
+            }
+        } else {
+            console.warn("Unhandled data type for ",elem)
+        }
+        return returnVar
+    }
+    deserializeWithDependencies(serializedWithDependencies) {
+        return this.deserialize(serializedWithDependencies).serialized
+    }
+    reconstruct(serialized) {
+        return new (this.serializableClassesManager.lookup(serialized.className))(serialized)
+    }
+    getUuidPlaceholder(uuid) {
+        var scope = this
+        var actualTarget
+        this.requestResolveDependency(uuid, replacementObject => {
+            actualTarget = replacementObject
+            if (scope.bufferedVirtualInstances[uuid]!==undefined) {
+                for (const [key, value] of Object.entries(scope.bufferedVirtualInstances[uuid])) {
+                    if (!((key==="className")||(key==="uuid"))) {
+                        replacementObject[key] = value
+                    }
+                }
+            }
+        })
+        if (scope.bufferedVirtualInstances[uuid]===undefined) {
+            scope.bufferedVirtualInstances[uuid] = {
+                "uuid": uuid,
+                "className": "uuidProxy"
+            }
+        }
+        var switcherooProxy = new Proxy(scope.bufferedVirtualInstances[uuid], {
+            get: function(placeholderTarget, prop, receiver) {
+                if (prop==="isProxy") {
+                    return true
+                }
+                if (!(actualTarget===undefined)) {
+                    return actualTarget[prop]
+                } else {
+                    console.warn("Getting properties of uninstantiated object. Serializable objects should not access other Serializable objects during construction!")
+                    
+                    return scope.bufferedVirtualInstances[uuid][prop]
+                }
+            },
+            set: function(placeholderTarget, prop, receiver) {
+                if (!(actualTarget===undefined)) {
+                    actualTarget[prop] = receiver
+                    return true
+                } else {
+                    placeholderTarget[prop] = receiver
+                    console.warn("Setting properties of uninstantiated object.")
+                    return true
+                }
+            }
+        })
+        return switcherooProxy
+    }
+}
+
+module.exports = DeserializationObjectContainer
+},{}],31:[function(require,module,exports){
+const uuid = require("uuid")
+const argsProcessor = require("./argsProcessor")
+const _ = require("underscore")
+
+class SerializableClassesManager {
+    constructor() {
+        this.classList = {}
+    }
+    register(newClass) {
+        // console.log(newClass)
+        if ((newClass.prototype instanceof Serializable)||(newClass===Serializable)) {
+            this.classList[newClass.name] = newClass
+        } else {
+            throw new TypeError("attempt to register invalid class")
+        }
+    }
+    lookup(lookupClass) {
+        if (!(this.classList[lookupClass]===undefined)) {
+            return this.classList[lookupClass]
+        } else {
+            throw new TypeError("unrecognized Serializable class")
+        }
+    }
+}
+
+var serializableClassesManager = new SerializableClassesManager()
+
+function applyArgs(targetArgs, sourceArgs) {
+    for (const [key, value] of Object.entries(sourceArgs)) {
+        targetArgs[key] = value
+    }
+}
+
+function serializableArrayRemoveDuplicates(serializableArray) { // For instantiated Serializables, order aware, keeps duplicate with lowest index (earliest)
+    var uuidDictObj = {}
+    var uuidIndexDictObj = {}
+    serializableArray.forEach((obj, index) => {
+        if (!(obj instanceof Serializable)) {
+            throw new TypeError("Array contains non-serializable class")
+        }
+        uuidDictObj[obj.args.uuid] = obj
+        if (uuidDictObj[obj.args.uuid]===undefined) { // If not in set
+            uuidIndexDictObj[obj.args.uuid] = index // Add to set
+        } else { // If in set already
+            uuidIndexDictObj[obj.args.uuid] = Math.min([index, uuidIndexDictObj[obj.args.uuid]]) // Remove the higher index duplicate
+        }
+    })
+    var unorderedObjectArray = []
+    for (const [key, value] of Object.entries(uuidIndexDictObj)) {
+        unorderedObjectArray.push({
+            "index":value,
+            "object":uuidDictObj[key]
+        })
+    }
+    var orderedObjectArray = []
+    _.sortBy(unorderedObjectArray, "index").forEach((elem)=>{
+        orderedObjectArray.push(elem["object"])
+    })
+    return orderedObjectArray
+}
+
+function serializableArraysDiff(before, after) { // For instantiated Serializables
+    return {
+        "added": [],
+        "removed": []
+    }
+}
+
+class Serializable {
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        // Check if constructor is valid, i.e. registered!
+        serializableClassesManager.lookup(this.constructor.name)
+        // Initialize uuid, className in args for Serializable
+        var defaultArgs = {
+            "uuid": uuid.v4(),
+            "className": this.constructor.name,
+            "serialize": true
+        }
+        // Initialize args functionality
+        this.argHandlers = _.extend({}, argHandlers)
+        this._args = {}
+        this.args = this.getArgObjectProxy()
+        // Run initialization code
+        initFunc(this)
+        // Set arguments, triggering necessary argHandlers (must happend after initialization, setting container variables etc)
+        applyArgs(this.args, Serializable.argsProcessor(defaultArgs, args))
+        this.getSelf = this.getSelf.bind(this)
+    }
+    serializeWithDependencies() {
+        return serializeElement(this)
+    }
+    updateArgs() {
+    }
+    getSelf() {
+        return this
+    }
+    getArgObjectProxy() {
+        var scope = this
+        return new Proxy(this._args, {
+            get(target, prop) {
+                if(scope.argHandlers[prop]!==undefined&&scope.argHandlers[prop].get!==undefined) {
+                    return scope.argHandlers[prop].get(scope, prop)
+                } else {
+                    return Reflect.get(...arguments)
+                }
+            },
+            set(target, prop, value) {
+                if(scope.argHandlers[prop]!==undefined&&scope.argHandlers[prop].set!==undefined) {
+                    return scope.argHandlers[prop].set(scope, value, prop)
+                } else {
+                    return Reflect.set(...arguments)
+                }
+            }
+        })
+    }
+    _setArgsPropHandler(propName, getter, setter) { // Handlers will not be serialized! Thus should only be used when writing classes that inherits Serializable.
+        if (getter.constructor!==Function||setter.constructor!==Function) {
+            throw new TypeError("invalid getters or setters")
+        }
+        this.argHandlers[propName] = {
+            get: getter,
+            set: setter
+        }
+    }
+    static serializeElement(elem) {
+        return serializeElement(elem)
+    }
+    static registerConstructor() {
+        serializableClassesManager.register(this)
+    }
+    static getSerializableClassesManager() {
+        return serializableClassesManager
+    }
+    static argsProcessor(defaultArgs, args) {
+        return argsProcessor(defaultArgs, args)
+    }
+    static argHandProcessor(handlers, additionalHandlers) { // Could be modified to combine multiple handlers
+        return _.extend(handlers, additionalHandlers)
+    }
+    static initFuncProcessor(initFunc, additionalInitFunc) {
+        return function(scope) {
+            initFunc(scope),
+            additionalInitFunc(scope)
+        }
+    }
+    static encodeTraversal(path=[]) {
+        return new Proxy((args)=>{}, {
+            get(target, prop, receiver) {
+                path.push(prop)
+                return Serializable.encodeTraversal(path)
+            },
+            set() {
+                throw new Error("attempt to set property of encodeTraversal proxy")
+            },
+            apply(target, thisArg, argArray) {
+                var destination = argArray[0]
+                path.forEach(child => {
+                    destination = destination[child]
+                })
+                return destination
+            }
+        })
+    }
+    static getReadOnly(object) {
+        return new Proxy(object, {
+            get(target, prop, receiever) {
+                if (Object(target[prop])!==target[prop]&&target[prop]!==undefined) {
+                    return Serializable.getReadOnly(target[prop])
+                } else {
+                    return target[prop]
+                }
+            },
+            set(target, prop, value) {
+                throw new Error("Read only property. Modify the direct children of the args object!")
+            },
+            apply(target, thisArg, argumentsList) {
+                throw new Error("Read only property. Modify the direct children of the args object!")
+            }
+        })
+    }
+    static getRecursiveSetTrigger(object, callback) {
+        return new Proxy(object, {
+            get(target, prop, receiever) {
+                if (Object(target[prop])===target[prop]&&target[prop]!==undefined) {
+                    return Serializable.getRecursiveSetTrigger(target[prop], callback)
+                } else {
+                    return target[prop]
+                }
+            },
+            set(target, prop, value) {
+                Reflect.set(...arguments)
+                callback()
+            },
+            apply(target, thisArg, argumentsList) {
+                Reflect.apply(...arguments)
+                callback()
+            }
+        })
+    }
+    static predicateHandler(predicate, error=new TypeError("Rejection by predicate")) {
+        return {
+            "set":function(scope, val, argName) {
+                if(predicate(val)===false) {
+                    throw error
+                }
+                scope._args[argName] = val
+            },
+            "get":function(scope, argName) {
+                if (!(Object(scope._args[argName])===scope._args[argName])||scope._args[argName]===undefined) {
+                    return scope._args[argName]
+                } else {
+                    return Serializable.getRecursiveSetTrigger(scope._args[argName], 
+                        ()=>{
+                            scope.args[argName] = scope._args[argName]
+                        })
+                }
+                
+            }
+        }
+    }
+    static serializableArrayRemoveDuplicates(array) {
+        return serializableArrayRemoveDuplicates(array)
+    }
+    static createConstructor(args={}, initFunc=function(scope){}, argHandlers={}, inherits=Serializable) {
+        class CustomBaseSerializable extends inherits{
+            constructor(_args={}, _initFunc=function(){}, _argHandlers={}) {
+                super(
+                    Serializable.argsProcessor(args, _args), 
+                    Serializable.initFuncProcessor(initFunc, _initFunc),
+                    Serializable.argHandProcessor(argHandlers, _argHandlers))
+            }
+        }
+        return CustomBaseSerializable
+    }
+}
+
+Serializable.registerConstructor()
+
+class DependencyArgSet{
+    constructor(set=[]) {
+        this.set = {}
+    }
+    forEach(func) {
+        this.toArray().forEach(func)
+    }
+    add(dependencyArg) {
+        if (dependencyArg["uuid"]===undefined) {
+            throw new Error("nonexistent uuid")
+        }
+        this.set[dependencyArg["uuid"]] = dependencyArg
+    }
+    merge(dependencyArgSet) {
+        this.set = _.extend(this.set, dependencyArgSet.set)
+    }
+    toArray() {
+        var returnArr = []
+        for (const [key, value] of Object.entries(this.set)) {
+            returnArr.push(value)
+        }
+        return returnArr
+    }
+    has(dependencyArg) {
+        return (this.set[dependencyArg["uuid"]]!==undefined)
+    }
+    reserve(uuid) {
+        if (this.set[uuid]!==undefined) {
+            throw new Error("attempt to reserve existing uuid")
+        }
+        this.set[uuid] = null
+    }
+}
+
+function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArgSet()) {
+    // console.log(elem)
+    var serialized
+    if (Object(elem)!==elem) {
+        serialized = elem
+    } else if (elem.constructor === Array) {
+        var returnVar = []
+        elem.forEach(value => {
+            var processedValue = serializeElement(value, false, _dependencies)
+            returnVar.push(processedValue.serialized)
+        })
+        serialized = returnVar  
+    } else if (elem.constructor === Object) {
+        var returnVar = {}
+        for (const [key, value] of Object.entries(elem)) {
+            var processedValue = serializeElement(value, false, _dependencies)
+            returnVar[key] = processedValue.serialized
+        }
+        serialized = returnVar
+    } else if (elem instanceof Serializable) {
+        if (!(elem.args.uuid)) {
+            throw new Error("UUID not found")
+        }
+        elem.updateArgs()
+        if (_dependencies.has(elem.args)) {
+            serialized = {
+                "className": "uuidProxy",
+                "uuid": elem.args.uuid
+            }
+        } else {
+            _dependencies.reserve(elem.args.uuid)
+            var processedValue = serializeElement(elem.args, false, _dependencies)
+            serialized = {
+                "className": "uuidProxy",
+                "uuid": elem.args.uuid
+            }
+            _dependencies.add(processedValue.serialized)  
+        }
+        
+    } else {
+        console.warn("Unhandled data type for ",elem)
+    }
+    var returnDependencies
+    if (isTopLevel) {
+        returnDependencies = _dependencies.toArray()
+    } else {
+        returnDependencies = _dependencies
+    }
+    return {
+        "serialized": serialized,
+        "dependencies": returnDependencies
+    }
+}
+
+module.exports = Serializable
+},{"./argsProcessor":32,"underscore":6,"uuid":7}],32:[function(require,module,exports){
+const _ = require("underscore");
+const Serializable = require("./Serializable");
+function argsProcessor(defaultArgs, args) {
+    let newArgs = Object.assign({}, defaultArgs);
+    let keysUnion = _.union(Object.keys(newArgs), Object.keys(args));
+    keysUnion.forEach(function (x) {
+      if ((args[x]!==undefined)&&(args[x].isProxy||args[x]["className"]!==undefined||args[x].args!==undefined||args[x].constructor === Array)) { // do not further expand and check trees if is Serializable / proxy object to prevent deep cloning
+        newArgs[x] = args[x]
+       } else if (args[x]!=undefined &&
+        !(args[x] instanceof Object) &&
+        !(newArgs[x] instanceof Object)) {
+        newArgs[x] = args[x];
+      } else if (args[x]!=undefined && args[x] instanceof Object) {
+        newArgs[x] = argsProcessor(newArgs[x], args[x]);
+      }
+    });
+    return newArgs;
+}
+
+module.exports = argsProcessor
+},{"./Serializable":31,"underscore":6}],33:[function(require,module,exports){
 const argumentProcessor = require("./utils/ArgumentProcessor");
 
 module.exports = {
     Subscription: require("./utils/Subscription"),
     argumentProcessor: require("./utils/argumentProcessor"),
+    vec3ShadowHandler: require("./utils/vec3ShadowHandler"),
+    eulerShadowHandler: require("./utils/eulerShadowHandler")
 }
-},{"./utils/ArgumentProcessor":47,"./utils/Subscription":48,"./utils/argumentProcessor":49}],30:[function(require,module,exports){
+},{"./utils/ArgumentProcessor":51,"./utils/Subscription":52,"./utils/argumentProcessor":53,"./utils/eulerShadowHandler":54,"./utils/vec3ShadowHandler":55}],34:[function(require,module,exports){
 
 module.exports = {
     Arrays: require("./Arrays"),
@@ -54684,71 +55166,126 @@ module.exports = {
     Objects: require("./Objects"),
     Viewers: require("./Viewers"),
     Utils: require("./Utils"),
-    Serializable: require("./Serializable")
+    Serialization: require("./Serialization")
 }
 
-},{"./Arrays":25,"./Modifiers":26,"./Objects":27,"./Serializable":28,"./Utils":29,"./Viewers":31}],31:[function(require,module,exports){
+},{"./Arrays":25,"./Modifiers":26,"./Objects":27,"./Serialization":29,"./Utils":33,"./Viewers":35}],35:[function(require,module,exports){
 module.exports = {
     Viewer: require("./viewers/Viewer")
 }
-},{"./viewers/Viewer":50}],32:[function(require,module,exports){
-Serializable = require("../Serializable")
+},{"./viewers/Viewer":56}],36:[function(require,module,exports){
+var {Serializable} = require("../Serialization")
+var _ = require("underscore")
+var BaseModifier = require("../modifiers/BaseModifier")
 
-class ModifierArray {
-    constructor(object, serializedModifiers=[]){
+class ModifierArray extends Serializable {
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serializable.argsProcessor({
+            // Default arguments:
+            "modifiers":[]
+        }, args), 
+        Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+            }, initFunc),
+        Serializable.argHandProcessor({
+            // Argument handlers:
+            "modifiers":{
+                "set":function(scope, val, argName) {
+                    if (scope._argumentsInitialized===true) {
+                        throw("attempt to set modifier argument in ModifierArray")
+                    } else {
+                        scope._args[argName] = val
+                        scope._argumentsInitialized = true
+                    }
+                    
+                },
+                "get":function(scope, argName) {
+                    return(new Proxy(scope._args[argName], {
+                        "set":function(){
+                            throw "attempt to modify modifier argument in ModifierArray"
+                        },
+                        "get":function(target, prop) {
+                            if(_.contains(["forEach", "toString", "toLocaleString"],prop)||(parseInt(prop).toString()===prop)) {
+                                return target[prop].bind(target)
+                            } else {
+                                throw "attempt to modify modifier argument in ModifierArray"
+                            }
+                        }
+                    }))
+                }
+            }
+        }, argHandlers))
+    }
+    load(object) { // Todo: add compatibility on side of object. // Only at this moment, load modifiers
+        // if (this.isLoaded) {
+        //     throw "attempt to load ModifierArray that is already loaded"
+        // }
         this.object = object
-        this._listOfModifiers=[]
-        this._listOfModifiers.forEach(x => this.add(x))
-        this.deferredLoads = []
-        serializedModifiers.forEach(serializedModifier => {
-            this.add(deserialize(serializedModifiers))
+        this.forEach(modifier=>{
+            modifier.load(object)
         })
     }
-    add(modifier){
-        if (this.object.viewer) {
-            this.flushDeferredLoads()
-            modifier.load(this.object)
-        } else {
-            this.deferredLoads.push((function() {
-                modifier.load(this.object)
-            }).bind(this))
-        }
-        this._listOfModifiers.push(modifier)
+    unload() { // Unload modifiers too
+        this.forEach(modifier=>{
+            modifier.unload(this.object)
+        })
+        this.object = undefined
     }
-    remove(modifier){
-        modifier.unload(this.object)
-        this._listOfModifiers.splice(this._listOfModifiers.indexOf(modifier), 1)
+    add(...modifiers) {
+        modifiers.forEach(modifier=>{
+            this.addSingle(modifier)
+        })
+    }
+    remove(...modifiers) {
+        modifiers.forEach(modifier=>{
+            this.removeSingle(modifier)
+        })
+    }
+    addSingle(modifier){
+        if (_.contains(this._args.modifiers, modifier)) {
+            throw "attempt to add already existing modifier"
+        } else if (!(modifier instanceof BaseModifier)) {
+            throw "attempt to add invalid class to ModifierArray"
+        } else {
+            this._args.modifiers.push(modifier)
+            if (this.isLoaded) {
+                modifier.load(this.object)
+            }
+        }
+
+    }
+    removeSingle(modifier){
+        if (!(_.contains(this._args.modifiers, modifier))) {
+            throw "attempt to remove non-existent modifier"
+        } else {
+            this._args.modifiers.splice(this._args.modifiers.indexOf(modifier), 1)
+            if (this.isLoaded) {
+                modifier.unload()
+            }
+        }
     }
     update(dt){
-        this._listOfModifiers.forEach(modifier => {
-            if (modifier.enabled) {
-                modifier.update(this.object, dt)
+        if (!this.isLoaded) {
+            throw "attempt to update "+this.constructor.name+" before loaded"
+        }
+        this.forEach(modifier => {
+            if (modifier.args.enabled) {
+                modifier.update(dt)
             }
         })
     }
-    flushDeferredLoads() {
-        this.deferredLoads.forEach(deferredLoad => {
-            deferredLoad()
-        })
+    get isLoaded() {
+        return (this.object!==undefined)
     }
-    serialize() {
-        var serializedModifiers = []
-        this._listOfModifiers.forEach(modifier => {
-            if (!modifier.args.ignore) {
-                serializedModifiers.push(modifier.serialize())
-            }
-        })
-        return serializedModifiers
-    }
-    deserialize(list) {
-        list.forEach(modifierObj => {
-            this.add(Serializable.deserialize(modifierObj))
-        })
+    get forEach() {
+        return (this.args.modifiers.forEach.bind(this.args.modifiers))
     }
 }
-
+ModifierArray.registerConstructor()
 module.exports = ModifierArray
-},{"../Serializable":28}],33:[function(require,module,exports){
+},{"../Serialization":29,"../modifiers/BaseModifier":39,"underscore":6}],37:[function(require,module,exports){
 var Serializable = require("../Serializable")
 class ObjectArray {
     constructor(viewer, listOfObjects=[]){
@@ -54814,7 +55351,7 @@ class ObjectArray {
 }
 
 module.exports = ObjectArray
-},{"../Serializable":28}],34:[function(require,module,exports){
+},{"../Serializable":28}],38:[function(require,module,exports){
 // Modified!
 /**
  * @author Filipe Caixeta / http://filipecaixeta.com.br
@@ -55213,108 +55750,121 @@ PCDLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
 } );
 
 module.exports = PCDLoader
-},{"three":5}],35:[function(require,module,exports){
-ModifierArray = require("../arrays/ModifierArray")
-Serializable = require("../Serializable")
-argsProc = require("../utils/argumentProcessor")
+},{"three":5}],39:[function(require,module,exports){
+var ModifierArray = require("../arrays/ModifierArray")
+var Serialization = require("../Serialization")
 
-class BaseModifier extends Serializable {
-    constructor(args={}) {
-        var defaultArgs = {"enabled": true}
-        var newArgs = argsProc(defaultArgs, args)
-        super(newArgs)
-        this.enabled = this.args.enabled
+class BaseModifier extends Serialization.Serializable {
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serialization.Serializable.argsProcessor({
+            // Default arguments:
+            "enabled": true
+        }, args), 
+        Serialization.Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+            }, initFunc),
+        Serialization.Serializable.argHandProcessor({
+            // Argument handlers:
+            "enabled": Serialization.Serializable.predicateHandler((elem)=>{
+                return (typeof elem === "boolean")
+            }, new TypeError("Modifier enabled flag must be bool"))
+        }, argHandlers))
     }
-    update(object, dt) {
+    update(dt) {
+        if (!this.isLoaded) {
+            throw new Error("Attempt to update Modifier before object is loaded.")
+        }
     }
     load(object) {
         this.object = object
     }
-    unload(object) {
+    unload() {
         this.object = undefined
     }
-    serialize() {
-        this.args.enabled = this.enabled
-        return super.serialize()
+    get isLoaded() {
+        return (!(this.object===undefined))
     }
 }
-
-Serializable.registerClass(BaseModifier)
+BaseModifier.registerConstructor()
 
 module.exports = BaseModifier
-},{"../Serializable":28,"../arrays/ModifierArray":32,"../utils/argumentProcessor":49}],36:[function(require,module,exports){
-BaseModifier = require("./BaseModifier")
-THREE = require("three")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+},{"../Serialization":29,"../arrays/ModifierArray":36}],40:[function(require,module,exports){
+var BaseModifier = require("./BaseModifier")
+var THREE = require("three")
+var Serialization = require("../Serialization")
+var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
 
 class ConstantRotationModifier extends BaseModifier {
-    constructor(args={}) {
-        super(argsProc(
-            {"rotVector":{
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serialization.Serializable.argsProcessor({
+            // Default arguments:
+            "rotVector":{
                 "x": 0,
                 "y": 0,
                 "z": 0
-            }}
-            , args))
-        this.rotation = new THREE.Vector3(this.args.rotVector.x, this.args.rotVector.y, this.args.rotVector.z)
+            }
+        }, args), 
+        Serialization.Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+                scope.rotation = new THREE.Vector3()
+            }, initFunc),
+        Serialization.Serializable.argHandProcessor({
+            // Argument handlers:
+            "rotVector":vec3ShadowHandler(Serialization.Serializable.encodeTraversal().rotation)
+        }, argHandlers))
     }
-    update(object, dt) {
-        super.update()
-        object.container.rotation.x += this.rotation.x * dt
-        object.container.rotation.y += this.rotation.y * dt
-        object.container.rotation.z += this.rotation.z * dt
-    }
-    serialize() {
-        this.args.rotVector = {
-            "x": this.rotation.x,
-            "y": this.rotation.y,
-            "z": this.rotation.z
-        }
-        return super.serialize()
+    update(dt) {
+        super.update(dt)
+        this.object.container.rotation.x += this.rotation.x * dt
+        this.object.container.rotation.y += this.rotation.y * dt
+        this.object.container.rotation.z += this.rotation.z * dt
     }
 }
-Serializable.registerClass(ConstantRotationModifier)
+ConstantRotationModifier.registerConstructor()
 module.exports = ConstantRotationModifier
-},{"../Serializable":28,"../utils/argumentProcessor":49,"./BaseModifier":35,"three":5}],37:[function(require,module,exports){
-THREE = require('three')
-BaseModifier = require("./BaseModifier")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+},{"../Serialization":29,"../utils/vec3ShadowHandler":55,"./BaseModifier":39,"three":5}],41:[function(require,module,exports){
+var THREE = require('three')
+var BaseModifier = require("./BaseModifier")
+var Serialization = require("../Serialization")
+var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
 
 class LinearAccelerationModifier extends BaseModifier{
-    constructor(args={}) {
-        super(argsProc(
-            {
-                "AccVector":{
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                }
-            }, args
-        ))
-        this.direction = new THREE.Vector3(this.args.AccVector.x, this.args.AccVector.y, this.args.AccVector.z)
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serialization.Serializable.argsProcessor({
+            // Default arguments:
+            "accVector":{
+                "x": 0,
+                "y": 0,
+                "z": 0
+            }
+        }, args), 
+        Serialization.Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+                scope.accVector = new THREE.Vector3()
+            }, initFunc),
+        Serialization.Serializable.argHandProcessor({
+            // Argument handlers:
+            "accVector": vec3ShadowHandler(Serialization.Serializable.encodeTraversal().accVector)
+        }, argHandlers))
     }
-    update(object, dt) {
-        super.update(object, dt)
-        object.addVelocity(this.direction.clone().multiplyScalar(dt))
-    }
-    serialize() {
-        this.args.AccVector = {
-            "x": this.direction.x,
-            "y": this.direction.y,
-            "z": this.direction.z
-        }
-        return super.serialize()
+    update(dt) {
+        super.update(dt)
+        this.object.addVelocity(this.accVector.clone().multiplyScalar(dt))
     }
 }
-Serializable.registerClass(LinearAccelerationModifier)
+LinearAccelerationModifier.registerConstructor()
 module.exports = LinearAccelerationModifier
-},{"../Serializable":28,"../utils/argumentProcessor":49,"./BaseModifier":35,"three":5}],38:[function(require,module,exports){
-BaseModifier = require("./BaseModifier")
-BasePhysicalObject = require("../objects/BasePhysicalObject")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+},{"../Serialization":29,"../utils/vec3ShadowHandler":55,"./BaseModifier":39,"three":5}],42:[function(require,module,exports){
+const { Serializable } = require("../Serialization");
+
+var BaseModifier = require("./BaseModifier")
+var BasePhysicalObject = require("../objects/BasePhysicalObject")
 
 function event_based_modifier_method(target, name, descriptor) {
     const original = descriptor.value;
@@ -55328,16 +55878,30 @@ function event_based_modifier_method(target, name, descriptor) {
     }
 }
 class PlayerModifier extends BaseModifier{
-    constructor(args={}) {
-        super(argsProc({"acceleration":7, "bounceRadius":1}, args))
-        this.acceleration = this.args.acceleration
-        this.bounceRadius = this.args.bounceRadius
-
-        this._reflectNormal = new THREE.Vector3()
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serializable.argsProcessor({
+            // Default arguments:
+            "acceleration": 7,
+            "bounceRadius": 1
+        }, args), 
+        Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+                scope._reflectNormal = new THREE.Vector3()
+            }, initFunc),
+        Serializable.argHandProcessor({
+            // Argument handlers:
+            "acceleration": Serializable.predicateHandler((elem)=>{
+                return (typeof elem === "number")
+            }, "TypeError: acceleration arg must be number"),
+            "bounceRadius": Serializable.predicateHandler((elem)=>{
+                return (typeof elem === "number")
+            }, "TypeError: bounceRadius arg must be number")
+        }, argHandlers))
     }
-    load(object) {
+    load(object) { // Only when object and viewer exists. When object exists in isolation, no point in updating modifiers.
         super.load(object)
-        this.viewer = object.viewer
         this.pointerControlsUpdate = this.pointerControlsUpdate.bind(this)
         // this.updateRotationFromControlObject = this.updateRotationFromControlObject.bind(this)
 
@@ -55356,7 +55920,7 @@ class PlayerModifier extends BaseModifier{
 
         // Pointer lock
         this.boundPointerControlHandler = this.pointerControlsUpdate
-        this.viewer.pointerControlSubscription.subscribe(this.pointerControlsUpdate)
+        this.object.viewer.pointerControlSubscription.subscribe(this.pointerControlsUpdate)
 
         // Keybinds
         this.forward = false
@@ -55375,10 +55939,10 @@ class PlayerModifier extends BaseModifier{
 
         this.setAsActive()
     }
-    unload(object) {
-        this.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
+    unload() {
+        this.object.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
         this.object.container.remove(this.camera)
-        this.viewer = undefined
+        super.unload()
     }
     // @event_based_modifier_method TODO: Migrate to ES6 with babel
     pointerControlsUpdate(e) {
@@ -55398,34 +55962,34 @@ class PlayerModifier extends BaseModifier{
         }
         this.object.container.setRotationFromQuaternion(this.controlObject.getWorldQuaternion(this._quaternion_container))
     }
-    update(object, dt) {
-        super.update(object, dt)
+    update(dt) {
+        super.update(dt)
         this.direction_helper.rotation.y = this.controlObject.rotation.y
-        var front = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.acceleration*dt)
+        var front = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.args.acceleration*dt)
         this.direction_helper.rotation.y = this.controlObject.rotation.y + Math.PI/2
-        var left = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.acceleration*dt)
-        if (this.viewer.hasPointerLock) {
-            if (this.viewer.getKeyState(87)) {
+        var left = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.args.acceleration*dt)
+        if (this.object.viewer.hasPointerLock) {
+            if (this.object.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
             }
-            if (this.viewer.getKeyState(83)) {
+            if (this.object.viewer.getKeyState(83)) {
                 this.object.addVelocity(front.clone().multiplyScalar(-1))
             }
-            if (this.viewer.getKeyState(65)) {
+            if (this.object.viewer.getKeyState(65)) {
                 this.object.addVelocity(left)
             }
-            if (this.viewer.getKeyState(68)) {
+            if (this.object.viewer.getKeyState(68)) {
                 this.object.addVelocity(left.clone().multiplyScalar(-1))
             }
-            if (this.viewer.getKeyState(32)) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.acceleration*dt))
+            if (this.object.viewer.getKeyState(32)) {
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(this.args.acceleration*dt))
             }
-            if (this.viewer.getKeyState(16)) {
-                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.acceleration*dt))
+            if (this.object.viewer.getKeyState(16)) {
+                this.object.addVelocity(this.up_direction.clone().multiplyScalar(-1).multiplyScalar(this.args.acceleration*dt))
             }
         }
         this.object.viewer.collisionList.forEach(x => {
-            var all_normals = x.searchNormals(this.object.container.position, this.bounceRadius)
+            var all_normals = x.searchNormals(this.object.container.position, this.args.bounceRadius)
             var filtered_normals = []
 
             all_normals.forEach(x => {
@@ -55443,48 +56007,53 @@ class PlayerModifier extends BaseModifier{
         })
     }
     setAsActive() {
-        this.viewer.changeCamera(this.camera)
-    }
-    serialize() {
-        this.args.acceleration = this.acceleration
-        this.args.bounceRadius = this.bounceRadius
-        return super.serialize()
+        this.object.viewer.changeCamera(this.camera)
     }
 }
+PlayerModifier.registerConstructor()
 
-Serializable.registerClass(PlayerModifier)
+// Serializable.registerClass(PlayerModifier)
 module.exports = PlayerModifier
-},{"../Serializable":28,"../objects/BasePhysicalObject":42,"../utils/argumentProcessor":49,"./BaseModifier":35}],39:[function(require,module,exports){
-BaseModifier = require("./BaseModifier")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+},{"../Serialization":29,"../objects/BasePhysicalObject":46,"./BaseModifier":39}],43:[function(require,module,exports){
+var BaseModifier = require("./BaseModifier")
+var {Serializable} = require("../Serialization")
 
 class VelocityDragModifier extends BaseModifier{
-    constructor(args={}) {
-        super(argsProc(
-            {"coef": 0.9}, args
-        ))
-        this.coef=this.args.coef
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serializable.argsProcessor({
+            // Default arguments:
+            "coef": 0.9
+        }, args), 
+        Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+            }, initFunc),
+        Serializable.argHandProcessor({
+            // Argument handlers:
+            "coef": Serializable.predicateHandler((elem)=>{
+                return (typeof elem==="number")
+            }, "TypeError: coef argument must be a number")
+        }, argHandlers))
     }
-    update(physical_object, dt) {
-        physical_object.velocity = physical_object.velocity.clone().multiplyScalar((1-this.coef)**dt)
+    update(dt) {
+        this.object.velocity = this.object.velocity.clone().multiplyScalar((1-this.args.coef)**dt)
     }
-    load(physical_object) {
-        if (!(physical_object instanceof BasePhysicalObject)) {
+    load(object) {
+        if (!(object instanceof BasePhysicalObject)) {
             throw new TypeError("VelocityDragModifier must only be added to class that extends BasePhysicalObject")
         }
-    }
-    serialize() {
-        this.args.coef = this.coef
-        return super.serialize()
+        super.load(object)
     }
 }
-Serializable.registerClass(VelocityDragModifier)
+VelocityDragModifier.registerConstructor()
+
 module.exports = VelocityDragModifier
-},{"../Serializable":28,"../utils/argumentProcessor":49,"./BaseModifier":35}],40:[function(require,module,exports){
+},{"../Serialization":29,"./BaseModifier":39}],44:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 Serializable = require("../Serializable")
 argsProc = require("../utils/argumentProcessor")
+var THREE = require("three")
 var audioLoader = new THREE.AudioLoader()
 
 /**
@@ -55640,18 +56209,23 @@ class AudioSourceObject extends BasePhysicalObject {
         return super.serialize()
     }
 }
-Serializable.registerClass(AudioSourceObject)
+// Serializable.registerClass(AudioSourceObject)
 module.exports = AudioSourceObject
-},{"../Serializable":28,"../utils/argumentProcessor":49,"./BaseObject":41}],41:[function(require,module,exports){
+},{"../Serializable":28,"../utils/argumentProcessor":53,"./BaseObject":45,"three":5}],45:[function(require,module,exports){
 var THREE = require("three")
 var ModifierArray = require("../arrays/ModifierArray")
-var Serializable = require("../Serializable")
-var argsProc = require("../utils/argumentProcessor")
+var {Serializable} = require("../Serialization")
+var vec3sh = require("../utils/vec3ShadowHandler")
+var eush = require("../utils/eulerShadowHandler")
+var Viewer = require("../viewers/viewer")
 
-class BaseObject extends Serializable {
-    constructor(args={}) { // All assets are supposed to be loaded during object construction in async, and when its done, this.declareAssetsLoaded must be called
-        // Process arguments
-        var defaultArgs = {
+var enc = Serializable.encodeTraversal
+
+class BaseObject extends Serializable { // Todo: load ModifierArray when this is loaded, unload otherwise!
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serializable.argsProcessor({
+            // Default arguments:
             "position": {
                 "x": 0,
                 "y": 0,
@@ -55660,7 +56234,8 @@ class BaseObject extends Serializable {
             "rotation": {
                 "x": 0,
                 "y": 0,
-                "z": 0
+                "z": 0,
+                "eulerOrder": "XYZ"
             },
             "scale": {
                 "x": 1,
@@ -55668,43 +56243,45 @@ class BaseObject extends Serializable {
                 "z": 1
             },
             "bypassModifiers": false,
-            "modifiers": new Array()
-        }
-        var newArgs = argsProc(defaultArgs, args)
-        super(newArgs)
-
-        this.onLoadedFunctionList = []
-        this.assetsLoaded = false
-        this.container = new THREE.Object3D()
-        this.container.position.x = this.args.position.x
-        this.container.position.y = this.args.position.y
-        this.container.position.z = this.args.position.z
-        this.container.rotation.x = this.args.rotation.x
-        this.container.rotation.y = this.args.rotation.y
-        this.container.rotation.z = this.args.rotation.z
-        this.container.scale.x = this.args.scale.x
-        this.container.scale.y = this.args.scale.y
-        this.container.scale.z = this.args.scale.z
-        this.modifiers = new ModifierArray(this)
-        this.bypassModifiers = false
-        this.modifiers.deserialize(this.args.modifiers)
-        if (this.constructor.name === BaseObject.name) {
-            this.declareAssetsLoaded()
-        }
+            "modifiers": new ModifierArray()
+        }, args), 
+        Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+                scope.onLoadedFunctionList = []
+                scope.assetsLoaded = false
+                scope.container = new THREE.Object3D()
+                scope.bypassModifiers = false
+                if (scope.constructor.name === BaseObject.name) {
+                    scope.declareAssetsLoaded()
+                }
+            }, initFunc),
+        Serializable.argHandProcessor({
+            // Argument handlers:
+            "position":vec3sh(enc().position), 
+            "rotation":eush(enc().rotation),
+            "scale":vec3sh(enc().scale)
+        }, argHandlers))
     }
-    getDistanceFromReference() {
-    }
-    load(viewer) { // How to add itself into the viewer
+    load(viewer) {
+        // if (!(viewer instanceof Viewer)) {
+        //     throw new TypeError("attempt to load invalid class")
+        // }
         this.viewer = viewer
-        viewer.scene.add(this.container)
+        // viewer.scene.add(this.container)
+        this.args.modifiers.load(this)
     }
-    unload(viewer) {
-        viewer.scene.remove(this.container)
+    unload() {
+        this.args.modifiers.unload(this)
+        // this.viewer.scene.remove(this.container)
         this.viewer = undefined
     }
     update(dt) {
-        if (!this.bypassModifiers) {
-            this.modifiers.update(dt)
+        if (!this.isLoaded) {
+            throw new Error("attempt to update "+this.constructor.name+" before loaded")
+        }
+        if (!this.args.bypassModifiers) {
+            this.args.modifiers.update(dt)
         }
     }
     declareAssetsLoaded() {
@@ -55714,7 +56291,6 @@ class BaseObject extends Serializable {
         if (this.objectArray) {
             this.objectArray.updateAssetLoaded()
         }
-        this.modifiers.flushDeferredLoads()
     } // Todo: Make it so that there is an option to block user input + load screen while loading, or load async.
     queueOnAssetLoaded(queuedFunction) {
         if (this.assetsLoaded) {
@@ -55724,44 +56300,34 @@ class BaseObject extends Serializable {
         }
     }
     set position(position) {
-        this.container.position = position
+        this.container.position.copy(position)
     }
     get position() {
         return this.container.position
     }
     set rotation(rotation) {
-        this.container.rotation = rotation
+        this.container.rotation.copy(rotation)
     }
     get rotation() {
         return this.container.rotation
     }
-
-    serialize() {
-        this.args.position = {
-            "x": this.container.position.x,
-            "y": this.container.position.y,
-            "z": this.container.position.z
-        }
-        this.args.rotation = {
-            "x": this.container.rotation.x,
-            "y": this.container.rotation.y,
-            "z": this.container.rotation.z
-        }
-        this.args.scale = {
-            "x": this.container.scale.x,
-            "y": this.container.scale.y,
-            "z": this.container.scale.z
-        }
-        this.args.bypassModifiers = this.bypassModifiers
-        this.args.modifiers = this.modifiers.serialize()
-        return super.serialize()
+    set scale(scale) {
+        this.container.scale.copy(scale)
+    }
+    get scale() {
+        return this.container.scale
+    }
+    get isLoaded() {
+        return (!(this.viewer===undefined))
+    }
+    get modifiers() {
+        return this.args.modifiers
     }
 }
-
-Serializable.registerClass(BaseObject)
+BaseObject.registerConstructor()
 
 module.exports = BaseObject
-},{"../Serializable":28,"../arrays/ModifierArray":32,"../utils/argumentProcessor":49,"three":5}],42:[function(require,module,exports){
+},{"../Serialization":29,"../arrays/ModifierArray":36,"../utils/eulerShadowHandler":54,"../utils/vec3ShadowHandler":55,"../viewers/viewer":58,"three":5}],46:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 argsProc = require("../utils/argumentProcessor")
 Serializable = require("../Serializable")
@@ -55808,9 +56374,9 @@ class BasePhysicalObject extends BaseObject{
         return super.serialize()
     }
 }
-Serializable.registerClass(BasePhysicalObject)
+// Serializable.registerClass(BasePhysicalObject)
 module.exports = BasePhysicalObject
-},{"../Serializable":28,"../utils/argumentProcessor":49,"./BaseObject":41}],43:[function(require,module,exports){
+},{"../Serializable":28,"../utils/argumentProcessor":53,"./BaseObject":45}],47:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -55880,9 +56446,9 @@ class CollisionCloudObject extends BaseObject {
         return super.serialize()
     }
 }
-Serializable.registerClass(CollisionCloudObject)
+// Serializable.registerClass(CollisionCloudObject)
 module.exports = CollisionCloudObject
-},{"../Serializable":28,"../loaders/PCDLoader":34,"../utils/argumentProcessor":49,"./BaseObject":41,"yaot":22}],44:[function(require,module,exports){
+},{"../Serializable":28,"../loaders/PCDLoader":38,"../utils/argumentProcessor":53,"./BaseObject":45,"yaot":22}],48:[function(require,module,exports){
 var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
@@ -56028,7 +56594,7 @@ class PlayerObject extends BasePhysicalObject {
     }
 }
 
-Serializable.registerClass(PlayerObject)
+// Serializable.registerClass(PlayerObject)
 
 class BezierPathAnimation{
     constructor(startPos=new THREE.Vector3(0, 0, 0), startDir=new THREE.Vector3(1, 0, 0), startVel=new THREE.Vector3(1, 0, 0), destPos=new THREE.Vector3(3, 3, 0), destDir=new THREE.Vector3(1, 0, 0), destScalarVel=0, duration=5, segments=100, endCallback, impossibleParamCompensation=true) {
@@ -56117,9 +56683,10 @@ class BezierPathAnimation{
 window.BezierPathAnimation = BezierPathAnimation;
 
 module.exports = PlayerObject
-},{"../Serializable":28,"../modifiers/PlayerModifier":38,"../modifiers/VelocityDragModifier":39,"../utils/argumentProcessor":49,"./BasePhysicalObject":42}],45:[function(require,module,exports){
+},{"../Serializable":28,"../modifiers/PlayerModifier":42,"../modifiers/VelocityDragModifier":43,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],49:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var Serializable = require("../Serializable")
+var BasePhysicalObject = require("./BasePhysicalObject")
 
 class PotreeObject extends BasePhysicalObject {
     constructor(args={}) {
@@ -56169,10 +56736,10 @@ class PotreeObject extends BasePhysicalObject {
     }
 }
 
-Serializable.registerClass(PotreeObject)
+// Serializable.registerClass(PotreeObject)
 
 module.exports = PotreeObject
-},{"../Serializable":28,"../utils/argumentProcessor":49}],46:[function(require,module,exports){
+},{"../Serializable":28,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],50:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 var Serializable = require("../Serializable")
 
@@ -56193,10 +56760,10 @@ class TestObject extends BasePhysicalObject{
     }
 }
 
-Serializable.registerClass(TestObject)
+// Serializable.registerClass(TestObject)
 
 module.exports = TestObject
-},{"../Serializable":28,"./BasePhysicalObject":42}],47:[function(require,module,exports){
+},{"../Serializable":28,"./BasePhysicalObject":46}],51:[function(require,module,exports){
 const _ = require("underscore")
 
 function argumentProcessor(defaultArgs, args) {
@@ -56216,7 +56783,7 @@ function argumentProcessor(defaultArgs, args) {
 }
 
 module.exports = argumentProcessor
-},{"underscore":6}],48:[function(require,module,exports){
+},{"underscore":6}],52:[function(require,module,exports){
 class Subscription {
     constructor() {
         this.subscribers = new Set()
@@ -56235,9 +56802,90 @@ class Subscription {
     }
 }
 module.exports = Subscription
-},{}],49:[function(require,module,exports){
-arguments[4][47][0].apply(exports,arguments)
-},{"dup":47,"underscore":6}],50:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
+arguments[4][51][0].apply(exports,arguments)
+},{"dup":51,"underscore":6}],54:[function(require,module,exports){
+var Serialization = require("../Serialization")
+function eulerShadowHandler(shadowVec3TraversalFunc) {
+    return {
+        "get":function(scope, argName) {
+            return Serialization.Serializable.getRecursiveSetTrigger(scope._args[argName] = {
+                "x": shadowVec3TraversalFunc(scope).x,
+                "y": shadowVec3TraversalFunc(scope).y,
+                "z": shadowVec3TraversalFunc(scope).z,
+                "order": shadowVec3TraversalFunc(scope).order
+            }, ()=>{
+                scope.args[argName] = scope._args[argName]
+            })
+        },
+        "set":function(scope, val, argName) {
+            if (val.constructor!==Object) {
+                throw new TypeError(argName+" must be an object")
+            }
+            if (scope._args[argName]===undefined) {
+                scope._args[argName]={x:0, y:0, z:0, order:"XYZ"}
+            }
+            ["x", "y", "z", "order"].forEach(key => {
+                if (val[key]!==undefined) {
+                    if (new Set(["x", "y", "z"]).has(key)) {
+                        if (typeof val[key] === "number") {
+                            shadowVec3TraversalFunc(scope)[key]=val[key]
+                            scope._args[argName][key] = val[key]
+                        } else {
+                            throw new TypeError("Coordinates must be numbers")
+                        }
+                    } else {
+                        if (new Set(["XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"]).has(val[key].toUpperCase())) {
+                            shadowVec3TraversalFunc(scope)[key]=val[key].toUpperCase()
+                            scope._args[argName][key] = val[key]
+                        } else {
+                            throw new TypeError("Invalid euler order")
+                        }
+                    }
+
+                }
+            })
+            return true
+        }
+    }
+}
+module.exports = eulerShadowHandler
+},{"../Serialization":29}],55:[function(require,module,exports){
+var Serialization = require("../Serialization")
+function vec3ShadowHandler(shadowVec3TraversalFunc) {
+    return {
+        "get":function(scope, argName) {
+            return Serialization.Serializable.getRecursiveSetTrigger(scope._args[argName] = {
+                "x": shadowVec3TraversalFunc(scope).x,
+                "y": shadowVec3TraversalFunc(scope).y,
+                "z": shadowVec3TraversalFunc(scope).z
+            }, ()=>{
+                scope.args[argName] = scope._args[argName]
+            })
+        },
+        "set":function(scope, val, argName) {
+            if (val.constructor!==Object) {
+                throw "TypeError: "+argName+" must be an object"
+            }
+            if (scope._args[argName]===undefined) {
+                scope._args[argName]={x:0, y:0, z:0}
+            }
+            ["x", "y", "z"].forEach(key => {
+                if (val[key]!==undefined) {
+                    if (typeof val[key] === "number") {
+                        shadowVec3TraversalFunc(scope)[key]=val[key]
+                        scope._args[argName][key] = val[key]
+                    } else {
+                        throw "TypeError: coordinates must be in numbers"
+                    }
+                }
+            })
+            return true
+        }
+    }
+}
+module.exports = vec3ShadowHandler
+},{"../Serialization":29}],56:[function(require,module,exports){
 THREE = require("three")
 ResizeSensor = require("css-element-queries/src/ResizeSensor")
 ThreeLoader = require('@pnext/three-loader')
@@ -56474,7 +57122,9 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../arrays/ObjectArray":33,"../utils/Subscription":48,"./viewer.css":51,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],51:[function(require,module,exports){
+},{"../arrays/ObjectArray":37,"../utils/Subscription":52,"./viewer.css":57,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],57:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":2}]},{},[30])(30)
+},{"browserify-css":2}],58:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"../arrays/ObjectArray":37,"../utils/Subscription":52,"./viewer.css":57,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":56,"three":5}]},{},[34])(34)
 });

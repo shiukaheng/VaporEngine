@@ -1,28 +1,39 @@
-ModifierArray = require("../arrays/ModifierArray")
-Serializable = require("../Serializable")
-argsProc = require("../utils/argumentProcessor")
+var ModifierArray = require("../arrays/ModifierArray")
+var Serialization = require("../Serialization")
 
-class BaseModifier extends Serializable {
-    constructor(args={}) {
-        var defaultArgs = {"enabled": true}
-        var newArgs = argsProc(defaultArgs, args)
-        super(newArgs)
-        this.enabled = this.args.enabled
+class BaseModifier extends Serialization.Serializable {
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serialization.Serializable.argsProcessor({
+            // Default arguments:
+            "enabled": true
+        }, args), 
+        Serialization.Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+            }, initFunc),
+        Serialization.Serializable.argHandProcessor({
+            // Argument handlers:
+            "enabled": Serialization.Serializable.predicateHandler((elem)=>{
+                return (typeof elem === "boolean")
+            }, new TypeError("Modifier enabled flag must be bool"))
+        }, argHandlers))
     }
-    update(object, dt) {
+    update(dt) {
+        if (!this.isLoaded) {
+            throw new Error("Attempt to update Modifier before object is loaded.")
+        }
     }
     load(object) {
         this.object = object
     }
-    unload(object) {
+    unload() {
         this.object = undefined
     }
-    serialize() {
-        this.args.enabled = this.enabled
-        return super.serialize()
+    get isLoaded() {
+        return (!(this.object===undefined))
     }
 }
-
-Serializable.registerClass(BaseModifier)
+BaseModifier.registerConstructor()
 
 module.exports = BaseModifier

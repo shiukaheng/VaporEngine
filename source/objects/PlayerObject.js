@@ -143,7 +143,7 @@ class PlayerObject extends BasePhysicalObject {
     }
 }
 
-Serializable.registerClass(PlayerObject)
+// Serializable.registerClass(PlayerObject)
 
 class BezierPathAnimation{
     constructor(startPos=new THREE.Vector3(0, 0, 0), startDir=new THREE.Vector3(1, 0, 0), startVel=new THREE.Vector3(1, 0, 0), destPos=new THREE.Vector3(3, 3, 0), destDir=new THREE.Vector3(1, 0, 0), destScalarVel=0, duration=5, segments=100, endCallback, impossibleParamCompensation=true) {

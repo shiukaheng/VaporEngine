@@ -1,56 +1,111 @@
-Serializable = require("../Serializable")
+var {Serializable} = require("../Serialization")
+var _ = require("underscore")
+var BaseModifier = require("../modifiers/BaseModifier")
 
-class ModifierArray {
-    constructor(object, serializedModifiers=[]){
+class ModifierArray extends Serializable {
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serializable.argsProcessor({
+            // Default arguments:
+            "modifiers":[]
+        }, args), 
+        Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+            }, initFunc),
+        Serializable.argHandProcessor({
+            // Argument handlers:
+            "modifiers":{
+                "set":function(scope, val, argName) {
+                    if (scope._argumentsInitialized===true) {
+                        throw("attempt to set modifier argument in ModifierArray")
+                    } else {
+                        scope._args[argName] = val
+                        scope._argumentsInitialized = true
+                    }
+                    
+                },
+                "get":function(scope, argName) {
+                    return(new Proxy(scope._args[argName], {
+                        "set":function(){
+                            throw "attempt to modify modifier argument in ModifierArray"
+                        },
+                        "get":function(target, prop) {
+                            if(_.contains(["forEach", "toString", "toLocaleString"],prop)||(parseInt(prop).toString()===prop)) {
+                                return target[prop].bind(target)
+                            } else {
+                                throw "attempt to modify modifier argument in ModifierArray"
+                            }
+                        }
+                    }))
+                }
+            }
+        }, argHandlers))
+    }
+    load(object) { // Todo: add compatibility on side of object. // Only at this moment, load modifiers
+        // if (this.isLoaded) {
+        //     throw "attempt to load ModifierArray that is already loaded"
+        // }
         this.object = object
-        this._listOfModifiers=[]
-        this._listOfModifiers.forEach(x => this.add(x))
-        this.deferredLoads = []
-        serializedModifiers.forEach(serializedModifier => {
-            this.add(deserialize(serializedModifiers))
+        this.forEach(modifier=>{
+            modifier.load(object)
         })
     }
-    add(modifier){
-        if (this.object.viewer) {
-            this.flushDeferredLoads()
-            modifier.load(this.object)
-        } else {
-            this.deferredLoads.push((function() {
-                modifier.load(this.object)
-            }).bind(this))
-        }
-        this._listOfModifiers.push(modifier)
+    unload() { // Unload modifiers too
+        this.forEach(modifier=>{
+            modifier.unload(this.object)
+        })
+        this.object = undefined
     }
-    remove(modifier){
-        modifier.unload(this.object)
-        this._listOfModifiers.splice(this._listOfModifiers.indexOf(modifier), 1)
+    add(...modifiers) {
+        modifiers.forEach(modifier=>{
+            this.addSingle(modifier)
+        })
+    }
+    remove(...modifiers) {
+        modifiers.forEach(modifier=>{
+            this.removeSingle(modifier)
+        })
+    }
+    addSingle(modifier){
+        if (_.contains(this._args.modifiers, modifier)) {
+            throw "attempt to add already existing modifier"
+        } else if (!(modifier instanceof BaseModifier)) {
+            throw "attempt to add invalid class to ModifierArray"
+        } else {
+            this._args.modifiers.push(modifier)
+            if (this.isLoaded) {
+                modifier.load(this.object)
+            }
+        }
+
+    }
+    removeSingle(modifier){
+        if (!(_.contains(this._args.modifiers, modifier))) {
+            throw "attempt to remove non-existent modifier"
+        } else {
+            this._args.modifiers.splice(this._args.modifiers.indexOf(modifier), 1)
+            if (this.isLoaded) {
+                modifier.unload()
+            }
+        }
     }
     update(dt){
-        this._listOfModifiers.forEach(modifier => {
-            if (modifier.enabled) {
-                modifier.update(this.object, dt)
+        if (!this.isLoaded) {
+            throw "attempt to update "+this.constructor.name+" before loaded"
+        }
+        this.forEach(modifier => {
+            if (modifier.args.enabled) {
+                modifier.update(dt)
             }
         })
     }
-    flushDeferredLoads() {
-        this.deferredLoads.forEach(deferredLoad => {
-            deferredLoad()
-        })
+    get isLoaded() {
+        return (this.object!==undefined)
     }
-    serialize() {
-        var serializedModifiers = []
-        this._listOfModifiers.forEach(modifier => {
-            if (!modifier.args.ignore) {
-                serializedModifiers.push(modifier.serialize())
-            }
-        })
-        return serializedModifiers
-    }
-    deserialize(list) {
-        list.forEach(modifierObj => {
-            this.add(Serializable.deserialize(modifierObj))
-        })
+    get forEach() {
+        return (this.args.modifiers.forEach.bind(this.args.modifiers))
     }
 }
-
+ModifierArray.registerConstructor()
 module.exports = ModifierArray

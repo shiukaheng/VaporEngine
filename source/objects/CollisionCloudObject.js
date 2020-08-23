@@ -67,5 +67,5 @@ class CollisionCloudObject extends BaseObject {
         return super.serialize()
     }
 }
-Serializable.registerClass(CollisionCloudObject)
+// Serializable.registerClass(CollisionCloudObject)
 module.exports = CollisionCloudObject

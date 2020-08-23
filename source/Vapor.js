@@ -5,5 +5,5 @@ module.exports = {
     Objects: require("./Objects"),
     Viewers: require("./Viewers"),
     Utils: require("./Utils"),
-    Serializable: require("./Serializable")
+    Serialization: require("./Serialization")
 }

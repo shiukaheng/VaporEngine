@@ -1,26 +1,34 @@
-BaseModifier = require("./BaseModifier")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+var BaseModifier = require("./BaseModifier")
+var {Serializable} = require("../Serialization")
 
 class VelocityDragModifier extends BaseModifier{
-    constructor(args={}) {
-        super(argsProc(
-            {"coef": 0.9}, args
-        ))
-        this.coef=this.args.coef
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serializable.argsProcessor({
+            // Default arguments:
+            "coef": 0.9
+        }, args), 
+        Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+            }, initFunc),
+        Serializable.argHandProcessor({
+            // Argument handlers:
+            "coef": Serializable.predicateHandler((elem)=>{
+                return (typeof elem==="number")
+            }, "TypeError: coef argument must be a number")
+        }, argHandlers))
     }
-    update(physical_object, dt) {
-        physical_object.velocity = physical_object.velocity.clone().multiplyScalar((1-this.coef)**dt)
+    update(dt) {
+        this.object.velocity = this.object.velocity.clone().multiplyScalar((1-this.args.coef)**dt)
     }
-    load(physical_object) {
-        if (!(physical_object instanceof BasePhysicalObject)) {
+    load(object) {
+        if (!(object instanceof BasePhysicalObject)) {
             throw new TypeError("VelocityDragModifier must only be added to class that extends BasePhysicalObject")
         }
-    }
-    serialize() {
-        this.args.coef = this.coef
-        return super.serialize()
+        super.load(object)
     }
 }
-Serializable.registerClass(VelocityDragModifier)
+VelocityDragModifier.registerConstructor()
+
 module.exports = VelocityDragModifier

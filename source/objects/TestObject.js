@@ -18,6 +18,6 @@ class TestObject extends BasePhysicalObject{
     }
 }
 
-Serializable.registerClass(TestObject)
+// Serializable.registerClass(TestObject)
 
 module.exports = TestObject

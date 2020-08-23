@@ -1,33 +1,35 @@
-BaseModifier = require("./BaseModifier")
-THREE = require("three")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+var BaseModifier = require("./BaseModifier")
+var THREE = require("three")
+var Serialization = require("../Serialization")
+var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
 
 class ConstantRotationModifier extends BaseModifier {
-    constructor(args={}) {
-        super(argsProc(
-            {"rotVector":{
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serialization.Serializable.argsProcessor({
+            // Default arguments:
+            "rotVector":{
                 "x": 0,
                 "y": 0,
                 "z": 0
-            }}
-            , args))
-        this.rotation = new THREE.Vector3(this.args.rotVector.x, this.args.rotVector.y, this.args.rotVector.z)
+            }
+        }, args), 
+        Serialization.Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+                scope.rotation = new THREE.Vector3()
+            }, initFunc),
+        Serialization.Serializable.argHandProcessor({
+            // Argument handlers:
+            "rotVector":vec3ShadowHandler(Serialization.Serializable.encodeTraversal().rotation)
+        }, argHandlers))
     }
-    update(object, dt) {
-        super.update()
-        object.container.rotation.x += this.rotation.x * dt
-        object.container.rotation.y += this.rotation.y * dt
-        object.container.rotation.z += this.rotation.z * dt
-    }
-    serialize() {
-        this.args.rotVector = {
-            "x": this.rotation.x,
-            "y": this.rotation.y,
-            "z": this.rotation.z
-        }
-        return super.serialize()
+    update(dt) {
+        super.update(dt)
+        this.object.container.rotation.x += this.rotation.x * dt
+        this.object.container.rotation.y += this.rotation.y * dt
+        this.object.container.rotation.z += this.rotation.z * dt
     }
 }
-Serializable.registerClass(ConstantRotationModifier)
+ConstantRotationModifier.registerConstructor()
 module.exports = ConstantRotationModifier

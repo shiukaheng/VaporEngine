@@ -1,33 +1,33 @@
-THREE = require('three')
-BaseModifier = require("./BaseModifier")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+var THREE = require('three')
+var BaseModifier = require("./BaseModifier")
+var Serialization = require("../Serialization")
+var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
 
 class LinearAccelerationModifier extends BaseModifier{
-    constructor(args={}) {
-        super(argsProc(
-            {
-                "AccVector":{
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                }
-            }, args
-        ))
-        this.direction = new THREE.Vector3(this.args.AccVector.x, this.args.AccVector.y, this.args.AccVector.z)
+    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+        super(
+        Serialization.Serializable.argsProcessor({
+            // Default arguments:
+            "accVector":{
+                "x": 0,
+                "y": 0,
+                "z": 0
+            }
+        }, args), 
+        Serialization.Serializable.initFuncProcessor(
+            function(scope){
+                // Initialization code:
+                scope.accVector = new THREE.Vector3()
+            }, initFunc),
+        Serialization.Serializable.argHandProcessor({
+            // Argument handlers:
+            "accVector": vec3ShadowHandler(Serialization.Serializable.encodeTraversal().accVector)
+        }, argHandlers))
     }
-    update(object, dt) {
-        super.update(object, dt)
-        object.addVelocity(this.direction.clone().multiplyScalar(dt))
-    }
-    serialize() {
-        this.args.AccVector = {
-            "x": this.direction.x,
-            "y": this.direction.y,
-            "z": this.direction.z
-        }
-        return super.serialize()
+    update(dt) {
+        super.update(dt)
+        this.object.addVelocity(this.accVector.clone().multiplyScalar(dt))
     }
 }
-Serializable.registerClass(LinearAccelerationModifier)
+LinearAccelerationModifier.registerConstructor()
 module.exports = LinearAccelerationModifier
