@@ -1,8 +1,34 @@
 var argsProc = require("../utils/argumentProcessor")
-var Serializable = require("../Serializable")
+var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
 
-class PotreeObject extends BasePhysicalObject {
+class PotreeObject extends Serializable.createConstructor(
+    {
+        "fileName": "",
+        "baseUrl": "",
+        "pointShape":2
+    },
+    function(scope) {
+        var promise = viewer.potree.loadPointCloud(this.fileName, url => `${this.baseUrl}${url}`)
+        promise.then(
+            pco => {
+                // console.log(pco)
+                pco.material.shape = this.pointShape
+                this.container.add(pco)
+                this.pco = pco
+                // console.log("potree load assets")
+                this.declareAssetsLoaded()
+            },
+            function() {
+                console.log(`Failed to load point cloud ${this.fileName}`)
+            }
+        )
+    }
+) {
+    
+}
+
+class OldPotreeObject extends BasePhysicalObject {
     constructor(args={}) {
         super(argsProc(
                 {"fileName": "",

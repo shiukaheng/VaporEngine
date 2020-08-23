@@ -54890,17 +54890,12 @@ function serializableArrayRemoveDuplicates(serializableArray) { // For instantia
     return orderedObjectArray
 }
 
-function serializableArraysDiff(before, after) { // For instantiated Serializables
-    return {
-        "added": [],
-        "removed": []
-    }
-}
-
 class Serializable {
-    constructor(args={}, initFunc=function(){}, argHandlers={}) {
+    constructor(args={}, initFunc=function(){}, argHandlers={}, afterArgsLoad=function(){}) {
         // Check if constructor is valid, i.e. registered!
         serializableClassesManager.lookup(this.constructor.name)
+        // Bind function before anything happens
+        this.getSelf = this.getSelf.bind(this)
         // Initialize uuid, className in args for Serializable
         var defaultArgs = {
             "uuid": uuid.v4(),
@@ -54915,7 +54910,8 @@ class Serializable {
         initFunc(this)
         // Set arguments, triggering necessary argHandlers (must happen after initialization, setting container variables etc)
         applyArgs(this.args, Serializable.argsProcessor(defaultArgs, args))
-        this.getSelf = this.getSelf.bind(this)
+        // Run other initialziation code that needs to happen after the arguments have been set
+        afterArgsLoad(this)
     }
     serializeWithDependencies() {
         return serializeElement(this)
@@ -55052,13 +55048,14 @@ class Serializable {
     static serializableArrayRemoveDuplicates(array) {
         return serializableArrayRemoveDuplicates(array)
     }
-    static createConstructor(args={}, initFunc=function(scope){}, argHandlers={}, inherits=Serializable) {
+    static createConstructor(args={}, initFunc=function(scope){}, argHandlers={}, afterArgsLoad=function(scope){}, inherits=Serializable) {
         class CustomBaseSerializable extends inherits{
-            constructor(_args={}, _initFunc=function(){}, _argHandlers={}) {
+            constructor(_args={}, _initFunc=function(){}, _argHandlers={}, _afterArgsLoad=function(){}) {
                 super(
                     Serializable.argsProcessor(args, _args), 
                     Serializable.initFuncProcessor(initFunc, _initFunc),
-                    Serializable.argHandProcessor(argHandlers, _argHandlers))
+                    Serializable.argHandProcessor(argHandlers, _argHandlers)),
+                    Serializable.initFuncProcessor(afterArgsLoad, _afterArgsLoad)
             }
         }
         return CustomBaseSerializable
@@ -56879,10 +56876,36 @@ window.BezierPathAnimation = BezierPathAnimation;
 module.exports = PlayerObject
 },{"../Serialization":29,"../modifiers/PlayerModifier":42,"../modifiers/VelocityDragModifier":43,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],49:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
-var Serializable = require("../Serializable")
+var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
 
-class PotreeObject extends BasePhysicalObject {
+class PotreeObject extends Serializable.createConstructor(
+    {
+        "fileName": "",
+        "baseUrl": "",
+        "pointShape":2
+    },
+    function(scope) {
+        var promise = viewer.potree.loadPointCloud(this.fileName, url => `${this.baseUrl}${url}`)
+        promise.then(
+            pco => {
+                // console.log(pco)
+                pco.material.shape = this.pointShape
+                this.container.add(pco)
+                this.pco = pco
+                // console.log("potree load assets")
+                this.declareAssetsLoaded()
+            },
+            function() {
+                console.log(`Failed to load point cloud ${this.fileName}`)
+            }
+        )
+    }
+) {
+    
+}
+
+class OldPotreeObject extends BasePhysicalObject {
     constructor(args={}) {
         super(argsProc(
                 {"fileName": "",
@@ -56933,7 +56956,7 @@ class PotreeObject extends BasePhysicalObject {
 // Serializable.registerClass(PotreeObject)
 
 module.exports = PotreeObject
-},{"../Serializable":28,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],50:[function(require,module,exports){
+},{"../Serialization":29,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],50:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 var Serializable = require("../Serializable")
 
