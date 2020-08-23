@@ -13,7 +13,27 @@
 
 var a = new Vapor.Objects.BaseObject()
 
-n = new Vapor.Modifiers.BaseModifier()
+class NewModifier extends Vapor.Serialization.Serializable.createConstructor(
+    {
+        "testArg": "sample"
+    },
+    function(scope) {
+        console.log("Constructed!", scope)
+    },
+    {},
+    Vapor.Modifiers.BaseModifier
+) {
+    foo(arg) {
+        console.log(this.args.testArg)
+    }
+    load(object) {
+        super.load(object)
+        console.log("Loaded")
+    }
+}
+NewModifier.registerConstructor()
+
+n = new NewModifier()
 
 a.load({})
 a.modifiers.add(n)

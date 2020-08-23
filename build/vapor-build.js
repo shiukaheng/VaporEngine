@@ -55035,6 +55035,25 @@ class Serializable {
         }
         return CustomBaseSerializable
     }
+    static numberHandler(min=-Infinity, max=Infinity, integerOnly=false) {
+        return {
+            "set": function(scope, val, argName) {
+                if (typeof val !== "number") {
+                    throw TypeError(argName+" must be a number")
+                }
+                if (integerOnly===true&&!(Number.isInteger(val))) {
+                    throw TypeError(argName+" must be a integer")
+                }
+                if (val<=min) {
+                    throw TypeError(argName+" must be above or equal to "+(min).toString())
+                }
+                if (val>=max) {
+                    throw TypeError(argName+" must be below or equal to "+(max).toString())
+                }
+                scope._args[argName] = val
+            }
+        }
+    }
 }
 
 Serializable.registerConstructor()
@@ -56328,31 +56347,41 @@ BaseObject.registerConstructor()
 
 module.exports = BaseObject
 },{"../Serialization":29,"../arrays/ModifierArray":36,"../utils/eulerShadowHandler":54,"../utils/vec3ShadowHandler":55,"../viewers/viewer":58,"three":5}],46:[function(require,module,exports){
-BaseObject = require("./BaseObject")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+var BaseObject = require("./BaseObject")
+var argsProc = require("../utils/argumentProcessor")
+var {Serializable} = require("../Serialization")
+var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
 
-class BasePhysicalObject extends BaseObject{
-    constructor(args={}) {
-        super(argsProc({
-            "mass":1,
-            "velocity": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            }
-        }, args))
-        this.mass = this.args.mass
-        this.velocity = new THREE.Vector3(this.args.velocity.x, this.args.velocity.y, this.args.velocity.z)
-        if (this.constructor.name === BasePhysicalObject.name) {
-            this.declareAssetsLoaded()
+class BasePhysicalObject extends Serializable.createConstructor(
+    // Default arguments
+    {
+        "mass":1,
+        "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
         }
-    }
+    },
+    // Initialization function
+    function(scope) {
+        scope.velocity = new THREE.Vector3(scope.args.velocity.x, scope.args.velocity.y, scope.args.velocity.z)
+        if (scope.constructor === BasePhysicalObject) {
+            scope.declareAssetsLoaded()
+        }
+    },
+    // Argument handlers
+    {
+        "mass": Serializable.numberHandler(),
+        "velocity": vec3ShadowHandler(Serializable.encodeTraversal().velocity)
+    },
+    // Inherits from
+    BaseObject
+) {
     load(viewer){
         super.load(viewer)
     }
-    addVelocity(vector3) {
-        this.velocity.add(vector3)
+    addVelocity(normal) {
+        this.velocity.add(normal)
     }
     reflectVelocity(vector3) {
         this.velocity.reflect(vector3)
@@ -56364,19 +56393,17 @@ class BasePhysicalObject extends BaseObject{
         this.container.position.add(this.velocity.clone().multiplyScalar(dt))
         super.update(dt)
     }
-    serialize() {
-        this.args.mass = this.mass
-        this.args.velocity = {
-            "x": this.velocity.x,
-            "y": this.velocity.y,
-            "z": this.velocity.z
-        }
-        return super.serialize()
+    get mass() {
+        return this.args.mass
+    }
+    set mass(value) {
+        this.args.mass = value
     }
 }
-// Serializable.registerClass(BasePhysicalObject)
+BasePhysicalObject.registerConstructor()
+
 module.exports = BasePhysicalObject
-},{"../Serializable":28,"../utils/argumentProcessor":53,"./BaseObject":45}],47:[function(require,module,exports){
+},{"../Serialization":29,"../utils/argumentProcessor":53,"../utils/vec3ShadowHandler":55,"./BaseObject":45}],47:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');

@@ -1,28 +1,38 @@
-BaseObject = require("./BaseObject")
-argsProc = require("../utils/argumentProcessor")
-Serializable = require("../Serializable")
+var BaseObject = require("./BaseObject")
+var argsProc = require("../utils/argumentProcessor")
+var {Serializable} = require("../Serialization")
+var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
 
-class BasePhysicalObject extends BaseObject{
-    constructor(args={}) {
-        super(argsProc({
-            "mass":1,
-            "velocity": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            }
-        }, args))
-        this.mass = this.args.mass
-        this.velocity = new THREE.Vector3(this.args.velocity.x, this.args.velocity.y, this.args.velocity.z)
-        if (this.constructor.name === BasePhysicalObject.name) {
-            this.declareAssetsLoaded()
+class BasePhysicalObject extends Serializable.createConstructor(
+    // Default arguments
+    {
+        "mass":1,
+        "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
         }
-    }
+    },
+    // Initialization function
+    function(scope) {
+        scope.velocity = new THREE.Vector3(scope.args.velocity.x, scope.args.velocity.y, scope.args.velocity.z)
+        if (scope.constructor === BasePhysicalObject) {
+            scope.declareAssetsLoaded()
+        }
+    },
+    // Argument handlers
+    {
+        "mass": Serializable.numberHandler(),
+        "velocity": vec3ShadowHandler(Serializable.encodeTraversal().velocity)
+    },
+    // Inherits from
+    BaseObject
+) {
     load(viewer){
         super.load(viewer)
     }
-    addVelocity(vector3) {
-        this.velocity.add(vector3)
+    addVelocity(normal) {
+        this.velocity.add(normal)
     }
     reflectVelocity(vector3) {
         this.velocity.reflect(vector3)
@@ -34,15 +44,13 @@ class BasePhysicalObject extends BaseObject{
         this.container.position.add(this.velocity.clone().multiplyScalar(dt))
         super.update(dt)
     }
-    serialize() {
-        this.args.mass = this.mass
-        this.args.velocity = {
-            "x": this.velocity.x,
-            "y": this.velocity.y,
-            "z": this.velocity.z
-        }
-        return super.serialize()
+    get mass() {
+        return this.args.mass
+    }
+    set mass(value) {
+        this.args.mass = value
     }
 }
-// Serializable.registerClass(BasePhysicalObject)
+BasePhysicalObject.registerConstructor()
+
 module.exports = BasePhysicalObject

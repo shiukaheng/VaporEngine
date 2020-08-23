@@ -232,6 +232,25 @@ class Serializable {
         }
         return CustomBaseSerializable
     }
+    static numberHandler(min=-Infinity, max=Infinity, integerOnly=false) {
+        return {
+            "set": function(scope, val, argName) {
+                if (typeof val !== "number") {
+                    throw TypeError(argName+" must be a number")
+                }
+                if (integerOnly===true&&!(Number.isInteger(val))) {
+                    throw TypeError(argName+" must be a integer")
+                }
+                if (val<=min) {
+                    throw TypeError(argName+" must be above or equal to "+(min).toString())
+                }
+                if (val>=max) {
+                    throw TypeError(argName+" must be below or equal to "+(max).toString())
+                }
+                scope._args[argName] = val
+            }
+        }
+    }
 }
 
 Serializable.registerConstructor()
