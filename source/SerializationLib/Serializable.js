@@ -60,7 +60,7 @@ function serializableArrayRemoveDuplicates(serializableArray) { // For instantia
 }
 
 class Serializable {
-    constructor(args={}, initFunc=function(){}, argHandlers={}, afterArgsLoad=function(){}) {
+    constructor(args={}, initFunc=function(){}, argHandlers={}, afterArgsLoad=(function(){})) {
         // Check if constructor is valid, i.e. registered!
         serializableClassesManager.lookup(this.constructor.name)
         // Bind function before anything happens
@@ -219,12 +219,12 @@ class Serializable {
     }
     static createConstructor(args={}, initFunc=function(scope){}, argHandlers={}, afterArgsLoad=function(scope){}, inherits=Serializable) {
         class CustomBaseSerializable extends inherits{
-            constructor(_args={}, _initFunc=function(){}, _argHandlers={}, _afterArgsLoad=function(){}) {
-                super(
-                    Serializable.argsProcessor(args, _args), 
+            constructor(_args={}, _initFunc=function(){}, _argHandlers={}, _afterArgsLoad=function(scope){}) {
+                super(Serializable.argsProcessor(args, _args), 
                     Serializable.initFuncProcessor(initFunc, _initFunc),
-                    Serializable.argHandProcessor(argHandlers, _argHandlers)),
+                    Serializable.argHandProcessor(argHandlers, _argHandlers),
                     Serializable.initFuncProcessor(afterArgsLoad, _afterArgsLoad)
+                )
             }
         }
         return CustomBaseSerializable
@@ -257,16 +257,22 @@ class Serializable {
             }
         }
     }
-    static readOnlyHandler() { // You only write once! That is, when the Serializable is initialized with its inital arguments.
+    static readOnlyHandler(error) { // You only write once! That is, when the Serializable is initialized with its inital arguments.
         return {
             "set": function(scope, val, argName) {
                 if (scope._argWritten===undefined) {
-                    scope._argWritten==={}
+                    scope._argWritten={}
                 }
-                if (scope._argWritten[val]===true) {
-                    throw Error(argName+" is a read only argument")
+                if (scope._argWritten[argName]===true) {
+                    if (error===undefined) {
+                        throw Error(argName+" is a read only argument")
+                    } else {
+                        throw error
+                    }
+                    
                 } else {
-                    scope._argWritten[val] = true
+                    scope._args[argName] = val
+                    scope._argWritten[argName] = true
                 }
             }
         }
@@ -311,7 +317,6 @@ class DependencyArgSet{
 }
 
 function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArgSet()) {
-    // console.log(elem)
     var serialized
     if (Object(elem)!==elem) {
         serialized = elem

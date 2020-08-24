@@ -16,6 +16,9 @@ class PotreeObject extends Serializable.createConstructor(
         "pointShape": Serializable.readOnlyHandler()
     },
     function(scope) {
+        if (scope.constructor===PotreeObject) {
+            scope.declareAssetsLoaded()
+        }
     },
     BasePhysicalObject
 ) {

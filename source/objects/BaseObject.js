@@ -7,59 +7,55 @@ var Viewer = require("../viewers/viewer")
 
 var enc = Serializable.encodeTraversal
 
-class BaseObject extends Serializable { // Todo: load ModifierArray when this is loaded, unload otherwise!
-    constructor(args={}, initFunc=function(){}, argHandlers={}) {
-        super(
-        Serializable.argsProcessor({
-            // Default arguments:
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
-            "rotation": {
-                "x": 0,
-                "y": 0,
-                "z": 0,
-                "eulerOrder": "XYZ"
-            },
-            "scale": {
-                "x": 1,
-                "y": 1,
-                "z": 1
-            },
-            "bypassModifiers": false,
-            "modifiers": new ModifierArray()
-        }, args), 
-        Serializable.initFuncProcessor(
-            function(scope){
-                // Initialization code:
-                scope.onLoadedFunctionList = []
-                scope.assetsLoaded = false
-                scope.container = new THREE.Object3D()
-                scope.bypassModifiers = false
-                if (scope.constructor.name === BaseObject.name) {
-                    scope.declareAssetsLoaded()
-                }
-            }, initFunc),
-        Serializable.argHandProcessor({
-            // Argument handlers:
-            "position":vec3sh(enc().position), 
-            "rotation":eush(enc().rotation),
-            "scale":vec3sh(enc().scale)
-        }, argHandlers))
+class BaseObject extends Serializable.createConstructor(
+{
+    "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "eulerOrder": "XYZ"
+    },
+    "scale": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+    },
+    "bypassModifiers": false,
+    "modifiers": new ModifierArray()
+},
+function(scope){
+    // Initialization code:
+    scope.onLoadedFunctionList = []
+    scope.assetsLoaded = false
+    scope.container = new THREE.Object3D()
+    scope.bypassModifiers = false
+    if (scope.constructor.name === BaseObject.name) {
+        scope.declareAssetsLoaded()
     }
+},
+{
+    "position":vec3sh(enc().position), 
+    "rotation":eush(enc().rotation),
+    "scale":vec3sh(enc().scale)
+}
+) {
     load(viewer) {
-        // if (!(viewer instanceof Viewer)) {
-        //     throw new TypeError("attempt to load invalid class")
-        // }
+        if (!(viewer.isViewer)) {
+            throw new TypeError("attempt to load invalid class")
+        }
         this.viewer = viewer
-        // viewer.scene.add(this.container)
+        viewer.scene.add(this.container)
         this.args.modifiers.load(this)
     }
     unload() {
         this.args.modifiers.unload(this)
-        // this.viewer.scene.remove(this.container)
+        this.onLoadedFunctionList = []
+        this.viewer.scene.remove(this.container)
         this.viewer = undefined
     }
     update(dt) {
@@ -74,9 +70,6 @@ class BaseObject extends Serializable { // Todo: load ModifierArray when this is
         this.assetsLoaded = true
         this.onLoadedFunctionList.forEach(x => {x()})
         this.onLoadedFunctionList = []
-        if (this.objectArray) {
-            this.objectArray.updateAssetLoaded()
-        }
     } // Todo: Make it so that there is an option to block user input + load screen while loading, or load async.
     queueOnAssetLoaded(queuedFunction) {
         if (this.assetsLoaded) {
@@ -109,6 +102,7 @@ class BaseObject extends Serializable { // Todo: load ModifierArray when this is
     get modifiers() {
         return this.args.modifiers
     }
+
 }
 BaseObject.registerConstructor()
 

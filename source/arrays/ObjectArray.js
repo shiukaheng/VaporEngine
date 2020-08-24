@@ -1,5 +1,84 @@
-var Serializable = require("../Serializable")
-class ObjectArray {
+var {Serializable} = require("../Serialization")
+class ObjectArray extends Serializable.createConstructor(
+    {
+        "objects": []
+    },
+    function(scope) {
+        scope.onAllAssetsLoadedQueue = new Set()
+    },
+    {
+        "objects": Serializable.readOnlyHandler(new Error("objects argument needs to be modified with object interface"))
+    }
+) {
+    update(dt){
+        this._args.objects.forEach(object => {
+            if (object.assetsLoaded) {
+                object.update(dt)
+            }
+        })
+    }
+    _queueLoadObject(object) {
+        object.objectArray = this
+        object.queueOnAssetLoaded(()=>{
+            object.load(viewer)
+            this.updateAssetsLoaded()
+        })        
+    } // what happens to object.objectArray if unloaded before assets are loaded?
+    _unloadObject(object) {
+        object.objectArray = undefined
+        object.unload()
+    }
+    load(viewer) {
+        // unload all objects and reload ??
+        this.viewer = viewer
+        this.args.objects.forEach(object => {
+            this._queueLoadObject(object)
+        })
+    }
+    unload() {
+        this.args.object.forEach(object => {
+            this._unloadObject(object)
+        })
+    }
+    add(object) {
+        this._args.objects.push(object)
+        if (this.isLoaded) { // If ObjectArray is already loaded, will need to load this object on an individual basis
+            this._queueLoadObject(object)
+        }
+    }
+    remove(object) {
+        this._args.objects.splice(this._args.objects.indexOf(object), 1)
+        if (this.isLoaded) {
+            this._unloadObject(object)
+        }
+    }
+    queueAllAssetsLoaded(callback=function(){}) {
+        this.onAllAssetsLoadedQueue.add(
+            {
+                "objectsToCheck": [...this.args.objects],
+                "callback": callback
+            }
+        )
+        this.updateAssetsLoaded()
+    }
+    updateAssetsLoaded() {
+        this.onAllAssetsLoadedQueue.forEach(check => {
+            var checkList = []
+            check.objectsToCheck.forEach((toCheck)=>{
+                checkList.push(toCheck.assetsLoaded===true)
+            })
+            if (!(checkList.includes(false))) {
+                check.callback()
+                this.onAllAssetsLoadedQueue.delete(check)
+            }
+        })
+    }
+    get isLoaded() {
+        return (this.viewer!==undefined)
+    }
+}
+ObjectArray.registerConstructor()
+class OldObjectArray {
     constructor(viewer, listOfObjects=[]){
         this.viewer = viewer
         this._listOfObjects=listOfObjects

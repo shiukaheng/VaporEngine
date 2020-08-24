@@ -5,12 +5,16 @@ class TestObject extends Serializable.createConstructor(
     {
         "color": "green"
     },
-    undefined,
+    function(scope) {
+    },  
     undefined,
     function(scope) {
         var geom = new THREE.BoxGeometry()
         var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
         scope.obj = new THREE.Mesh(geom, mat)
+        if (scope.constructor===TestObject) {
+            scope.declareAssetsLoaded()
+        }
     },
     BasePhysicalObject
 ) {

@@ -54891,7 +54891,7 @@ function serializableArrayRemoveDuplicates(serializableArray) { // For instantia
 }
 
 class Serializable {
-    constructor(args={}, initFunc=function(){}, argHandlers={}, afterArgsLoad=function(){}) {
+    constructor(args={}, initFunc=function(){}, argHandlers={}, afterArgsLoad=(function(){})) {
         // Check if constructor is valid, i.e. registered!
         serializableClassesManager.lookup(this.constructor.name)
         // Bind function before anything happens
@@ -55050,12 +55050,12 @@ class Serializable {
     }
     static createConstructor(args={}, initFunc=function(scope){}, argHandlers={}, afterArgsLoad=function(scope){}, inherits=Serializable) {
         class CustomBaseSerializable extends inherits{
-            constructor(_args={}, _initFunc=function(){}, _argHandlers={}, _afterArgsLoad=function(){}) {
-                super(
-                    Serializable.argsProcessor(args, _args), 
+            constructor(_args={}, _initFunc=function(){}, _argHandlers={}, _afterArgsLoad=function(scope){}) {
+                super(Serializable.argsProcessor(args, _args), 
                     Serializable.initFuncProcessor(initFunc, _initFunc),
-                    Serializable.argHandProcessor(argHandlers, _argHandlers)),
+                    Serializable.argHandProcessor(argHandlers, _argHandlers),
                     Serializable.initFuncProcessor(afterArgsLoad, _afterArgsLoad)
+                )
             }
         }
         return CustomBaseSerializable
@@ -55088,16 +55088,22 @@ class Serializable {
             }
         }
     }
-    static readOnlyHandler() { // You only write once! That is, when the Serializable is initialized with its inital arguments.
+    static readOnlyHandler(error) { // You only write once! That is, when the Serializable is initialized with its inital arguments.
         return {
             "set": function(scope, val, argName) {
                 if (scope._argWritten===undefined) {
-                    scope._argWritten==={}
+                    scope._argWritten={}
                 }
-                if (scope._argWritten[val]===true) {
-                    throw Error(argName+" is a read only argument")
+                if (scope._argWritten[argName]===true) {
+                    if (error===undefined) {
+                        throw Error(argName+" is a read only argument")
+                    } else {
+                        throw error
+                    }
+                    
                 } else {
-                    scope._argWritten[val] = true
+                    scope._args[argName] = val
+                    scope._argWritten[argName] = true
                 }
             }
         }
@@ -55142,7 +55148,6 @@ class DependencyArgSet{
 }
 
 function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArgSet()) {
-    // console.log(elem)
     var serialized
     if (Object(elem)!==elem) {
         serialized = elem
@@ -55208,9 +55213,9 @@ function argsProcessor(defaultArgs, args) {
     let newArgs = Object.assign({}, defaultArgs);
     let keysUnion = _.union(Object.keys(newArgs), Object.keys(args));
     keysUnion.forEach(function (x) {
-      if ((args[x]!==undefined)&&(args[x].isProxy||args[x]["className"]!==undefined||args[x].args!==undefined||args[x].constructor === Array)) { // do not further expand and check trees if is Serializable / proxy object to prevent deep cloning
+      if (!((args[x]===undefined)||(args[x]===null))&&(args[x].isProxy||args[x]["className"]!==undefined||args[x].args!==undefined||args[x].constructor === Array)) { // do not further expand and check trees if is Serializable / proxy object to prevent deep cloning
         newArgs[x] = args[x]
-       } else if (args[x]!=undefined &&
+       } else if (args[x]!==undefined &&
         !(args[x] instanceof Object) &&
         !(newArgs[x] instanceof Object)) {
         newArgs[x] = args[x];
@@ -55359,8 +55364,87 @@ class ModifierArray extends Serializable {
 ModifierArray.registerConstructor()
 module.exports = ModifierArray
 },{"../Serialization":29,"../modifiers/BaseModifier":39,"underscore":6}],37:[function(require,module,exports){
-var Serializable = require("../Serializable")
-class ObjectArray {
+var {Serializable} = require("../Serialization")
+class ObjectArray extends Serializable.createConstructor(
+    {
+        "objects": []
+    },
+    function(scope) {
+        scope.onAllAssetsLoadedQueue = new Set()
+    },
+    {
+        "objects": Serializable.readOnlyHandler(new Error("objects argument needs to be modified with object interface"))
+    }
+) {
+    update(dt){
+        this._args.objects.forEach(object => {
+            if (object.assetsLoaded) {
+                object.update(dt)
+            }
+        })
+    }
+    _queueLoadObject(object) {
+        object.objectArray = this
+        object.queueOnAssetLoaded(()=>{
+            object.load(viewer)
+            this.updateAssetsLoaded()
+        })        
+    } // what happens to object.objectArray if unloaded before assets are loaded?
+    _unloadObject(object) {
+        object.objectArray = undefined
+        object.unload()
+    }
+    load(viewer) {
+        // unload all objects and reload ??
+        this.viewer = viewer
+        this.args.objects.forEach(object => {
+            this._queueLoadObject(object)
+        })
+    }
+    unload() {
+        this.args.object.forEach(object => {
+            this._unloadObject(object)
+        })
+    }
+    add(object) {
+        this._args.objects.push(object)
+        if (this.isLoaded) { // If ObjectArray is already loaded, will need to load this object on an individual basis
+            this._queueLoadObject(object)
+        }
+    }
+    remove(object) {
+        this._args.objects.splice(this._args.objects.indexOf(object), 1)
+        if (this.isLoaded) {
+            this._unloadObject(object)
+        }
+    }
+    queueAllAssetsLoaded(callback=function(){}) {
+        this.onAllAssetsLoadedQueue.add(
+            {
+                "objectsToCheck": [...this.args.objects],
+                "callback": callback
+            }
+        )
+        this.updateAssetsLoaded()
+    }
+    updateAssetsLoaded() {
+        this.onAllAssetsLoadedQueue.forEach(check => {
+            var checkList = []
+            check.objectsToCheck.forEach((toCheck)=>{
+                checkList.push(toCheck.assetsLoaded===true)
+            })
+            if (!(checkList.includes(false))) {
+                check.callback()
+                this.onAllAssetsLoadedQueue.delete(check)
+            }
+        })
+    }
+    get isLoaded() {
+        return (this.viewer!==undefined)
+    }
+}
+ObjectArray.registerConstructor()
+class OldObjectArray {
     constructor(viewer, listOfObjects=[]){
         this.viewer = viewer
         this._listOfObjects=listOfObjects
@@ -55424,7 +55508,7 @@ class ObjectArray {
 }
 
 module.exports = ObjectArray
-},{"../Serializable":28}],38:[function(require,module,exports){
+},{"../Serialization":29}],38:[function(require,module,exports){
 // Modified!
 /**
  * @author Filipe Caixeta / http://filipecaixeta.com.br
@@ -56294,59 +56378,55 @@ var Viewer = require("../viewers/viewer")
 
 var enc = Serializable.encodeTraversal
 
-class BaseObject extends Serializable { // Todo: load ModifierArray when this is loaded, unload otherwise!
-    constructor(args={}, initFunc=function(){}, argHandlers={}) {
-        super(
-        Serializable.argsProcessor({
-            // Default arguments:
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
-            "rotation": {
-                "x": 0,
-                "y": 0,
-                "z": 0,
-                "eulerOrder": "XYZ"
-            },
-            "scale": {
-                "x": 1,
-                "y": 1,
-                "z": 1
-            },
-            "bypassModifiers": false,
-            "modifiers": new ModifierArray()
-        }, args), 
-        Serializable.initFuncProcessor(
-            function(scope){
-                // Initialization code:
-                scope.onLoadedFunctionList = []
-                scope.assetsLoaded = false
-                scope.container = new THREE.Object3D()
-                scope.bypassModifiers = false
-                if (scope.constructor.name === BaseObject.name) {
-                    scope.declareAssetsLoaded()
-                }
-            }, initFunc),
-        Serializable.argHandProcessor({
-            // Argument handlers:
-            "position":vec3sh(enc().position), 
-            "rotation":eush(enc().rotation),
-            "scale":vec3sh(enc().scale)
-        }, argHandlers))
+class BaseObject extends Serializable.createConstructor(
+{
+    "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "eulerOrder": "XYZ"
+    },
+    "scale": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+    },
+    "bypassModifiers": false,
+    "modifiers": new ModifierArray()
+},
+function(scope){
+    // Initialization code:
+    scope.onLoadedFunctionList = []
+    scope.assetsLoaded = false
+    scope.container = new THREE.Object3D()
+    scope.bypassModifiers = false
+    if (scope.constructor.name === BaseObject.name) {
+        scope.declareAssetsLoaded()
     }
+},
+{
+    "position":vec3sh(enc().position), 
+    "rotation":eush(enc().rotation),
+    "scale":vec3sh(enc().scale)
+}
+) {
     load(viewer) {
-        // if (!(viewer instanceof Viewer)) {
-        //     throw new TypeError("attempt to load invalid class")
-        // }
+        if (!(viewer.isViewer)) {
+            throw new TypeError("attempt to load invalid class")
+        }
         this.viewer = viewer
-        // viewer.scene.add(this.container)
+        viewer.scene.add(this.container)
         this.args.modifiers.load(this)
     }
     unload() {
         this.args.modifiers.unload(this)
-        // this.viewer.scene.remove(this.container)
+        this.onLoadedFunctionList = []
+        this.viewer.scene.remove(this.container)
         this.viewer = undefined
     }
     update(dt) {
@@ -56361,9 +56441,6 @@ class BaseObject extends Serializable { // Todo: load ModifierArray when this is
         this.assetsLoaded = true
         this.onLoadedFunctionList.forEach(x => {x()})
         this.onLoadedFunctionList = []
-        if (this.objectArray) {
-            this.objectArray.updateAssetLoaded()
-        }
     } // Todo: Make it so that there is an option to block user input + load screen while loading, or load async.
     queueOnAssetLoaded(queuedFunction) {
         if (this.assetsLoaded) {
@@ -56396,15 +56473,16 @@ class BaseObject extends Serializable { // Todo: load ModifierArray when this is
     get modifiers() {
         return this.args.modifiers
     }
+
 }
 BaseObject.registerConstructor()
 
 module.exports = BaseObject
 },{"../Serialization":29,"../arrays/ModifierArray":36,"../utils/eulerShadowHandler":54,"../utils/vec3ShadowHandler":55,"../viewers/viewer":58,"three":5}],46:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
-var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
+var THREE = require("three")
 
 class BasePhysicalObject extends Serializable.createConstructor(
     // Default arguments
@@ -56418,10 +56496,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
     },
     // Initialization function
     function(scope) {
-        scope.velocity = new THREE.Vector3(scope.args.velocity.x, scope.args.velocity.y, scope.args.velocity.z)
-        if (scope.constructor === BasePhysicalObject) {
-            scope.declareAssetsLoaded()
-        }
+        scope.velocity = new THREE.Vector3()
     },
     // Argument handlers
     {
@@ -56430,6 +56505,9 @@ class BasePhysicalObject extends Serializable.createConstructor(
     },
     function(scope) {
         
+        if (scope.constructor === BasePhysicalObject) {
+            scope.declareAssetsLoaded()
+        }
     },
     // Inherits from
     BaseObject
@@ -56457,7 +56535,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
 BasePhysicalObject.registerConstructor()
 
 module.exports = BasePhysicalObject
-},{"../Serialization":29,"../utils/argumentProcessor":53,"../utils/vec3ShadowHandler":55,"./BaseObject":45}],47:[function(require,module,exports){
+},{"../Serialization":29,"../utils/vec3ShadowHandler":55,"./BaseObject":45,"three":5}],47:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -56583,7 +56661,6 @@ class PlayerObject extends Serializable.createConstructor(
         "bounceRadius": Serializable.numberHandler(0)
     },
     function(scope) {
-
     },
     BasePhysicalObject
 ) {
@@ -56925,6 +57002,9 @@ class PotreeObject extends Serializable.createConstructor(
         "pointShape": Serializable.readOnlyHandler()
     },
     function(scope) {
+        if (scope.constructor===PotreeObject) {
+            scope.declareAssetsLoaded()
+        }
     },
     BasePhysicalObject
 ) {
@@ -57012,12 +57092,16 @@ class TestObject extends Serializable.createConstructor(
     {
         "color": "green"
     },
-    undefined,
+    function(scope) {
+    },  
     undefined,
     function(scope) {
         var geom = new THREE.BoxGeometry()
         var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
         scope.obj = new THREE.Mesh(geom, mat)
+        if (scope.constructor===TestObject) {
+            scope.declareAssetsLoaded()
+        }
     },
     BasePhysicalObject
 ) {
@@ -57198,6 +57282,7 @@ class Viewer {
         this.scene = new THREE.Scene()
         this.rendererCamera = undefined
         this.objects = new ObjectArray(this)
+        this.objects.load(this)
         this.collisionList = []
         this.nearestInteractObject = undefined
 
@@ -57350,7 +57435,6 @@ class Viewer {
 
     add(object) {
         this.objects.add(object)
-        object.modifiers.flushDeferredLoads()
     }
 
     remove(object) {
@@ -57385,6 +57469,10 @@ class Viewer {
 
     get allowUserControl() {
         return this._allowUserControl
+    }
+
+    get isViewer() {
+        return (this instanceof Viewer)
     }
 
 }

@@ -1,7 +1,7 @@
 var BaseObject = require("./BaseObject")
-var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
+var THREE = require("three")
 
 class BasePhysicalObject extends Serializable.createConstructor(
     // Default arguments
@@ -15,10 +15,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
     },
     // Initialization function
     function(scope) {
-        scope.velocity = new THREE.Vector3(scope.args.velocity.x, scope.args.velocity.y, scope.args.velocity.z)
-        if (scope.constructor === BasePhysicalObject) {
-            scope.declareAssetsLoaded()
-        }
+        scope.velocity = new THREE.Vector3()
     },
     // Argument handlers
     {
@@ -27,6 +24,9 @@ class BasePhysicalObject extends Serializable.createConstructor(
     },
     function(scope) {
         
+        if (scope.constructor === BasePhysicalObject) {
+            scope.declareAssetsLoaded()
+        }
     },
     // Inherits from
     BaseObject

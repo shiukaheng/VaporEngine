@@ -44,7 +44,6 @@ class PlayerObject extends Serializable.createConstructor(
         "bounceRadius": Serializable.numberHandler(0)
     },
     function(scope) {
-
     },
     BasePhysicalObject
 ) {

@@ -40,6 +40,7 @@ class Viewer {
         this.scene = new THREE.Scene()
         this.rendererCamera = undefined
         this.objects = new ObjectArray(this)
+        this.objects.load(this)
         this.collisionList = []
         this.nearestInteractObject = undefined
 
@@ -192,7 +193,6 @@ class Viewer {
 
     add(object) {
         this.objects.add(object)
-        object.modifiers.flushDeferredLoads()
     }
 
     remove(object) {
@@ -227,6 +227,10 @@ class Viewer {
 
     get allowUserControl() {
         return this._allowUserControl
+    }
+
+    get isViewer() {
+        return (this instanceof Viewer)
     }
 
 }
