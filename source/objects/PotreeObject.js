@@ -32,8 +32,8 @@ class PotreeObject extends Serializable.createConstructor(
                 this.pco = pco
                 this.viewer.potreePointClouds.push(this.pco)
             },
-            function() {
-                console.warn(`Failed to load point cloud ${this.args.fileName}`)
+            function(e) {
+                console.warn(`Failed to load point cloud ${this.args.fileName}, reason: ${e}`)
             }.bind(this)
         )
         
