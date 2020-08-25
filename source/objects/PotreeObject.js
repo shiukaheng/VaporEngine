@@ -30,12 +30,13 @@ class PotreeObject extends Serializable.createConstructor(
                 pco.material.shape = this.args.pointShape
                 this.container.add(pco)
                 this.pco = pco
+                this.viewer.potreePointClouds.push(this.pco)
             },
             function() {
-                console.warn(`Failed to load point cloud ${this.fileName}`)
-            }
+                console.warn(`Failed to load point cloud ${this.args.fileName}`)
+            }.bind(this)
         )
-        this.viewer.potreePointClouds.push(this.pco)
+        
     }
     unload() {
         if (this.pco!==undefined) {

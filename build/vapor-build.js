@@ -55285,8 +55285,12 @@ class ModifierArray extends Serializable {
                             throw "attempt to modify modifier argument in ModifierArray"
                         },
                         "get":function(target, prop) {
-                            if(_.contains(["forEach", "toString", "toLocaleString"],prop)||(parseInt(prop).toString()===prop)) {
-                                return target[prop].bind(target)
+                            if(_.contains(["forEach", "toString", "toLocaleString", "length"],prop)||(parseInt(prop).toString()===prop)) {
+                                var returnVar = target[prop]
+                                if (target.constructor === Function) {
+                                    returnVar = returnVar.bind(target)
+                                }
+                                return returnVar
                             } else {
                                 throw "attempt to modify modifier argument in ModifierArray"
                             }
@@ -56103,12 +56107,13 @@ class PlayerModifier extends BaseModifier{
     }
     // @event_based_modifier_method TODO: Migrate to ES6 with babel
     pointerControlsUpdate(e) {
-        if (this.enabled&&!this.object.bypassModifiers) {
+        if (this.args.enabled&&!this.object.bypassModifiers) {
             this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
             this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
             this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
             this.updateRotationFromControlObject()
         }
+        // console.log(this.controlObject.rotation) 
     }
     updateRotationFromControlObject() {
         if (this.controlObject.rotation.x > Math.PI/2) {
@@ -56397,10 +56402,11 @@ class BaseObject extends Serializable.createConstructor(
         "z": 1
     },
     "bypassModifiers": false,
-    "modifiers": new ModifierArray()
+    "modifiers": undefined
 },
 function(scope){
     // Initialization code:
+    scope._args.modifiers = new ModifierArray()
     scope.onLoadedFunctionList = []
     scope.assetsLoaded = false
     scope.container = new THREE.Object3D()
@@ -56799,7 +56805,6 @@ class OldPlayerObject extends BasePhysicalObject {
         this.modifiers.remove(this.velocityDragModifier)
     }
     update(dt) {
-
         super.update(dt)
         if (this._bezierHelper) {
             this._bezierHelper.update((pos, vel) => {
@@ -57016,12 +57021,13 @@ class PotreeObject extends Serializable.createConstructor(
                 pco.material.shape = this.args.pointShape
                 this.container.add(pco)
                 this.pco = pco
+                this.viewer.potreePointClouds.push(this.pco)
             },
             function() {
-                console.warn(`Failed to load point cloud ${this.fileName}`)
-            }
+                console.warn(`Failed to load point cloud ${this.args.fileName}`)
+            }.bind(this)
         )
-        this.viewer.potreePointClouds.push(this.pco)
+        
     }
     unload() {
         if (this.pco!==undefined) {
@@ -57090,14 +57096,14 @@ var {Serializable} = require("../Serialization")
 
 class TestObject extends Serializable.createConstructor(
     {
-        "color": "green"
+        "color": "red"
     },
     function(scope) {
     },  
     undefined,
     function(scope) {
         var geom = new THREE.BoxGeometry()
-        var mat = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true})
+        var mat = new THREE.MeshBasicMaterial({color: scope.args.color, wireframe: true})
         scope.obj = new THREE.Mesh(geom, mat)
         if (scope.constructor===TestObject) {
             scope.declareAssetsLoaded()

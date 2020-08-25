@@ -31,8 +31,12 @@ class ModifierArray extends Serializable {
                             throw "attempt to modify modifier argument in ModifierArray"
                         },
                         "get":function(target, prop) {
-                            if(_.contains(["forEach", "toString", "toLocaleString"],prop)||(parseInt(prop).toString()===prop)) {
-                                return target[prop].bind(target)
+                            if(_.contains(["forEach", "toString", "toLocaleString", "length"],prop)||(parseInt(prop).toString()===prop)) {
+                                var returnVar = target[prop]
+                                if (target.constructor === Function) {
+                                    returnVar = returnVar.bind(target)
+                                }
+                                return returnVar
                             } else {
                                 throw "attempt to modify modifier argument in ModifierArray"
                             }

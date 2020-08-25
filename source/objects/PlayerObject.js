@@ -182,7 +182,6 @@ class OldPlayerObject extends BasePhysicalObject {
         this.modifiers.remove(this.velocityDragModifier)
     }
     update(dt) {
-
         super.update(dt)
         if (this._bezierHelper) {
             this._bezierHelper.update((pos, vel) => {

@@ -26,10 +26,11 @@ class BaseObject extends Serializable.createConstructor(
         "z": 1
     },
     "bypassModifiers": false,
-    "modifiers": new ModifierArray()
+    "modifiers": undefined
 },
 function(scope){
     // Initialization code:
+    scope._args.modifiers = new ModifierArray()
     scope.onLoadedFunctionList = []
     scope.assetsLoaded = false
     scope.container = new THREE.Object3D()
