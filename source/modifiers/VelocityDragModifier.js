@@ -23,7 +23,7 @@ class VelocityDragModifier extends BaseModifier{
         this.object.velocity = this.object.velocity.clone().multiplyScalar((1-this.args.coef)**dt)
     }
     load(object) {
-        if (!(object instanceof BasePhysicalObject)) {
+        if (!(object.isBasePhysicalObject)) {
             throw new TypeError("VelocityDragModifier must only be added to class that extends BasePhysicalObject")
         }
         super.load(object)

@@ -9,7 +9,7 @@ function argumentProcessor(defaultArgs, args) {
       newArgs[x] = args[x];
 
     }
-    if (args[x]!=undefined && args[x].constructor == Object) {
+    if (args[x]!=undefined && args[x].constructor.name===Object.name) {
       newArgs[x] = argumentProcessor(newArgs[x], args[x]);
     }
   });

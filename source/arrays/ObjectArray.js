@@ -8,7 +8,10 @@ class ObjectArray extends Serializable.createConstructor(
     },
     {
         "objects": Serializable.readOnlyHandler(new Error("objects argument needs to be modified with object interface"))
-    }
+    },
+    function(scope) {
+    },
+    Serializable    
 ) {
     update(dt){
         this._args.objects.forEach(object => {
@@ -36,7 +39,7 @@ class ObjectArray extends Serializable.createConstructor(
         })
     }
     unload() {
-        this.args.object.forEach(object => {
+        this.args.objects.forEach(object => {
             this._unloadObject(object)
         })
     }

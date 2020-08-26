@@ -33,6 +33,9 @@ class BaseModifier extends Serialization.Serializable {
     get isLoaded() {
         return (!(this.object===undefined))
     }
+    get isBaseModifier() {
+        return true
+    }
 }
 BaseModifier.registerConstructor()
 

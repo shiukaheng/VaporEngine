@@ -24,7 +24,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
     },
     function(scope) {
         
-        if (scope.constructor === BasePhysicalObject) {
+        if (scope.constructor.name===BasePhysicalObject.name) {
             scope.declareAssetsLoaded()
         }
     },
@@ -49,6 +49,9 @@ class BasePhysicalObject extends Serializable.createConstructor(
     }
     set mass(value) {
         this.args.mass = value
+    }
+    get isBasePhysicalObject() {
+        return true
     }
 }
 BasePhysicalObject.registerConstructor()

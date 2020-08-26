@@ -1,9 +1,10 @@
-THREE = require("three")
-ResizeSensor = require("css-element-queries/src/ResizeSensor")
-ThreeLoader = require('@pnext/three-loader')
-ObjectArray = require("../arrays/ObjectArray")
-Subscription = require("../utils/Subscription")
-// PCDLoader = require("../loaders/PCDLoader")
+var THREE = require("three")
+var ResizeSensor = require("css-element-queries/src/ResizeSensor")
+var ThreeLoader = require('@pnext/three-loader')
+var ObjectArray = require("../arrays/ObjectArray")
+var Subscription = require("../utils/Subscription")
+var {Serializable, DeserializationObjectContainer} = require("../Serialization")
+
 
 require("./viewer.css")
 
@@ -39,7 +40,7 @@ class Viewer {
         // TODO: Move collision detection, interact object processing to global modifiers
         this.scene = new THREE.Scene()
         this.rendererCamera = undefined
-        this.objects = new ObjectArray(this)
+        this.objects = new ObjectArray()
         this.objects.load(this)
         this.collisionList = []
         this.nearestInteractObject = undefined
@@ -126,6 +127,8 @@ class Viewer {
 
         // Some extra flags
         this._allowUserControl = true
+
+        this.deserializationContainer = new DeserializationObjectContainer()
         
         
     }
@@ -208,6 +211,22 @@ class Viewer {
     }
 
     updateFirstInteraction() {
+    }
+
+    exportJSON() {
+        return btoa(JSON.stringify(this.objects.serializeWithDependencies()))
+    }
+
+    importNewJSON(json) {
+        this.objects.unload()
+        var object = JSON.parse(atob(json))
+        this.deserializationContainer = new DeserializationObjectContainer()
+        this.objects = this.deserializationContainer.deserializeWithDependencies(object)
+        this.objects.load(this)
+    }
+
+    cloneTest() {
+        this.importNewJSON(this.exportJSON())
     }
 
     changeCamera(camera) {

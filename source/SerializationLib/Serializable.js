@@ -35,7 +35,7 @@ function serializableArrayRemoveDuplicates(serializableArray) { // For instantia
     var uuidDictObj = {}
     var uuidIndexDictObj = {}
     serializableArray.forEach((obj, index) => {
-        if (!(obj instanceof Serializable)) {
+        if (!(obj.isSerializable)) {
             throw new TypeError("Array contains non-serializable class")
         }
         uuidDictObj[obj.args.uuid] = obj
@@ -81,6 +81,9 @@ class Serializable {
         applyArgs(this.args, Serializable.argsProcessor(defaultArgs, args))
         // Run other initialziation code that needs to happen after the arguments have been set
         afterArgsLoad(this)
+    }
+    get isSerializable() {
+        return true
     }
     serializeWithDependencies() {
         return serializeElement(this)
@@ -320,23 +323,23 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
     var serialized
     if (Object(elem)!==elem) {
         serialized = elem
-    } else if (elem.constructor === Array) {
+    } else if (elem.constructor.name === Array.name) {
         var returnVar = []
         elem.forEach(value => {
-            if (!(value instanceof Serializable && value.args.serialize===false)) { // If value marked as serialize = false, then dont add to array
+            if (!(value.isSerializable && value.args.serialize===false)) { // If value marked as serialize = false, then dont add to array
                 var processedValue = serializeElement(value, false, _dependencies)
                 returnVar.push(processedValue.serialized)
             }
         })
         serialized = returnVar  
-    } else if (elem.constructor === Object) {
+    } else if (elem.constructor.name === Object.name) {
         var returnVar = {}
         for (const [key, value] of Object.entries(elem)) {
             var processedValue = serializeElement(value, false, _dependencies)
             returnVar[key] = processedValue.serialized
         }
         serialized = returnVar
-    } else if (elem instanceof Serializable) {
+    } else if (elem.isSerializable) {
         if (!(elem.args.uuid)) {
             throw new Error("UUID not found")
         }
@@ -360,7 +363,7 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
             }
         }
     } else {
-        console.warn("Unhandled data type for ",elem)
+        throw new Error("Unhandled data type")
     }
     var returnDependencies
     if (isTopLevel) {

@@ -1,16 +1,16 @@
-
+var Serializable = require("./Serializable")
 // Keeps track of deserialized objects and its dependencies!
 function isUuidProxyArgsObj(elem) {
-    return ((elem.constructor === Object) && (elem["className"] === "uuidProxy"))
+    return ((elem.constructor.name===Object.name) && (elem["className"] === "uuidProxy"))
 }
 function isSerializableArgsObj(elem) {
-    return ((elem.constructor === Object) && (elem["className"] !== undefined))
+    return ((elem.constructor.name===Object.name) && (elem["className"] !== undefined))
 }
 function isObject(elem) {
-    return (elem.constructor === Object)
+    return (elem.constructor.name===Object.name)
 }
 function isArray(elem) {
-    return (elem.constructor === Array)
+    return (elem.constructor.name=== Array.name)
 }
 function isLiteral(elem) {
     return (Object(elem)!==elem)
@@ -19,9 +19,14 @@ function isUuidProxy(elem) {
     return elem.isProxy
 }
 
+function peek(elem) {
+    console.log(elem)
+    return elem
+}
+
 class DeserializationObjectContainer{
     constructor(serializableClassesManager) {
-        this.serializableClassesManager = serializableClassesManager
+        this.serializableClassesManager = Serializable.getSerializableClassesManager()
         this.unfulfilledDependencies={}
         this.serializableInstances={}
         this.bufferedVirtualInstances={}
@@ -33,7 +38,7 @@ class DeserializationObjectContainer{
         if (this.serializableInstances[uuid]===undefined) {
             if (this.unfulfilledDependencies[uuid]===undefined) {
                 this.unfulfilledDependencies[uuid] = [callback]
-            } else if (this.unfulfilledDependencies[uuid].constructor==Array) {
+            } else if (this.unfulfilledDependencies[uuid].constructor.name==Array.name) {
                 this.unfulfilledDependencies[uuid].push(callback)
             } else {
                 throw new Error("unfulfilledDependencies corruption")
@@ -67,6 +72,7 @@ class DeserializationObjectContainer{
         return returnVar
     }
     deserialize(elem) { // Can deserialize any arbitrary structure as long as follows JSON compatible structured object, and that a serialized object only exists once.
+        // console.log(elem)
         var returnVar
         if (elem.isProxy) {
             returnVar = elem
@@ -75,14 +81,9 @@ class DeserializationObjectContainer{
         } else if (isArray(elem)) {
             returnVar = []
             elem.forEach(value => {
-                if (isSerializableArgsObj(value)) {
-                    if (value["serialize"]===true) {
-                        returnVar.push(this.deserialize(value))
-                    }
-                } else {
-                    returnVar.push(this.deserialize(value))
-                }
+                returnVar.push(this.deserialize(value))
             })
+            // console.log("isArray", returnVar)
         } else if (isUuidProxyArgsObj(elem)) {
             returnVar = this.getUuidPlaceholder(elem["uuid"])
         } else if (isSerializableArgsObj(elem)) {
@@ -92,9 +93,11 @@ class DeserializationObjectContainer{
             for (const [key, value] of Object.entries(elem)) {
                 returnVar[key] = this.deserialize(value)
             }
+            // console.log("isObject", returnVar)
         } else {
             console.warn("Unhandled data type for ",elem)
         }
+        // console.log(elem, returnVar)
         return returnVar
     }
     deserializeWithDependencies(serializedWithDependencies) {

@@ -54675,19 +54675,19 @@ module.exports = {
     DeserializationObjectContainer: require("./SerializationLib/DeserializationObjectContainer")
 }
 },{"./SerializationLib/DeserializationObjectContainer":30,"./SerializationLib/Serializable":31}],30:[function(require,module,exports){
-
+var Serializable = require("./Serializable")
 // Keeps track of deserialized objects and its dependencies!
 function isUuidProxyArgsObj(elem) {
-    return ((elem.constructor === Object) && (elem["className"] === "uuidProxy"))
+    return ((elem.constructor.name===Object.name) && (elem["className"] === "uuidProxy"))
 }
 function isSerializableArgsObj(elem) {
-    return ((elem.constructor === Object) && (elem["className"] !== undefined))
+    return ((elem.constructor.name===Object.name) && (elem["className"] !== undefined))
 }
 function isObject(elem) {
-    return (elem.constructor === Object)
+    return (elem.constructor.name===Object.name)
 }
 function isArray(elem) {
-    return (elem.constructor === Array)
+    return (elem.constructor.name=== Array.name)
 }
 function isLiteral(elem) {
     return (Object(elem)!==elem)
@@ -54696,9 +54696,14 @@ function isUuidProxy(elem) {
     return elem.isProxy
 }
 
+function peek(elem) {
+    console.log(elem)
+    return elem
+}
+
 class DeserializationObjectContainer{
     constructor(serializableClassesManager) {
-        this.serializableClassesManager = serializableClassesManager
+        this.serializableClassesManager = Serializable.getSerializableClassesManager()
         this.unfulfilledDependencies={}
         this.serializableInstances={}
         this.bufferedVirtualInstances={}
@@ -54710,7 +54715,7 @@ class DeserializationObjectContainer{
         if (this.serializableInstances[uuid]===undefined) {
             if (this.unfulfilledDependencies[uuid]===undefined) {
                 this.unfulfilledDependencies[uuid] = [callback]
-            } else if (this.unfulfilledDependencies[uuid].constructor==Array) {
+            } else if (this.unfulfilledDependencies[uuid].constructor.name==Array.name) {
                 this.unfulfilledDependencies[uuid].push(callback)
             } else {
                 throw new Error("unfulfilledDependencies corruption")
@@ -54744,6 +54749,7 @@ class DeserializationObjectContainer{
         return returnVar
     }
     deserialize(elem) { // Can deserialize any arbitrary structure as long as follows JSON compatible structured object, and that a serialized object only exists once.
+        // console.log(elem)
         var returnVar
         if (elem.isProxy) {
             returnVar = elem
@@ -54752,14 +54758,9 @@ class DeserializationObjectContainer{
         } else if (isArray(elem)) {
             returnVar = []
             elem.forEach(value => {
-                if (isSerializableArgsObj(value)) {
-                    if (value["serialize"]===true) {
-                        returnVar.push(this.deserialize(value))
-                    }
-                } else {
-                    returnVar.push(this.deserialize(value))
-                }
+                returnVar.push(this.deserialize(value))
             })
+            // console.log("isArray", returnVar)
         } else if (isUuidProxyArgsObj(elem)) {
             returnVar = this.getUuidPlaceholder(elem["uuid"])
         } else if (isSerializableArgsObj(elem)) {
@@ -54769,9 +54770,11 @@ class DeserializationObjectContainer{
             for (const [key, value] of Object.entries(elem)) {
                 returnVar[key] = this.deserialize(value)
             }
+            // console.log("isObject", returnVar)
         } else {
             console.warn("Unhandled data type for ",elem)
         }
+        // console.log(elem, returnVar)
         return returnVar
     }
     deserializeWithDependencies(serializedWithDependencies) {
@@ -54828,7 +54831,7 @@ class DeserializationObjectContainer{
 }
 
 module.exports = DeserializationObjectContainer
-},{}],31:[function(require,module,exports){
+},{"./Serializable":31}],31:[function(require,module,exports){
 const uuid = require("uuid")
 const argsProcessor = require("./argsProcessor")
 const _ = require("underscore")
@@ -54866,7 +54869,7 @@ function serializableArrayRemoveDuplicates(serializableArray) { // For instantia
     var uuidDictObj = {}
     var uuidIndexDictObj = {}
     serializableArray.forEach((obj, index) => {
-        if (!(obj instanceof Serializable)) {
+        if (!(obj.isSerializable)) {
             throw new TypeError("Array contains non-serializable class")
         }
         uuidDictObj[obj.args.uuid] = obj
@@ -54912,6 +54915,9 @@ class Serializable {
         applyArgs(this.args, Serializable.argsProcessor(defaultArgs, args))
         // Run other initialziation code that needs to happen after the arguments have been set
         afterArgsLoad(this)
+    }
+    get isSerializable() {
+        return true
     }
     serializeWithDependencies() {
         return serializeElement(this)
@@ -55151,23 +55157,23 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
     var serialized
     if (Object(elem)!==elem) {
         serialized = elem
-    } else if (elem.constructor === Array) {
+    } else if (elem.constructor.name === Array.name) {
         var returnVar = []
         elem.forEach(value => {
-            if (!(value instanceof Serializable && value.args.serialize===false)) { // If value marked as serialize = false, then dont add to array
+            if (!(value.isSerializable && value.args.serialize===false)) { // If value marked as serialize = false, then dont add to array
                 var processedValue = serializeElement(value, false, _dependencies)
                 returnVar.push(processedValue.serialized)
             }
         })
         serialized = returnVar  
-    } else if (elem.constructor === Object) {
+    } else if (elem.constructor.name === Object.name) {
         var returnVar = {}
         for (const [key, value] of Object.entries(elem)) {
             var processedValue = serializeElement(value, false, _dependencies)
             returnVar[key] = processedValue.serialized
         }
         serialized = returnVar
-    } else if (elem instanceof Serializable) {
+    } else if (elem.isSerializable) {
         if (!(elem.args.uuid)) {
             throw new Error("UUID not found")
         }
@@ -55191,7 +55197,7 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
             }
         }
     } else {
-        console.warn("Unhandled data type for ",elem)
+        throw new Error("Unhandled data type")
     }
     var returnDependencies
     if (isTopLevel) {
@@ -55213,7 +55219,7 @@ function argsProcessor(defaultArgs, args) {
     let newArgs = Object.assign({}, defaultArgs);
     let keysUnion = _.union(Object.keys(newArgs), Object.keys(args));
     keysUnion.forEach(function (x) {
-      if (!((args[x]===undefined)||(args[x]===null))&&(args[x].isProxy||args[x]["className"]!==undefined||args[x].args!==undefined||args[x].constructor === Array)) { // do not further expand and check trees if is Serializable / proxy object to prevent deep cloning
+      if (!((args[x]===undefined)||(args[x]===null))&&(args[x].isProxy||args[x]["className"]!==undefined||args[x].args!==undefined||args[x].constructor.name===Array.name)) { // do not further expand and check trees if is Serializable / proxy object to prevent deep cloning
         newArgs[x] = args[x]
        } else if (args[x]!==undefined &&
         !(args[x] instanceof Object) &&
@@ -55285,9 +55291,9 @@ class ModifierArray extends Serializable {
                             throw "attempt to modify modifier argument in ModifierArray"
                         },
                         "get":function(target, prop) {
-                            if(_.contains(["forEach", "toString", "toLocaleString", "length"],prop)||(parseInt(prop).toString()===prop)) {
+                            if(_.contains(["forEach", "toString", "toLocaleString", "length", "constructor"],prop)||(parseInt(prop).toString()===prop)) {
                                 var returnVar = target[prop]
-                                if (target.constructor === Function) {
+                                if (target.constructor.name === Function.name) {
                                     returnVar = returnVar.bind(target)
                                 }
                                 return returnVar
@@ -55328,7 +55334,7 @@ class ModifierArray extends Serializable {
     addSingle(modifier){
         if (_.contains(this._args.modifiers, modifier)) {
             throw "attempt to add already existing modifier"
-        } else if (!(modifier instanceof BaseModifier)) {
+        } else if (!(modifier.isBaseModifier)) {
             throw "attempt to add invalid class to ModifierArray"
         } else {
             this._args.modifiers.push(modifier)
@@ -55378,7 +55384,10 @@ class ObjectArray extends Serializable.createConstructor(
     },
     {
         "objects": Serializable.readOnlyHandler(new Error("objects argument needs to be modified with object interface"))
-    }
+    },
+    function(scope) {
+    },
+    Serializable    
 ) {
     update(dt){
         this._args.objects.forEach(object => {
@@ -55406,7 +55415,7 @@ class ObjectArray extends Serializable.createConstructor(
         })
     }
     unload() {
-        this.args.object.forEach(object => {
+        this.args.objects.forEach(object => {
             this._unloadObject(object)
         })
     }
@@ -55947,6 +55956,9 @@ class BaseModifier extends Serialization.Serializable {
     get isLoaded() {
         return (!(this.object===undefined))
     }
+    get isBaseModifier() {
+        return true
+    }
 }
 BaseModifier.registerConstructor()
 
@@ -56022,10 +56034,10 @@ class LinearAccelerationModifier extends BaseModifier{
 LinearAccelerationModifier.registerConstructor()
 module.exports = LinearAccelerationModifier
 },{"../Serialization":29,"../utils/vec3ShadowHandler":55,"./BaseModifier":39,"three":5}],42:[function(require,module,exports){
-const { Serializable } = require("../Serialization");
-
+var { Serializable } = require("../Serialization");
 var BaseModifier = require("./BaseModifier")
 var BasePhysicalObject = require("../objects/BasePhysicalObject")
+var THREE = require("three")
 
 function event_based_modifier_method(target, name, descriptor) {
     const original = descriptor.value;
@@ -56066,7 +56078,7 @@ class PlayerModifier extends BaseModifier{
         this.pointerControlsUpdate = this.pointerControlsUpdate.bind(this)
         // this.updateRotationFromControlObject = this.updateRotationFromControlObject.bind(this)
 
-        if (!(object instanceof BasePhysicalObject)) {
+        if (!(object.isBasePhysicalObject)) {
             throw new TypeError("PlayerModifier must only be added to class that extends BasePhysicalObject")
         }
         // Parameters
@@ -56176,7 +56188,7 @@ PlayerModifier.registerConstructor()
 
 // Serializable.registerClass(PlayerModifier)
 module.exports = PlayerModifier
-},{"../Serialization":29,"../objects/BasePhysicalObject":46,"./BaseModifier":39}],43:[function(require,module,exports){
+},{"../Serialization":29,"../objects/BasePhysicalObject":46,"./BaseModifier":39,"three":5}],43:[function(require,module,exports){
 var BaseModifier = require("./BaseModifier")
 var {Serializable} = require("../Serialization")
 
@@ -56202,7 +56214,7 @@ class VelocityDragModifier extends BaseModifier{
         this.object.velocity = this.object.velocity.clone().multiplyScalar((1-this.args.coef)**dt)
     }
     load(object) {
-        if (!(object instanceof BasePhysicalObject)) {
+        if (!(object.isBasePhysicalObject)) {
             throw new TypeError("VelocityDragModifier must only be added to class that extends BasePhysicalObject")
         }
         super.load(object)
@@ -56511,7 +56523,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
     },
     function(scope) {
         
-        if (scope.constructor === BasePhysicalObject) {
+        if (scope.constructor.name===BasePhysicalObject.name) {
             scope.declareAssetsLoaded()
         }
     },
@@ -56536,6 +56548,9 @@ class BasePhysicalObject extends Serializable.createConstructor(
     }
     set mass(value) {
         this.args.mass = value
+    }
+    get isBasePhysicalObject() {
+        return true
     }
 }
 BasePhysicalObject.registerConstructor()
@@ -56625,7 +56640,7 @@ var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
 var argsProc = require("../utils/argumentProcessor")
-// var Serializable = require("../Serializable")
+var THREE = require("three")
 var {Serializable} = require("../Serialization")
 
 function peek(x) {
@@ -56988,7 +57003,7 @@ class BezierPathAnimation{
 window.BezierPathAnimation = BezierPathAnimation;
 
 module.exports = PlayerObject
-},{"../Serialization":29,"../modifiers/PlayerModifier":42,"../modifiers/VelocityDragModifier":43,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],49:[function(require,module,exports){
+},{"../Serialization":29,"../modifiers/PlayerModifier":42,"../modifiers/VelocityDragModifier":43,"../utils/argumentProcessor":53,"./BasePhysicalObject":46,"three":5}],49:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -57007,7 +57022,7 @@ class PotreeObject extends Serializable.createConstructor(
         "pointShape": Serializable.readOnlyHandler()
     },
     function(scope) {
-        if (scope.constructor===PotreeObject) {
+        if (scope.constructor.name===PotreeObject.name) {
             scope.declareAssetsLoaded()
         }
     },
@@ -57093,6 +57108,7 @@ module.exports = PotreeObject
 },{"../Serialization":29,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],50:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
+var THREE = require("three")
 
 class TestObject extends Serializable.createConstructor(
     {
@@ -57105,7 +57121,7 @@ class TestObject extends Serializable.createConstructor(
         var geom = new THREE.BoxGeometry()
         var mat = new THREE.MeshBasicMaterial({color: scope.args.color, wireframe: true})
         scope.obj = new THREE.Mesh(geom, mat)
-        if (scope.constructor===TestObject) {
+        if (scope.constructor.name===TestObject.name) {
             scope.declareAssetsLoaded()
         }
     },
@@ -57123,7 +57139,7 @@ class TestObject extends Serializable.createConstructor(
 TestObject.registerConstructor()
 
 module.exports = TestObject
-},{"../Serialization":29,"./BasePhysicalObject":46}],51:[function(require,module,exports){
+},{"../Serialization":29,"./BasePhysicalObject":46,"three":5}],51:[function(require,module,exports){
 const _ = require("underscore")
 
 function argumentProcessor(defaultArgs, args) {
@@ -57135,7 +57151,7 @@ function argumentProcessor(defaultArgs, args) {
       newArgs[x] = args[x];
 
     }
-    if (args[x]!=undefined && args[x].constructor == Object) {
+    if (args[x]!=undefined && args[x].constructor.name===Object.name) {
       newArgs[x] = argumentProcessor(newArgs[x], args[x]);
     }
   });
@@ -57246,12 +57262,13 @@ function vec3ShadowHandler(shadowVec3TraversalFunc) {
 }
 module.exports = vec3ShadowHandler
 },{"../Serialization":29}],56:[function(require,module,exports){
-THREE = require("three")
-ResizeSensor = require("css-element-queries/src/ResizeSensor")
-ThreeLoader = require('@pnext/three-loader')
-ObjectArray = require("../arrays/ObjectArray")
-Subscription = require("../utils/Subscription")
-// PCDLoader = require("../loaders/PCDLoader")
+var THREE = require("three")
+var ResizeSensor = require("css-element-queries/src/ResizeSensor")
+var ThreeLoader = require('@pnext/three-loader')
+var ObjectArray = require("../arrays/ObjectArray")
+var Subscription = require("../utils/Subscription")
+var {Serializable, DeserializationObjectContainer} = require("../Serialization")
+
 
 require("./viewer.css")
 
@@ -57287,7 +57304,7 @@ class Viewer {
         // TODO: Move collision detection, interact object processing to global modifiers
         this.scene = new THREE.Scene()
         this.rendererCamera = undefined
-        this.objects = new ObjectArray(this)
+        this.objects = new ObjectArray()
         this.objects.load(this)
         this.collisionList = []
         this.nearestInteractObject = undefined
@@ -57374,6 +57391,8 @@ class Viewer {
 
         // Some extra flags
         this._allowUserControl = true
+
+        this.deserializationContainer = new DeserializationObjectContainer()
         
         
     }
@@ -57458,6 +57477,22 @@ class Viewer {
     updateFirstInteraction() {
     }
 
+    exportJSON() {
+        return btoa(JSON.stringify(this.objects.serializeWithDependencies()))
+    }
+
+    importNewJSON(json) {
+        this.objects.unload()
+        var object = JSON.parse(atob(json))
+        this.deserializationContainer = new DeserializationObjectContainer()
+        this.objects = this.deserializationContainer.deserializeWithDependencies(object)
+        this.objects.load(this)
+    }
+
+    cloneTest() {
+        this.importNewJSON(this.exportJSON())
+    }
+
     changeCamera(camera) {
         this.rendererCamera = camera
         this.onContainerElementResize()
@@ -57486,9 +57521,9 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../arrays/ObjectArray":37,"../utils/Subscription":52,"./viewer.css":57,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],57:[function(require,module,exports){
+},{"../Serialization":29,"../arrays/ObjectArray":37,"../utils/Subscription":52,"./viewer.css":57,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],57:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
 },{"browserify-css":2}],58:[function(require,module,exports){
 arguments[4][56][0].apply(exports,arguments)
-},{"../arrays/ObjectArray":37,"../utils/Subscription":52,"./viewer.css":57,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":56,"three":5}]},{},[34])(34)
+},{"../Serialization":29,"../arrays/ObjectArray":37,"../utils/Subscription":52,"./viewer.css":57,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":56,"three":5}]},{},[34])(34)
 });

@@ -1,7 +1,7 @@
-const { Serializable } = require("../Serialization");
-
+var { Serializable } = require("../Serialization");
 var BaseModifier = require("./BaseModifier")
 var BasePhysicalObject = require("../objects/BasePhysicalObject")
+var THREE = require("three")
 
 function event_based_modifier_method(target, name, descriptor) {
     const original = descriptor.value;
@@ -42,7 +42,7 @@ class PlayerModifier extends BaseModifier{
         this.pointerControlsUpdate = this.pointerControlsUpdate.bind(this)
         // this.updateRotationFromControlObject = this.updateRotationFromControlObject.bind(this)
 
-        if (!(object instanceof BasePhysicalObject)) {
+        if (!(object.isBasePhysicalObject)) {
             throw new TypeError("PlayerModifier must only be added to class that extends BasePhysicalObject")
         }
         // Parameters

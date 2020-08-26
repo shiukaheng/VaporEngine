@@ -31,9 +31,9 @@ class ModifierArray extends Serializable {
                             throw "attempt to modify modifier argument in ModifierArray"
                         },
                         "get":function(target, prop) {
-                            if(_.contains(["forEach", "toString", "toLocaleString", "length"],prop)||(parseInt(prop).toString()===prop)) {
+                            if(_.contains(["forEach", "toString", "toLocaleString", "length", "constructor"],prop)||(parseInt(prop).toString()===prop)) {
                                 var returnVar = target[prop]
-                                if (target.constructor === Function) {
+                                if (target.constructor.name === Function.name) {
                                     returnVar = returnVar.bind(target)
                                 }
                                 return returnVar
@@ -74,7 +74,7 @@ class ModifierArray extends Serializable {
     addSingle(modifier){
         if (_.contains(this._args.modifiers, modifier)) {
             throw "attempt to add already existing modifier"
-        } else if (!(modifier instanceof BaseModifier)) {
+        } else if (!(modifier.isBaseModifier)) {
             throw "attempt to add invalid class to ModifierArray"
         } else {
             this._args.modifiers.push(modifier)
