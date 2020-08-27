@@ -83,7 +83,7 @@ class PlayerModifier extends BaseModifier{
     }
     // @event_based_modifier_method TODO: Migrate to ES6 with babel
     pointerControlsUpdate(e) {
-        if (this.args.enabled&&!this.object.bypassModifiers) {
+        if (this.args.enabled&&!this.object.bypassModifiers&&this.object.viewer.allowUserControl) {
             this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
             this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
             this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity

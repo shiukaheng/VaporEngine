@@ -54597,7 +54597,7 @@ module.exports = {
     ModifierArray: require("./arrays/ModifierArray"),
     ObjectArray: require("./arrays/ObjectArray")
 }
-},{"./arrays/ModifierArray":36,"./arrays/ObjectArray":37}],26:[function(require,module,exports){
+},{"./arrays/ModifierArray":39,"./arrays/ObjectArray":40}],26:[function(require,module,exports){
 module.exports = {
     BaseModifier: require("./modifiers/BaseModifier"),
     ConstantRotationModifier: require("./modifiers/ConstantRotationModifier"),
@@ -54605,7 +54605,7 @@ module.exports = {
     PlayerModifier: require("./modifiers/PlayerModifier"),
     VelocityDragModifier: require("./modifiers/VelocityDragModifier")
 }
-},{"./modifiers/BaseModifier":39,"./modifiers/ConstantRotationModifier":40,"./modifiers/LinearAccelerationModifier":41,"./modifiers/PlayerModifier":42,"./modifiers/VelocityDragModifier":43}],27:[function(require,module,exports){
+},{"./modifiers/BaseModifier":42,"./modifiers/ConstantRotationModifier":43,"./modifiers/LinearAccelerationModifier":44,"./modifiers/PlayerModifier":45,"./modifiers/VelocityDragModifier":46}],27:[function(require,module,exports){
 module.exports = {
     BaseObject: require("./objects/BaseObject"),
     BasePhysicalObject: require("./objects/BasePhysicalObject"),
@@ -54615,7 +54615,549 @@ module.exports = {
     AudioSourceObject: require("./objects/AudioSourceObject"),
     PlayerObject: require("./objects/PlayerObject")
 }
-},{"./objects/AudioSourceObject":44,"./objects/BaseObject":45,"./objects/BasePhysicalObject":46,"./objects/CollisionCloudObject":47,"./objects/PlayerObject":48,"./objects/PotreeObject":49,"./objects/TestObject":50}],28:[function(require,module,exports){
+},{"./objects/AudioSourceObject":47,"./objects/BaseObject":48,"./objects/BasePhysicalObject":49,"./objects/CollisionCloudObject":50,"./objects/PlayerObject":51,"./objects/PotreeObject":52,"./objects/TestObject":53}],28:[function(require,module,exports){
+var THREE = require("three")
+var ModifierArray = require("../arrays/ModifierArray")
+var {Serializable} = require("../Serialization")
+var vec3sh = require("../utils/vec3ShadowHandler")
+var eush = require("../utils/eulerShadowHandler")
+var Viewer = require("../viewers/viewer")
+
+var enc = Serializable.encodeTraversal
+
+class BaseObject extends Serializable.createConstructor(
+{
+    "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "eulerOrder": "XYZ"
+    },
+    "scale": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+    },
+    "bypassModifiers": false,
+    "modifiers": undefined
+},
+function(scope){
+    // Initialization code:
+    scope._args.modifiers = new ModifierArray()
+    scope.onLoadedFunctionList = []
+    scope.assetsLoaded = false
+    scope.container = new THREE.Object3D()
+    scope.bypassModifiers = false
+    if (scope.constructor.name === BaseObject.name) {
+        scope.declareAssetsLoaded()
+    }
+},
+{
+    "position":vec3sh(enc().position), 
+    "rotation":eush(enc().rotation),
+    "scale":vec3sh(enc().scale)
+}
+) {
+    load(viewer) {
+        if (!(viewer.isViewer)) {
+            throw new TypeError("attempt to load invalid class")
+        }
+        this.viewer = viewer
+        viewer.scene.add(this.container)
+        this.args.modifiers.load(this)
+    }
+    unload() {
+        this.args.modifiers.unload(this)
+        this.onLoadedFunctionList = []
+        this.viewer.scene.remove(this.container)
+        this.viewer = undefined
+    }
+    update(dt) {
+        if (!this.isLoaded) {
+            throw new Error("attempt to update "+this.constructor.name+" before loaded")
+        }
+        if (!this.args.bypassModifiers) {
+            this.args.modifiers.update(dt)
+        }
+    }
+    declareAssetsLoaded() {
+        this.assetsLoaded = true
+        this.onLoadedFunctionList.forEach(x => {x()})
+        this.onLoadedFunctionList = []
+    } // Todo: Make it so that there is an option to block user input + load screen while loading, or load async.
+    queueOnAssetLoaded(queuedFunction) {
+        if (this.assetsLoaded) {
+            queuedFunction()
+        } else {
+            this.onLoadedFunctionList.push(queuedFunction)
+        }
+    }
+    set position(position) {
+        this.container.position.copy(position)
+    }
+    get position() {
+        return this.container.position
+    }
+    set rotation(rotation) {
+        this.container.rotation.copy(rotation)
+    }
+    get rotation() {
+        return this.container.rotation
+    }
+    set scale(scale) {
+        this.container.scale.copy(scale)
+    }
+    get scale() {
+        return this.container.scale
+    }
+    get isLoaded() {
+        return (!(this.viewer===undefined))
+    }
+    get modifiers() {
+        return this.args.modifiers
+    }
+
+}
+BaseObject.registerConstructor()
+
+module.exports = BaseObject
+},{"../Serialization":32,"../arrays/ModifierArray":39,"../utils/eulerShadowHandler":57,"../utils/vec3ShadowHandler":58,"../viewers/viewer":62,"three":5}],29:[function(require,module,exports){
+var BaseObject = require("./BaseObject")
+var {Serializable} = require("../Serialization")
+var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
+var THREE = require("three")
+
+class BasePhysicalObject extends Serializable.createConstructor(
+    // Default arguments
+    {
+        "mass":1,
+        "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+        }
+    },
+    // Initialization function
+    function(scope) {
+        scope.velocity = new THREE.Vector3()
+    },
+    // Argument handlers
+    {
+        "mass": Serializable.numberHandler(),
+        "velocity": vec3ShadowHandler(Serializable.encodeTraversal().velocity)
+    },
+    function(scope) {
+        
+        if (scope.constructor.name===BasePhysicalObject.name) {
+            scope.declareAssetsLoaded()
+        }
+    },
+    // Inherits from
+    BaseObject
+) {
+    addVelocity(normal) {
+        this.velocity.add(normal)
+    }
+    reflectVelocity(vector3) {
+        this.velocity.reflect(vector3)
+    }
+    addMomentum(vector3) {
+        this.velocity.add(vector3.clone().multiplyScalar(this.mass))
+    }
+    update(dt) {
+        this.container.position.add(this.velocity.clone().multiplyScalar(dt))
+        super.update(dt)
+    }
+    get mass() {
+        return this.args.mass
+    }
+    set mass(value) {
+        this.args.mass = value
+    }
+    get isBasePhysicalObject() {
+        return true
+    }
+}
+BasePhysicalObject.registerConstructor()
+
+module.exports = BasePhysicalObject
+},{"../Serialization":32,"../utils/vec3ShadowHandler":58,"./BaseObject":28,"three":5}],30:[function(require,module,exports){
+var BasePhysicalObject = require("./BasePhysicalObject")
+var PlayerModifier = require("../modifiers/PlayerModifier")
+var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
+var argsProc = require("../utils/argumentProcessor")
+var THREE = require("three")
+var {Serializable} = require("../Serialization")
+
+function peek(x) {
+    console.log(x)
+    return x
+}
+
+//source: https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
+function randn_bm() {
+    var u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+}
+
+class PlayerObject extends Serializable.createConstructor(
+    {
+        "drag": 0.9,
+        "acceleration": 7,
+        "bounceRadius": 1
+    },
+    function(scope) {
+        scope._bezierFlyToMode = false
+        scope._bezierHelper = undefined
+        scope._sampledBezierPath = undefined
+        scope._lastCam = new THREE.PerspectiveCamera()
+        scope._direction = new THREE.Vector3()
+        scope.__direction = new THREE.Vector3()
+        scope._bezierAnimClock = new THREE.Clock(false)
+        scope._demoLookTo = undefined
+        
+        if (scope.constructor.name === PlayerObject.name) {
+            scope.declareAssetsLoaded()
+        }
+    },
+    {
+        "drag": Serializable.numberHandler(),
+        "acceleration": Serializable.numberHandler(),
+        "bounceRadius": Serializable.numberHandler(0)
+    },
+    function(scope) {
+    },
+    BasePhysicalObject
+) {
+    load(viewer) {
+        super.load(viewer)
+        this.playerModifier = new PlayerModifier({"acceleration":this.args.acceleration, "bounceRadius":this.args.bounceRadius, "serialize":false})
+        this.velocityDragModifier = new VelocityDragModifier({"coef":this.args.drag, "serialize":false})
+        this.modifiers.add(this.playerModifier)
+        this.modifiers.add(this.velocityDragModifier)
+    }
+    unload(){
+        this.modifiers.remove(this.playerModifier)
+        this.modifiers.remove(this.velocityDragModifier)
+        super.unload()
+    }
+    update(dt) {
+        super.update(dt)
+        if (this._bezierHelper) {
+            this._bezierHelper.update((pos, vel) => {
+                this.position.copy(pos)
+                this.velocity.copy(vel)
+                if (this._demoLookTo) {
+                    this.lookAt(this._demoLookTo)
+                } else {
+                    if (this.velocity.length()>0) {
+                        this.lookAt(this.position.clone().add(this.velocity))
+                    }
+                }
+            })
+        }
+        this._direction = this.__direction.copy(this.playerModifier.camera.position).addScaledVector(this._lastCam.position, -1).normalize()
+        this._lastCam.copy(this.playerModifier.camera) 
+    }
+    lookAt(pos) {
+        this.container.lookAt(pos)
+    }
+    bezierFlyTo(destCamera=camB, duration=10, segments=500, endVel=1, onEnd=()=>{}) {
+        var startPos = this.playerModifier.camera.getWorldPosition(new THREE.Vector3())
+        if (this.velocity.length() == 0) {
+            var startDir = this.playerModifier.camera.getWorldDirection(new THREE.Vector3())
+        } else {
+            var startDir = this.velocity.clone().normalize()
+        }
+        var startVel = this.velocity
+        var destPos = destCamera.getWorldPosition(new THREE.Vector3())
+        var destDir = destCamera.getWorldDirection(new THREE.Vector3())
+        var destScalarVel = endVel
+        this._bezierHelper = new BezierPathAnimation(startPos, startDir, startVel, destPos, destDir, destScalarVel, duration, segments, ()=>{
+            this._bezierHelper=undefined
+            onEnd()
+        })
+    }
+    demoMode(center=new THREE.Vector3(0,0,0), radius=30, radiusVariance=1, donutConstant=10, perPointTime=20, _destCamera=new THREE.PerspectiveCamera()) {
+        this.viewer.allowUserControl = false
+        if (donutConstant<0) {
+            throw "Donut constant must be larger than 0!"
+        }
+        var pos = new THREE.Vector3(randn_bm(), randn_bm()/(1+donutConstant), randn_bm()).normalize()
+        pos.multiplyScalar(radius+randn_bm()*radiusVariance).add(center)
+        _destCamera.position.copy(pos)
+        _destCamera.lookAt(center)
+        this.bezierFlyTo(_destCamera, perPointTime, 500, 0, ()=>{
+            this.demoMode(center, radius, radiusVariance, donutConstant, perPointTime, _destCamera)
+        })
+        this._demoLookTo = center.clone()
+    }
+    exitDemoMode() {
+        this._bezierHelper = undefined
+        this._demoLookTo = undefined
+        this.allowUserControl = true
+    }
+    get pan() {
+        return -this.playerModifier.controlObject.rotation.y
+    }
+    set pan(pan) {
+        this.playerModifier.controlObject.rotation.y = -pan
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get tilt() {
+        return -this.playerModifier.controlObject.rotation.x
+    }
+    set tilt(tilt) {
+        this.playerModifier.controlObject.rotation.x = -tilt
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get row() {
+        return -this.playerModifier.controlObject.rotation.z
+    }
+    set row(row) {
+        this.playerModifier.controlObject.rotation.z = -row
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get speed() {
+        return this.playerModifier.acceleration
+    }
+    set speed(speed) {
+        this.playerModifier.acceleration = speed
+    }
+    get drag() {
+        return this.velocityDragModifier.coef
+    }
+    set drag(drag) {
+        this.velocityDragModifier.coef = drag
+    }
+    get isPlayerObject() {
+        return true
+    }
+}
+PlayerObject.registerConstructor()
+
+class OldPlayerObject extends BasePhysicalObject {
+    constructor(args={}) {
+        super(argsProc({"drag":0.9, "acceleration":7, "bounceRadius":1}, args))
+        if (this.constructor.name === PlayerObject.name) {
+            this._bezierFlyToMode = false
+            this._bezierHelper = undefined
+            this._sampledBezierPath = undefined
+            this._lastCam = new THREE.PerspectiveCamera()
+            this._direction = new THREE.Vector3()
+            this.__direction = new THREE.Vector3()
+            this._bezierAnimClock = new THREE.Clock(false)
+            this._demoLookTo = undefined
+            this.playerModifier = new PlayerModifier({"acceleration":this.args.acceleration, "bounceRadius":this.args.bounceRadius, "ignore":true})
+            this.velocityDragModifier = new VelocityDragModifier({"coef":this.args.drag, "ignore":true})
+            this.declareAssetsLoaded()
+        }
+    }
+    lookAt(pos) {
+        this.container.lookAt(pos)
+    }
+    load(viewer) {
+        super.load(viewer)
+        this.modifiers.add(this.playerModifier)
+        this.modifiers.add(this.velocityDragModifier)
+    }
+    unload(viewer){
+        super.unload(viewer)
+        this.modifiers.remove(this.playerModifier)
+        this.modifiers.remove(this.velocityDragModifier)
+    }
+    update(dt) {
+        super.update(dt)
+        if (this._bezierHelper) {
+            this._bezierHelper.update((pos, vel) => {
+                this.position.copy(pos)
+                this.velocity.copy(vel)
+                if (this._demoLookTo) {
+                    this.lookAt(this._demoLookTo)
+                } else {
+                    if (this.velocity.length()>0) {
+                        this.lookAt(this.position.clone().add(this.velocity))
+                    }
+                }
+            })
+        }
+        this._direction = this.__direction.copy(this.playerModifier.camera.position).addScaledVector(this._lastCam.position, -1).normalize()
+        this._lastCam.copy(this.playerModifier.camera) 
+
+    }
+    get pan() {
+         return -this.playerModifier.controlObject.rotation.y
+    }
+    set pan(pan) {
+        this.playerModifier.controlObject.rotation.y = -pan
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get tilt() {
+        return -this.playerModifier.controlObject.rotation.x
+    }
+    set tilt(tilt) {
+        this.playerModifier.controlObject.rotation.x = -tilt
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get row() {
+        return -this.playerModifier.controlObject.rotation.z
+    }
+    set row(row) {
+        this.playerModifier.controlObject.rotation.z = -row
+        this.playerModifier.updateRotationFromControlObject()
+    }
+    get speed() {
+        return this.playerModifier.acceleration
+    }
+    set speed(speed) {
+        this.playerModifier.acceleration = speed
+    }
+    get drag() {
+        return this.velocityDragModifier.coef
+    }
+    set drag(drag) {
+        this.velocityDragModifier.coef = drag
+    }
+    bezierFlyTo(destCamera=camB, duration=10, segments=500, endVel=1, onEnd=()=>{}) {
+        var startPos = this.playerModifier.camera.getWorldPosition(new THREE.Vector3())
+        if (this.velocity.length() == 0) {
+            var startDir = this.playerModifier.camera.getWorldDirection(new THREE.Vector3())
+        } else {
+            var startDir = this.velocity.clone().normalize()
+        }
+        var startVel = this.velocity
+        var destPos = destCamera.getWorldPosition(new THREE.Vector3())
+        var destDir = destCamera.getWorldDirection(new THREE.Vector3())
+        var destScalarVel = endVel
+        this._bezierHelper = new BezierPathAnimation(startPos, startDir, startVel, destPos, destDir, destScalarVel, duration, segments, ()=>{
+            this._bezierHelper=undefined
+            onEnd()
+        })
+    }
+    demoMode(center=new THREE.Vector3(0,0,0), radius=30, radiusVariance=1, donutConstant=10, perPointTime=20, _destCamera=new THREE.PerspectiveCamera()) {
+        this.viewer.allowUserControl = false
+        if (donutConstant<0) {
+            throw "Donut constant must be larger than 0!"
+        }
+        var pos = new THREE.Vector3(randn_bm(), randn_bm()/(1+donutConstant), randn_bm()).normalize()
+        pos.multiplyScalar(radius+randn_bm()*radiusVariance).add(center)
+        _destCamera.position.copy(pos)
+        _destCamera.lookAt(center)
+        this.bezierFlyTo(_destCamera, perPointTime, 500, 0, ()=>{
+            this.demoMode(center, radius, radiusVariance, donutConstant, perPointTime, _destCamera)
+        })
+        this._demoLookTo = center.clone()
+    }
+    exitDemoMode() {
+        this._bezierHelper = undefined
+        this._demoLookTo = undefined
+        this.allowUserControl = true
+    }
+    serialize() {
+        this.args.drag = this.velocityDragModifier.coef
+        this.args.acceleration = this.playerModifier.acceleration
+        this.args.bounceRadius = this.playerModifier.bounceRadius
+        return super.serialize()
+    }
+}
+
+// Serializable.registerClass(PlayerObject)
+
+class BezierPathAnimation{
+    constructor(startPos=new THREE.Vector3(0, 0, 0), startDir=new THREE.Vector3(1, 0, 0), startVel=new THREE.Vector3(1, 0, 0), destPos=new THREE.Vector3(3, 3, 0), destDir=new THREE.Vector3(1, 0, 0), destScalarVel=0, duration=5, segments=100, endCallback, impossibleParamCompensation=true) {
+        this.startPos = startPos
+        this.destPos = destPos
+        this._lerpVector = new THREE.Vector3()
+        this.duration = duration
+        this.startVel = startVel
+        this.startScalarVel = startVel.length()
+        this.destScalarVel = destScalarVel
+        this.clock = new THREE.Clock()
+        this.endCallback = endCallback
+        this.velocity = new THREE.Vector3()
+        this._lastPos = new THREE.Vector3()
+
+        var a = startPos
+        var d = destPos.clone()
+        var bc_offset = a.distanceTo(d)/2
+        var b
+        if (!startVel < 1) {
+            b = a.clone().add(startDir.multiplyScalar(bc_offset+(-1/(bc_offset*this.startScalarVel**2+1))))
+        } else {
+            b = a.clone().add(this._direction.clone().multiplyScalar(bc_offset+(-1/(bc_offset*this.startScalarVel**2+1))))
+        }
+        var c = d.clone().addScaledVector(destDir, -bc_offset)
+        this.bezierPath = new THREE.CubicBezierCurve3(a, b, c ,d)
+        this.bezierLength = this.bezierPath.getLength()
+        this.sampledBezierPath = this.bezierPath.getSpacedPoints(segments)
+        this._w = this.bezierLength/this.duration-this.startScalarVel/2-this.destScalarVel/2
+        console.log(this.bezierLength, this.duration, this.startScalarVel, this.destScalarVel, this._w)
+        if (this._w < 0) {
+            if (impossibleParamCompensation) {
+                var original_duration = this.duration
+                this.duration = this.bezierLength/(this.startScalarVel/2+this.destScalarVel/2)
+                console.log("New duration: "+this.duration)
+                this._w = 0
+                console.warn("Bezier camera transition duration compensated: "+original_duration+" --> "+this.duration)
+            } else {
+                throw "Impossible parameters!"
+            }
+        }
+        this._halfTimeDistance = (this.duration/2)**2*(this._w-this.startScalarVel)/this.duration + (this.duration/2)*this.startScalarVel
+        this._halfTimeDistanceB = (this.duration/2)*(this.duration*(2*this._w-this.destScalarVel)+(this.duration/2)*(this.destScalarVel-this._w))/this.duration
+        // console.log(this)
+        this.update = this.update.bind(this)
+    }
+    update(updateCallback) {
+        var delta_time = this.clock.getDelta()
+        var time = this.clock.elapsedTime
+        if (time>this.duration||time<0) {
+            console.log("True duration: "+this.clock.elapsedTime)
+            this.endCallback()
+        }
+        var s
+        var u = this.startScalarVel
+        var v = this.destScalarVel
+        var w = this._w
+        var t_total = this.duration
+        if (time<=this.duration/2) {
+            s = 2*((time**2*(w-u))/t_total+time*u)
+        } else {
+            s = 2*(this._halfTimeDistance - this._halfTimeDistanceB + time*(t_total*(2*w-v)+time*(v-w))/t_total)
+        }
+        var t = s/this.bezierLength
+        // console.log(t)
+        t = Math.max(0, Math.min(1, t))
+        var fuzzyIndex = t*(this.sampledBezierPath.length-1)
+        var posVec
+        if (fuzzyIndex%1 == 0) {
+            posVec = this.sampledBezierPath[fuzzyIndex]
+        } else {
+            var p2 = Math.ceil(fuzzyIndex)
+            var p1 = p2-1
+            posVec = this._lerpVector.lerpVectors(this.sampledBezierPath[p1], this.sampledBezierPath[p2], fuzzyIndex-p1)
+        }
+        if (delta_time==0) {
+            this.velocity.copy(this.startVel)
+        } else {
+            this.velocity.subVectors(posVec, this._lastPos).divideScalar(delta_time)
+        }
+        updateCallback(posVec, this.velocity)
+        this._lastPos.copy(posVec)
+    }
+}
+
+window.BezierPathAnimation = BezierPathAnimation;
+
+module.exports = PlayerObject
+},{"../Serialization":32,"../modifiers/PlayerModifier":45,"../modifiers/VelocityDragModifier":46,"../utils/argumentProcessor":56,"./BasePhysicalObject":29,"three":5}],31:[function(require,module,exports){
 const uuid = require("uuid")
 const _ = require("underscore")
 const argsProc = require("./utils/argumentProcessor")
@@ -54669,12 +55211,12 @@ class SerializableClassesManager {
 var manager = new SerializableClassesManager()
 
 module.exports = Serializable
-},{"./utils/argumentProcessor":53,"underscore":6,"uuid":7}],29:[function(require,module,exports){
+},{"./utils/argumentProcessor":56,"underscore":6,"uuid":7}],32:[function(require,module,exports){
 module.exports = {
     Serializable: require("./SerializationLib/Serializable"),
     DeserializationObjectContainer: require("./SerializationLib/DeserializationObjectContainer")
 }
-},{"./SerializationLib/DeserializationObjectContainer":30,"./SerializationLib/Serializable":31}],30:[function(require,module,exports){
+},{"./SerializationLib/DeserializationObjectContainer":33,"./SerializationLib/Serializable":34}],33:[function(require,module,exports){
 var Serializable = require("./Serializable")
 // Keeps track of deserialized objects and its dependencies!
 function isUuidProxyArgsObj(elem) {
@@ -54831,7 +55373,7 @@ class DeserializationObjectContainer{
 }
 
 module.exports = DeserializationObjectContainer
-},{"./Serializable":31}],31:[function(require,module,exports){
+},{"./Serializable":34}],34:[function(require,module,exports){
 const uuid = require("uuid")
 const argsProcessor = require("./argsProcessor")
 const _ = require("underscore")
@@ -55212,7 +55754,7 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
 }
 
 module.exports = Serializable
-},{"./argsProcessor":32,"underscore":6,"uuid":7}],32:[function(require,module,exports){
+},{"./argsProcessor":35,"underscore":6,"uuid":7}],35:[function(require,module,exports){
 const _ = require("underscore");
 const Serializable = require("./Serializable");
 function argsProcessor(defaultArgs, args) {
@@ -55233,7 +55775,7 @@ function argsProcessor(defaultArgs, args) {
 }
 
 module.exports = argsProcessor
-},{"./Serializable":31,"underscore":6}],33:[function(require,module,exports){
+},{"./Serializable":34,"underscore":6}],36:[function(require,module,exports){
 const argumentProcessor = require("./utils/ArgumentProcessor");
 
 module.exports = {
@@ -55242,7 +55784,7 @@ module.exports = {
     vec3ShadowHandler: require("./utils/vec3ShadowHandler"),
     eulerShadowHandler: require("./utils/eulerShadowHandler")
 }
-},{"./utils/ArgumentProcessor":51,"./utils/Subscription":52,"./utils/argumentProcessor":53,"./utils/eulerShadowHandler":54,"./utils/vec3ShadowHandler":55}],34:[function(require,module,exports){
+},{"./utils/ArgumentProcessor":54,"./utils/Subscription":55,"./utils/argumentProcessor":56,"./utils/eulerShadowHandler":57,"./utils/vec3ShadowHandler":58}],37:[function(require,module,exports){
 
 module.exports = {
     Arrays: require("./Arrays"),
@@ -55253,11 +55795,12 @@ module.exports = {
     Serialization: require("./Serialization")
 }
 
-},{"./Arrays":25,"./Modifiers":26,"./Objects":27,"./Serialization":29,"./Utils":33,"./Viewers":35}],35:[function(require,module,exports){
+},{"./Arrays":25,"./Modifiers":26,"./Objects":27,"./Serialization":32,"./Utils":36,"./Viewers":38}],38:[function(require,module,exports){
 module.exports = {
-    Viewer: require("./viewers/Viewer")
+    Viewer: require("./viewers/Viewer"),
+    EditorViewer: require("./viewers/EditorViewer")
 }
-},{"./viewers/Viewer":56}],36:[function(require,module,exports){
+},{"./viewers/EditorViewer":59,"./viewers/Viewer":60}],39:[function(require,module,exports){
 var {Serializable} = require("../Serialization")
 var _ = require("underscore")
 var BaseModifier = require("../modifiers/BaseModifier")
@@ -55373,8 +55916,9 @@ class ModifierArray extends Serializable {
 }
 ModifierArray.registerConstructor()
 module.exports = ModifierArray
-},{"../Serialization":29,"../modifiers/BaseModifier":39,"underscore":6}],37:[function(require,module,exports){
+},{"../Serialization":32,"../modifiers/BaseModifier":42,"underscore":6}],40:[function(require,module,exports){
 var {Serializable} = require("../Serialization")
+var PlayerObject = require("../Objects/PlayerObject")
 class ObjectArray extends Serializable.createConstructor(
     {
         "objects": []
@@ -55389,10 +55933,17 @@ class ObjectArray extends Serializable.createConstructor(
     },
     Serializable    
 ) {
-    update(dt){
+    update(dt, playerOnly=false){
         this._args.objects.forEach(object => {
             if (object.assetsLoaded) {
-                object.update(dt)
+                if (playerOnly===true) {
+                    if (object.isPlayerObject) {
+                        object.update(dt)
+                    }
+                } else {
+                    object.update(dt)
+                }
+                
             }
         })
     }
@@ -55521,7 +56072,7 @@ class OldObjectArray {
 }
 
 module.exports = ObjectArray
-},{"../Serialization":29}],38:[function(require,module,exports){
+},{"../Objects/PlayerObject":30,"../Serialization":32}],41:[function(require,module,exports){
 // Modified!
 /**
  * @author Filipe Caixeta / http://filipecaixeta.com.br
@@ -55920,7 +56471,7 @@ PCDLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
 } );
 
 module.exports = PCDLoader
-},{"three":5}],39:[function(require,module,exports){
+},{"three":5}],42:[function(require,module,exports){
 var ModifierArray = require("../arrays/ModifierArray")
 var Serialization = require("../Serialization")
 
@@ -55963,7 +56514,7 @@ class BaseModifier extends Serialization.Serializable {
 BaseModifier.registerConstructor()
 
 module.exports = BaseModifier
-},{"../Serialization":29,"../arrays/ModifierArray":36}],40:[function(require,module,exports){
+},{"../Serialization":32,"../arrays/ModifierArray":39}],43:[function(require,module,exports){
 var BaseModifier = require("./BaseModifier")
 var THREE = require("three")
 var Serialization = require("../Serialization")
@@ -55999,7 +56550,7 @@ class ConstantRotationModifier extends BaseModifier {
 }
 ConstantRotationModifier.registerConstructor()
 module.exports = ConstantRotationModifier
-},{"../Serialization":29,"../utils/vec3ShadowHandler":55,"./BaseModifier":39,"three":5}],41:[function(require,module,exports){
+},{"../Serialization":32,"../utils/vec3ShadowHandler":58,"./BaseModifier":42,"three":5}],44:[function(require,module,exports){
 var THREE = require('three')
 var BaseModifier = require("./BaseModifier")
 var Serialization = require("../Serialization")
@@ -56033,7 +56584,7 @@ class LinearAccelerationModifier extends BaseModifier{
 }
 LinearAccelerationModifier.registerConstructor()
 module.exports = LinearAccelerationModifier
-},{"../Serialization":29,"../utils/vec3ShadowHandler":55,"./BaseModifier":39,"three":5}],42:[function(require,module,exports){
+},{"../Serialization":32,"../utils/vec3ShadowHandler":58,"./BaseModifier":42,"three":5}],45:[function(require,module,exports){
 var { Serializable } = require("../Serialization");
 var BaseModifier = require("./BaseModifier")
 var BasePhysicalObject = require("../objects/BasePhysicalObject")
@@ -56119,7 +56670,7 @@ class PlayerModifier extends BaseModifier{
     }
     // @event_based_modifier_method TODO: Migrate to ES6 with babel
     pointerControlsUpdate(e) {
-        if (this.args.enabled&&!this.object.bypassModifiers) {
+        if (this.args.enabled&&!this.object.bypassModifiers&&this.object.viewer.allowUserControl) {
             this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
             this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
             this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
@@ -56188,7 +56739,7 @@ PlayerModifier.registerConstructor()
 
 // Serializable.registerClass(PlayerModifier)
 module.exports = PlayerModifier
-},{"../Serialization":29,"../objects/BasePhysicalObject":46,"./BaseModifier":39,"three":5}],43:[function(require,module,exports){
+},{"../Serialization":32,"../objects/BasePhysicalObject":49,"./BaseModifier":42,"three":5}],46:[function(require,module,exports){
 var BaseModifier = require("./BaseModifier")
 var {Serializable} = require("../Serialization")
 
@@ -56223,7 +56774,7 @@ class VelocityDragModifier extends BaseModifier{
 VelocityDragModifier.registerConstructor()
 
 module.exports = VelocityDragModifier
-},{"../Serialization":29,"./BaseModifier":39}],44:[function(require,module,exports){
+},{"../Serialization":32,"./BaseModifier":42}],47:[function(require,module,exports){
 BaseObject = require("./BaseObject")
 Serializable = require("../Serializable")
 argsProc = require("../utils/argumentProcessor")
@@ -56385,178 +56936,11 @@ class AudioSourceObject extends BasePhysicalObject {
 }
 // Serializable.registerClass(AudioSourceObject)
 module.exports = AudioSourceObject
-},{"../Serializable":28,"../utils/argumentProcessor":53,"./BaseObject":45,"three":5}],45:[function(require,module,exports){
-var THREE = require("three")
-var ModifierArray = require("../arrays/ModifierArray")
-var {Serializable} = require("../Serialization")
-var vec3sh = require("../utils/vec3ShadowHandler")
-var eush = require("../utils/eulerShadowHandler")
-var Viewer = require("../viewers/viewer")
-
-var enc = Serializable.encodeTraversal
-
-class BaseObject extends Serializable.createConstructor(
-{
-    "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-    },
-    "rotation": {
-        "x": 0,
-        "y": 0,
-        "z": 0,
-        "eulerOrder": "XYZ"
-    },
-    "scale": {
-        "x": 1,
-        "y": 1,
-        "z": 1
-    },
-    "bypassModifiers": false,
-    "modifiers": undefined
-},
-function(scope){
-    // Initialization code:
-    scope._args.modifiers = new ModifierArray()
-    scope.onLoadedFunctionList = []
-    scope.assetsLoaded = false
-    scope.container = new THREE.Object3D()
-    scope.bypassModifiers = false
-    if (scope.constructor.name === BaseObject.name) {
-        scope.declareAssetsLoaded()
-    }
-},
-{
-    "position":vec3sh(enc().position), 
-    "rotation":eush(enc().rotation),
-    "scale":vec3sh(enc().scale)
-}
-) {
-    load(viewer) {
-        if (!(viewer.isViewer)) {
-            throw new TypeError("attempt to load invalid class")
-        }
-        this.viewer = viewer
-        viewer.scene.add(this.container)
-        this.args.modifiers.load(this)
-    }
-    unload() {
-        this.args.modifiers.unload(this)
-        this.onLoadedFunctionList = []
-        this.viewer.scene.remove(this.container)
-        this.viewer = undefined
-    }
-    update(dt) {
-        if (!this.isLoaded) {
-            throw new Error("attempt to update "+this.constructor.name+" before loaded")
-        }
-        if (!this.args.bypassModifiers) {
-            this.args.modifiers.update(dt)
-        }
-    }
-    declareAssetsLoaded() {
-        this.assetsLoaded = true
-        this.onLoadedFunctionList.forEach(x => {x()})
-        this.onLoadedFunctionList = []
-    } // Todo: Make it so that there is an option to block user input + load screen while loading, or load async.
-    queueOnAssetLoaded(queuedFunction) {
-        if (this.assetsLoaded) {
-            queuedFunction()
-        } else {
-            this.onLoadedFunctionList.push(queuedFunction)
-        }
-    }
-    set position(position) {
-        this.container.position.copy(position)
-    }
-    get position() {
-        return this.container.position
-    }
-    set rotation(rotation) {
-        this.container.rotation.copy(rotation)
-    }
-    get rotation() {
-        return this.container.rotation
-    }
-    set scale(scale) {
-        this.container.scale.copy(scale)
-    }
-    get scale() {
-        return this.container.scale
-    }
-    get isLoaded() {
-        return (!(this.viewer===undefined))
-    }
-    get modifiers() {
-        return this.args.modifiers
-    }
-
-}
-BaseObject.registerConstructor()
-
-module.exports = BaseObject
-},{"../Serialization":29,"../arrays/ModifierArray":36,"../utils/eulerShadowHandler":54,"../utils/vec3ShadowHandler":55,"../viewers/viewer":58,"three":5}],46:[function(require,module,exports){
-var BaseObject = require("./BaseObject")
-var {Serializable} = require("../Serialization")
-var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
-var THREE = require("three")
-
-class BasePhysicalObject extends Serializable.createConstructor(
-    // Default arguments
-    {
-        "mass":1,
-        "velocity": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-        }
-    },
-    // Initialization function
-    function(scope) {
-        scope.velocity = new THREE.Vector3()
-    },
-    // Argument handlers
-    {
-        "mass": Serializable.numberHandler(),
-        "velocity": vec3ShadowHandler(Serializable.encodeTraversal().velocity)
-    },
-    function(scope) {
-        
-        if (scope.constructor.name===BasePhysicalObject.name) {
-            scope.declareAssetsLoaded()
-        }
-    },
-    // Inherits from
-    BaseObject
-) {
-    addVelocity(normal) {
-        this.velocity.add(normal)
-    }
-    reflectVelocity(vector3) {
-        this.velocity.reflect(vector3)
-    }
-    addMomentum(vector3) {
-        this.velocity.add(vector3.clone().multiplyScalar(this.mass))
-    }
-    update(dt) {
-        this.container.position.add(this.velocity.clone().multiplyScalar(dt))
-        super.update(dt)
-    }
-    get mass() {
-        return this.args.mass
-    }
-    set mass(value) {
-        this.args.mass = value
-    }
-    get isBasePhysicalObject() {
-        return true
-    }
-}
-BasePhysicalObject.registerConstructor()
-
-module.exports = BasePhysicalObject
-},{"../Serialization":29,"../utils/vec3ShadowHandler":55,"./BaseObject":45,"three":5}],47:[function(require,module,exports){
+},{"../Serializable":31,"../utils/argumentProcessor":56,"./BaseObject":48,"three":5}],48:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"../Serialization":32,"../arrays/ModifierArray":39,"../utils/eulerShadowHandler":57,"../utils/vec3ShadowHandler":58,"../viewers/viewer":62,"dup":28,"three":5}],49:[function(require,module,exports){
+arguments[4][29][0].apply(exports,arguments)
+},{"../Serialization":32,"../utils/vec3ShadowHandler":58,"./BaseObject":48,"dup":29,"three":5}],50:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -56635,375 +57019,9 @@ class CollisionCloudObject extends Serializable.createConstructor(
 CollisionCloudObject.registerConstructor()
 
 module.exports = CollisionCloudObject
-},{"../Serialization":29,"../loaders/PCDLoader":38,"../utils/argumentProcessor":53,"./BaseObject":45,"yaot":22}],48:[function(require,module,exports){
-var BasePhysicalObject = require("./BasePhysicalObject")
-var PlayerModifier = require("../modifiers/PlayerModifier")
-var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
-var argsProc = require("../utils/argumentProcessor")
-var THREE = require("three")
-var {Serializable} = require("../Serialization")
-
-function peek(x) {
-    console.log(x)
-    return x
-}
-
-//source: https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
-function randn_bm() {
-    var u = 0, v = 0;
-    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-    while(v === 0) v = Math.random();
-    return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-}
-
-class PlayerObject extends Serializable.createConstructor(
-    {
-        "drag": 0.9,
-        "acceleration": 7,
-        "bounceRadius": 1
-    },
-    function(scope) {
-        scope._bezierFlyToMode = false
-        scope._bezierHelper = undefined
-        scope._sampledBezierPath = undefined
-        scope._lastCam = new THREE.PerspectiveCamera()
-        scope._direction = new THREE.Vector3()
-        scope.__direction = new THREE.Vector3()
-        scope._bezierAnimClock = new THREE.Clock(false)
-        scope._demoLookTo = undefined
-        
-        if (scope.constructor.name === PlayerObject.name) {
-            scope.declareAssetsLoaded()
-        }
-    },
-    {
-        "drag": Serializable.numberHandler(),
-        "acceleration": Serializable.numberHandler(),
-        "bounceRadius": Serializable.numberHandler(0)
-    },
-    function(scope) {
-    },
-    BasePhysicalObject
-) {
-    load(viewer) {
-        super.load(viewer)
-        this.playerModifier = new PlayerModifier({"acceleration":this.args.acceleration, "bounceRadius":this.args.bounceRadius, "serialize":false})
-        this.velocityDragModifier = new VelocityDragModifier({"coef":this.args.drag, "serialize":false})
-        this.modifiers.add(this.playerModifier)
-        this.modifiers.add(this.velocityDragModifier)
-    }
-    unload(){
-        this.modifiers.remove(this.playerModifier)
-        this.modifiers.remove(this.velocityDragModifier)
-        super.unload()
-    }
-    update(dt) {
-        super.update(dt)
-        if (this._bezierHelper) {
-            this._bezierHelper.update((pos, vel) => {
-                this.position.copy(pos)
-                this.velocity.copy(vel)
-                if (this._demoLookTo) {
-                    this.lookAt(this._demoLookTo)
-                } else {
-                    if (this.velocity.length()>0) {
-                        this.lookAt(this.position.clone().add(this.velocity))
-                    }
-                }
-            })
-        }
-        this._direction = this.__direction.copy(this.playerModifier.camera.position).addScaledVector(this._lastCam.position, -1).normalize()
-        this._lastCam.copy(this.playerModifier.camera) 
-    }
-    lookAt(pos) {
-        this.container.lookAt(pos)
-    }
-    bezierFlyTo(destCamera=camB, duration=10, segments=500, endVel=1, onEnd=()=>{}) {
-        var startPos = this.playerModifier.camera.getWorldPosition(new THREE.Vector3())
-        if (this.velocity.length() == 0) {
-            var startDir = this.playerModifier.camera.getWorldDirection(new THREE.Vector3())
-        } else {
-            var startDir = this.velocity.clone().normalize()
-        }
-        var startVel = this.velocity
-        var destPos = destCamera.getWorldPosition(new THREE.Vector3())
-        var destDir = destCamera.getWorldDirection(new THREE.Vector3())
-        var destScalarVel = endVel
-        this._bezierHelper = new BezierPathAnimation(startPos, startDir, startVel, destPos, destDir, destScalarVel, duration, segments, ()=>{
-            this._bezierHelper=undefined
-            onEnd()
-        })
-    }
-    demoMode(center=new THREE.Vector3(0,0,0), radius=30, radiusVariance=1, donutConstant=10, perPointTime=20, _destCamera=new THREE.PerspectiveCamera()) {
-        this.viewer.allowUserControl = false
-        if (donutConstant<0) {
-            throw "Donut constant must be larger than 0!"
-        }
-        var pos = new THREE.Vector3(randn_bm(), randn_bm()/(1+donutConstant), randn_bm()).normalize()
-        pos.multiplyScalar(radius+randn_bm()*radiusVariance).add(center)
-        _destCamera.position.copy(pos)
-        _destCamera.lookAt(center)
-        this.bezierFlyTo(_destCamera, perPointTime, 500, 0, ()=>{
-            this.demoMode(center, radius, radiusVariance, donutConstant, perPointTime, _destCamera)
-        })
-        this._demoLookTo = center.clone()
-    }
-    exitDemoMode() {
-        this._bezierHelper = undefined
-        this._demoLookTo = undefined
-        this.allowUserControl = true
-    }
-    get pan() {
-        return -this.playerModifier.controlObject.rotation.y
-    }
-    set pan(pan) {
-        this.playerModifier.controlObject.rotation.y = -pan
-        this.playerModifier.updateRotationFromControlObject()
-    }
-    get tilt() {
-        return -this.playerModifier.controlObject.rotation.x
-    }
-    set tilt(tilt) {
-        this.playerModifier.controlObject.rotation.x = -tilt
-        this.playerModifier.updateRotationFromControlObject()
-    }
-    get row() {
-        return -this.playerModifier.controlObject.rotation.z
-    }
-    set row(row) {
-        this.playerModifier.controlObject.rotation.z = -row
-        this.playerModifier.updateRotationFromControlObject()
-    }
-    get speed() {
-        return this.playerModifier.acceleration
-    }
-    set speed(speed) {
-        this.playerModifier.acceleration = speed
-    }
-    get drag() {
-        return this.velocityDragModifier.coef
-    }
-    set drag(drag) {
-        this.velocityDragModifier.coef = drag
-    }
-}
-PlayerObject.registerConstructor()
-
-class OldPlayerObject extends BasePhysicalObject {
-    constructor(args={}) {
-        super(argsProc({"drag":0.9, "acceleration":7, "bounceRadius":1}, args))
-        if (this.constructor.name === PlayerObject.name) {
-            this._bezierFlyToMode = false
-            this._bezierHelper = undefined
-            this._sampledBezierPath = undefined
-            this._lastCam = new THREE.PerspectiveCamera()
-            this._direction = new THREE.Vector3()
-            this.__direction = new THREE.Vector3()
-            this._bezierAnimClock = new THREE.Clock(false)
-            this._demoLookTo = undefined
-            this.playerModifier = new PlayerModifier({"acceleration":this.args.acceleration, "bounceRadius":this.args.bounceRadius, "ignore":true})
-            this.velocityDragModifier = new VelocityDragModifier({"coef":this.args.drag, "ignore":true})
-            this.declareAssetsLoaded()
-        }
-    }
-    lookAt(pos) {
-        this.container.lookAt(pos)
-    }
-    load(viewer) {
-        super.load(viewer)
-        this.modifiers.add(this.playerModifier)
-        this.modifiers.add(this.velocityDragModifier)
-    }
-    unload(viewer){
-        super.unload(viewer)
-        this.modifiers.remove(this.playerModifier)
-        this.modifiers.remove(this.velocityDragModifier)
-    }
-    update(dt) {
-        super.update(dt)
-        if (this._bezierHelper) {
-            this._bezierHelper.update((pos, vel) => {
-                this.position.copy(pos)
-                this.velocity.copy(vel)
-                if (this._demoLookTo) {
-                    this.lookAt(this._demoLookTo)
-                } else {
-                    if (this.velocity.length()>0) {
-                        this.lookAt(this.position.clone().add(this.velocity))
-                    }
-                }
-            })
-        }
-        this._direction = this.__direction.copy(this.playerModifier.camera.position).addScaledVector(this._lastCam.position, -1).normalize()
-        this._lastCam.copy(this.playerModifier.camera) 
-
-    }
-    get pan() {
-         return -this.playerModifier.controlObject.rotation.y
-    }
-    set pan(pan) {
-        this.playerModifier.controlObject.rotation.y = -pan
-        this.playerModifier.updateRotationFromControlObject()
-    }
-    get tilt() {
-        return -this.playerModifier.controlObject.rotation.x
-    }
-    set tilt(tilt) {
-        this.playerModifier.controlObject.rotation.x = -tilt
-        this.playerModifier.updateRotationFromControlObject()
-    }
-    get row() {
-        return -this.playerModifier.controlObject.rotation.z
-    }
-    set row(row) {
-        this.playerModifier.controlObject.rotation.z = -row
-        this.playerModifier.updateRotationFromControlObject()
-    }
-    get speed() {
-        return this.playerModifier.acceleration
-    }
-    set speed(speed) {
-        this.playerModifier.acceleration = speed
-    }
-    get drag() {
-        return this.velocityDragModifier.coef
-    }
-    set drag(drag) {
-        this.velocityDragModifier.coef = drag
-    }
-    bezierFlyTo(destCamera=camB, duration=10, segments=500, endVel=1, onEnd=()=>{}) {
-        var startPos = this.playerModifier.camera.getWorldPosition(new THREE.Vector3())
-        if (this.velocity.length() == 0) {
-            var startDir = this.playerModifier.camera.getWorldDirection(new THREE.Vector3())
-        } else {
-            var startDir = this.velocity.clone().normalize()
-        }
-        var startVel = this.velocity
-        var destPos = destCamera.getWorldPosition(new THREE.Vector3())
-        var destDir = destCamera.getWorldDirection(new THREE.Vector3())
-        var destScalarVel = endVel
-        this._bezierHelper = new BezierPathAnimation(startPos, startDir, startVel, destPos, destDir, destScalarVel, duration, segments, ()=>{
-            this._bezierHelper=undefined
-            onEnd()
-        })
-    }
-    demoMode(center=new THREE.Vector3(0,0,0), radius=30, radiusVariance=1, donutConstant=10, perPointTime=20, _destCamera=new THREE.PerspectiveCamera()) {
-        this.viewer.allowUserControl = false
-        if (donutConstant<0) {
-            throw "Donut constant must be larger than 0!"
-        }
-        var pos = new THREE.Vector3(randn_bm(), randn_bm()/(1+donutConstant), randn_bm()).normalize()
-        pos.multiplyScalar(radius+randn_bm()*radiusVariance).add(center)
-        _destCamera.position.copy(pos)
-        _destCamera.lookAt(center)
-        this.bezierFlyTo(_destCamera, perPointTime, 500, 0, ()=>{
-            this.demoMode(center, radius, radiusVariance, donutConstant, perPointTime, _destCamera)
-        })
-        this._demoLookTo = center.clone()
-    }
-    exitDemoMode() {
-        this._bezierHelper = undefined
-        this._demoLookTo = undefined
-        this.allowUserControl = true
-    }
-    serialize() {
-        this.args.drag = this.velocityDragModifier.coef
-        this.args.acceleration = this.playerModifier.acceleration
-        this.args.bounceRadius = this.playerModifier.bounceRadius
-        return super.serialize()
-    }
-}
-
-// Serializable.registerClass(PlayerObject)
-
-class BezierPathAnimation{
-    constructor(startPos=new THREE.Vector3(0, 0, 0), startDir=new THREE.Vector3(1, 0, 0), startVel=new THREE.Vector3(1, 0, 0), destPos=new THREE.Vector3(3, 3, 0), destDir=new THREE.Vector3(1, 0, 0), destScalarVel=0, duration=5, segments=100, endCallback, impossibleParamCompensation=true) {
-        this.startPos = startPos
-        this.destPos = destPos
-        this._lerpVector = new THREE.Vector3()
-        this.duration = duration
-        this.startVel = startVel
-        this.startScalarVel = startVel.length()
-        this.destScalarVel = destScalarVel
-        this.clock = new THREE.Clock()
-        this.endCallback = endCallback
-        this.velocity = new THREE.Vector3()
-        this._lastPos = new THREE.Vector3()
-
-        var a = startPos
-        var d = destPos.clone()
-        var bc_offset = a.distanceTo(d)/2
-        var b
-        if (!startVel < 1) {
-            b = a.clone().add(startDir.multiplyScalar(bc_offset+(-1/(bc_offset*this.startScalarVel**2+1))))
-        } else {
-            b = a.clone().add(this._direction.clone().multiplyScalar(bc_offset+(-1/(bc_offset*this.startScalarVel**2+1))))
-        }
-        var c = d.clone().addScaledVector(destDir, -bc_offset)
-        this.bezierPath = new THREE.CubicBezierCurve3(a, b, c ,d)
-        this.bezierLength = this.bezierPath.getLength()
-        this.sampledBezierPath = this.bezierPath.getSpacedPoints(segments)
-        this._w = this.bezierLength/this.duration-this.startScalarVel/2-this.destScalarVel/2
-        console.log(this.bezierLength, this.duration, this.startScalarVel, this.destScalarVel, this._w)
-        if (this._w < 0) {
-            if (impossibleParamCompensation) {
-                var original_duration = this.duration
-                this.duration = this.bezierLength/(this.startScalarVel/2+this.destScalarVel/2)
-                console.log("New duration: "+this.duration)
-                this._w = 0
-                console.warn("Bezier camera transition duration compensated: "+original_duration+" --> "+this.duration)
-            } else {
-                throw "Impossible parameters!"
-            }
-        }
-        this._halfTimeDistance = (this.duration/2)**2*(this._w-this.startScalarVel)/this.duration + (this.duration/2)*this.startScalarVel
-        this._halfTimeDistanceB = (this.duration/2)*(this.duration*(2*this._w-this.destScalarVel)+(this.duration/2)*(this.destScalarVel-this._w))/this.duration
-        // console.log(this)
-        this.update = this.update.bind(this)
-    }
-    update(updateCallback) {
-        var delta_time = this.clock.getDelta()
-        var time = this.clock.elapsedTime
-        if (time>this.duration||time<0) {
-            console.log("True duration: "+this.clock.elapsedTime)
-            this.endCallback()
-        }
-        var s
-        var u = this.startScalarVel
-        var v = this.destScalarVel
-        var w = this._w
-        var t_total = this.duration
-        if (time<=this.duration/2) {
-            s = 2*((time**2*(w-u))/t_total+time*u)
-        } else {
-            s = 2*(this._halfTimeDistance - this._halfTimeDistanceB + time*(t_total*(2*w-v)+time*(v-w))/t_total)
-        }
-        var t = s/this.bezierLength
-        // console.log(t)
-        t = Math.max(0, Math.min(1, t))
-        var fuzzyIndex = t*(this.sampledBezierPath.length-1)
-        var posVec
-        if (fuzzyIndex%1 == 0) {
-            posVec = this.sampledBezierPath[fuzzyIndex]
-        } else {
-            var p2 = Math.ceil(fuzzyIndex)
-            var p1 = p2-1
-            posVec = this._lerpVector.lerpVectors(this.sampledBezierPath[p1], this.sampledBezierPath[p2], fuzzyIndex-p1)
-        }
-        if (delta_time==0) {
-            this.velocity.copy(this.startVel)
-        } else {
-            this.velocity.subVectors(posVec, this._lastPos).divideScalar(delta_time)
-        }
-        updateCallback(posVec, this.velocity)
-        this._lastPos.copy(posVec)
-    }
-}
-
-window.BezierPathAnimation = BezierPathAnimation;
-
-module.exports = PlayerObject
-},{"../Serialization":29,"../modifiers/PlayerModifier":42,"../modifiers/VelocityDragModifier":43,"../utils/argumentProcessor":53,"./BasePhysicalObject":46,"three":5}],49:[function(require,module,exports){
+},{"../Serialization":32,"../loaders/PCDLoader":41,"../utils/argumentProcessor":56,"./BaseObject":48,"yaot":22}],51:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"../Serialization":32,"../modifiers/PlayerModifier":45,"../modifiers/VelocityDragModifier":46,"../utils/argumentProcessor":56,"./BasePhysicalObject":49,"dup":30,"three":5}],52:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -57105,7 +57123,7 @@ class OldPotreeObject extends BasePhysicalObject {
 // Serializable.registerClass(PotreeObject)
 
 module.exports = PotreeObject
-},{"../Serialization":29,"../utils/argumentProcessor":53,"./BasePhysicalObject":46}],50:[function(require,module,exports){
+},{"../Serialization":32,"../utils/argumentProcessor":56,"./BasePhysicalObject":49}],53:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
 var THREE = require("three")
@@ -57139,7 +57157,7 @@ class TestObject extends Serializable.createConstructor(
 TestObject.registerConstructor()
 
 module.exports = TestObject
-},{"../Serialization":29,"./BasePhysicalObject":46,"three":5}],51:[function(require,module,exports){
+},{"../Serialization":32,"./BasePhysicalObject":49,"three":5}],54:[function(require,module,exports){
 const _ = require("underscore")
 
 function argumentProcessor(defaultArgs, args) {
@@ -57159,7 +57177,7 @@ function argumentProcessor(defaultArgs, args) {
 }
 
 module.exports = argumentProcessor
-},{"underscore":6}],52:[function(require,module,exports){
+},{"underscore":6}],55:[function(require,module,exports){
 class Subscription {
     constructor() {
         this.subscribers = new Set()
@@ -57178,9 +57196,9 @@ class Subscription {
     }
 }
 module.exports = Subscription
-},{}],53:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"underscore":6}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"dup":54,"underscore":6}],57:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function eulerShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -57226,7 +57244,7 @@ function eulerShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = eulerShadowHandler
-},{"../Serialization":29}],55:[function(require,module,exports){
+},{"../Serialization":32}],58:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function vec3ShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -57261,7 +57279,35 @@ function vec3ShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = vec3ShadowHandler
-},{"../Serialization":29}],56:[function(require,module,exports){
+},{"../Serialization":32}],59:[function(require,module,exports){
+var Viewer = require("./Viewer")
+var THREE = require("three")
+class EditorViewer extends Viewer {
+    constructor(...args) {
+        super(...args)
+        this.floorMat = new THREE.MeshBasicMaterial({wireframe:true, color:"grey"})
+        this.floorGeom = new THREE.PlaneGeometry(200,200,100,100)
+        this.floor = new THREE.Mesh(this.floorGeom, this.floorMat)
+        this.floor.rotation.x = Math.PI/2
+        this.scene.add(this.floor)
+    }
+    update(dt, playerOnly=false){
+        this._args.objects.forEach(object => {
+            if (object.assetsLoaded) {
+                if (playerOnly===true) {
+                    if (object.isPlayerObject) {
+                        object.update(dt)
+                    }
+                } else {
+                    object.update(dt)
+                }
+                
+            }
+        })
+    }
+}
+module.exports = EditorViewer
+},{"./Viewer":60,"three":5}],60:[function(require,module,exports){
 var THREE = require("three")
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var ThreeLoader = require('@pnext/three-loader')
@@ -57303,7 +57349,9 @@ class Viewer {
         // Initialize scene, renderer camera, object array, collision detection, interact object variables
         // TODO: Move collision detection, interact object processing to global modifiers
         this.scene = new THREE.Scene()
-        this.rendererCamera = undefined
+        this.sourceCamera = undefined
+        this.rendererCamera = new THREE.PerspectiveCamera()
+        this.scene.add(this.rendererCamera)
         this.objects = new ObjectArray()
         this.objects.load(this)
         this.collisionList = []
@@ -57372,6 +57420,7 @@ class Viewer {
 
         // Positional audio initialization
         this.audioListener = new THREE.AudioListener()
+        this.rendererCamera.add(this.audioListener)
 
         // Page interaction checking initialization, used for starting objects with audio. Unreliable for that purpose though!
         this.firstInteraction = false
@@ -57391,7 +57440,7 @@ class Viewer {
 
         // Some extra flags
         this._allowUserControl = true
-
+        this._updatePlayerOnly = false
         this.deserializationContainer = new DeserializationObjectContainer()
         
         
@@ -57416,11 +57465,14 @@ class Viewer {
     /** Render loop */
     renderLoop() {
         var dt = this.renderClock.getDelta()
-        this.objects.update(dt)
-        if (this.rendererCamera) {
+        this.objects.update(dt, this._updatePlayerOnly)
+        if (this.sourceCamera) {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
+            this.rendererCamera.copy(this.sourceCamera)
+            this.rendererCamera.position.setFromMatrixPosition(this.sourceCamera.matrixWorld)
+            this.rendererCamera.rotation.setFromRotationMatrix(this.sourceCamera.matrixWorld)
             this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
             this.renderer.render(this.scene, this.rendererCamera)
             this.skippedRender = false
@@ -57437,8 +57489,8 @@ class Viewer {
         var height = this.containerElement.clientHeight
         
         try {
-            this.rendererCamera.aspect = width/height
-            this.rendererCamera.updateProjectionMatrix()
+            this.sourceCamera.aspect = width/height
+            this.sourceCamera.updateProjectionMatrix()
             this.renderer.setSize(width, height)
         }
         catch(error) {
@@ -57494,16 +57546,14 @@ class Viewer {
     }
 
     changeCamera(camera) {
-        this.rendererCamera = camera
+        this.sourceCamera = camera
         this.onContainerElementResize()
-        var audioListener = this.audioListener
-        if (this.audioListener.parent) {
-            this.audioListener.parent.remove(this.audioListener)
-        }
-        camera.add(audioListener)
     }
 
     set allowUserControl(bool) {
+        if (typeof bool !== "boolean") {
+            throw new TypeError("allowUserControl must be bool")
+        }
         this._allowUserControl = bool
         this.keyPressed = {}
     }
@@ -57516,14 +57566,25 @@ class Viewer {
         return (this instanceof Viewer)
     }
 
+    set updatePlayerOnly(bool) {
+        if (typeof bool !== "boolean") {
+            throw new TypeError("updatePlayerOnly must be bool")
+        }
+        this._updatePlayerOnly = bool
+    }
+
+    get updatePlayerOnly() {
+        return this._updatePlayerOnly
+    }
+
 }
 
 
 
 module.exports = Viewer;
-},{"../Serialization":29,"../arrays/ObjectArray":37,"../utils/Subscription":52,"./viewer.css":57,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],57:[function(require,module,exports){
+},{"../Serialization":32,"../arrays/ObjectArray":40,"../utils/Subscription":55,"./viewer.css":61,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],61:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":2}],58:[function(require,module,exports){
-arguments[4][56][0].apply(exports,arguments)
-},{"../Serialization":29,"../arrays/ObjectArray":37,"../utils/Subscription":52,"./viewer.css":57,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":56,"three":5}]},{},[34])(34)
+},{"browserify-css":2}],62:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"../Serialization":32,"../arrays/ObjectArray":40,"../utils/Subscription":55,"./viewer.css":61,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":60,"three":5}]},{},[37])(37)
 });

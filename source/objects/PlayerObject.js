@@ -148,6 +148,9 @@ class PlayerObject extends Serializable.createConstructor(
     set drag(drag) {
         this.velocityDragModifier.coef = drag
     }
+    get isPlayerObject() {
+        return true
+    }
 }
 PlayerObject.registerConstructor()
 

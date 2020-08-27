@@ -1,4 +1,5 @@
 var {Serializable} = require("../Serialization")
+var PlayerObject = require("../Objects/PlayerObject")
 class ObjectArray extends Serializable.createConstructor(
     {
         "objects": []
@@ -13,10 +14,17 @@ class ObjectArray extends Serializable.createConstructor(
     },
     Serializable    
 ) {
-    update(dt){
+    update(dt, playerOnly=false){
         this._args.objects.forEach(object => {
             if (object.assetsLoaded) {
-                object.update(dt)
+                if (playerOnly===true) {
+                    if (object.isPlayerObject) {
+                        object.update(dt)
+                    }
+                } else {
+                    object.update(dt)
+                }
+                
             }
         })
     }

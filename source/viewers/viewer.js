@@ -39,7 +39,9 @@ class Viewer {
         // Initialize scene, renderer camera, object array, collision detection, interact object variables
         // TODO: Move collision detection, interact object processing to global modifiers
         this.scene = new THREE.Scene()
-        this.rendererCamera = undefined
+        this.sourceCamera = undefined
+        this.rendererCamera = new THREE.PerspectiveCamera()
+        this.scene.add(this.rendererCamera)
         this.objects = new ObjectArray()
         this.objects.load(this)
         this.collisionList = []
@@ -108,6 +110,7 @@ class Viewer {
 
         // Positional audio initialization
         this.audioListener = new THREE.AudioListener()
+        this.rendererCamera.add(this.audioListener)
 
         // Page interaction checking initialization, used for starting objects with audio. Unreliable for that purpose though!
         this.firstInteraction = false
@@ -127,7 +130,7 @@ class Viewer {
 
         // Some extra flags
         this._allowUserControl = true
-
+        this._updatePlayerOnly = false
         this.deserializationContainer = new DeserializationObjectContainer()
         
         
@@ -152,11 +155,14 @@ class Viewer {
     /** Render loop */
     renderLoop() {
         var dt = this.renderClock.getDelta()
-        this.objects.update(dt)
-        if (this.rendererCamera) {
+        this.objects.update(dt, this._updatePlayerOnly)
+        if (this.sourceCamera) {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
+            this.rendererCamera.copy(this.sourceCamera)
+            this.rendererCamera.position.setFromMatrixPosition(this.sourceCamera.matrixWorld)
+            this.rendererCamera.rotation.setFromRotationMatrix(this.sourceCamera.matrixWorld)
             this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
             this.renderer.render(this.scene, this.rendererCamera)
             this.skippedRender = false
@@ -173,8 +179,8 @@ class Viewer {
         var height = this.containerElement.clientHeight
         
         try {
-            this.rendererCamera.aspect = width/height
-            this.rendererCamera.updateProjectionMatrix()
+            this.sourceCamera.aspect = width/height
+            this.sourceCamera.updateProjectionMatrix()
             this.renderer.setSize(width, height)
         }
         catch(error) {
@@ -230,16 +236,14 @@ class Viewer {
     }
 
     changeCamera(camera) {
-        this.rendererCamera = camera
+        this.sourceCamera = camera
         this.onContainerElementResize()
-        var audioListener = this.audioListener
-        if (this.audioListener.parent) {
-            this.audioListener.parent.remove(this.audioListener)
-        }
-        camera.add(audioListener)
     }
 
     set allowUserControl(bool) {
+        if (typeof bool !== "boolean") {
+            throw new TypeError("allowUserControl must be bool")
+        }
         this._allowUserControl = bool
         this.keyPressed = {}
     }
@@ -250,6 +254,17 @@ class Viewer {
 
     get isViewer() {
         return (this instanceof Viewer)
+    }
+
+    set updatePlayerOnly(bool) {
+        if (typeof bool !== "boolean") {
+            throw new TypeError("updatePlayerOnly must be bool")
+        }
+        this._updatePlayerOnly = bool
+    }
+
+    get updatePlayerOnly() {
+        return this._updatePlayerOnly
     }
 
 }
