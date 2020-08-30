@@ -1,4 +1,5 @@
 
+THREE = require("three")
 module.exports = {
     Arrays: require("./Arrays"),
     Modifiers: require("./Modifiers"),

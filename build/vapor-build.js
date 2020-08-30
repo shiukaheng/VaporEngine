@@ -55745,6 +55745,7 @@ module.exports = {
 }
 },{"./utils/ArgumentProcessor":53,"./utils/Subscription":54,"./utils/argumentProcessor":55,"./utils/eulerShadowHandler":56,"./utils/vec3ShadowHandler":57}],36:[function(require,module,exports){
 
+THREE = require("three")
 module.exports = {
     Arrays: require("./Arrays"),
     Modifiers: require("./Modifiers"),
@@ -55754,7 +55755,7 @@ module.exports = {
     Serialization: require("./Serialization")
 }
 
-},{"./Arrays":25,"./Modifiers":26,"./Objects":27,"./Serialization":31,"./Utils":35,"./Viewers":37}],37:[function(require,module,exports){
+},{"./Arrays":25,"./Modifiers":26,"./Objects":27,"./Serialization":31,"./Utils":35,"./Viewers":37,"three":5}],37:[function(require,module,exports){
 module.exports = {
     Viewer: require("./viewers/Viewer"),
     EditorViewer: require("./viewers/EditorViewer")
@@ -57182,6 +57183,8 @@ class PotreeObject extends Serializable.createConstructor(
                 pco.material.shape = this.args.pointShape
                 this.container.add(pco)
                 this.pco = pco
+                this.pco.material.size = Math.max(Math.abs(this.scale.x), Math.abs(this.scale.y), Math.abs(this.scale.z))
+                
                 this.viewer.potreePointClouds.push(this.pco)
             },
             function(e) {
@@ -57196,6 +57199,13 @@ class PotreeObject extends Serializable.createConstructor(
             this.container.remove(this.pco)
         }
         super.unload()
+    }
+    set scale(scale) {
+        super.scale = scale
+        this.pco.material.size = Math.max(Math.abs(this.scale.x), Math.abs(this.scale.y), Math.abs(this.scale.z))
+    }
+    get scale() {
+        return super.scale
     }
 }
 PotreeObject.registerConstructor()

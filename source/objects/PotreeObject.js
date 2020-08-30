@@ -30,6 +30,8 @@ class PotreeObject extends Serializable.createConstructor(
                 pco.material.shape = this.args.pointShape
                 this.container.add(pco)
                 this.pco = pco
+                this.pco.material.size = Math.max(Math.abs(this.scale.x), Math.abs(this.scale.y), Math.abs(this.scale.z))
+                
                 this.viewer.potreePointClouds.push(this.pco)
             },
             function(e) {
@@ -44,6 +46,13 @@ class PotreeObject extends Serializable.createConstructor(
             this.container.remove(this.pco)
         }
         super.unload()
+    }
+    set scale(scale) {
+        super.scale = scale
+        this.pco.material.size = Math.max(Math.abs(this.scale.x), Math.abs(this.scale.y), Math.abs(this.scale.z))
+    }
+    get scale() {
+        return super.scale
     }
 }
 PotreeObject.registerConstructor()
