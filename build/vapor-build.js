@@ -54597,7 +54597,7 @@ module.exports = {
     ModifierArray: require("./arrays/ModifierArray"),
     ObjectArray: require("./arrays/ObjectArray")
 }
-},{"./arrays/ModifierArray":39,"./arrays/ObjectArray":40}],26:[function(require,module,exports){
+},{"./arrays/ModifierArray":38,"./arrays/ObjectArray":39}],26:[function(require,module,exports){
 module.exports = {
     BaseModifier: require("./modifiers/BaseModifier"),
     ConstantRotationModifier: require("./modifiers/ConstantRotationModifier"),
@@ -54605,7 +54605,7 @@ module.exports = {
     PlayerModifier: require("./modifiers/PlayerModifier"),
     VelocityDragModifier: require("./modifiers/VelocityDragModifier")
 }
-},{"./modifiers/BaseModifier":42,"./modifiers/ConstantRotationModifier":43,"./modifiers/LinearAccelerationModifier":44,"./modifiers/PlayerModifier":45,"./modifiers/VelocityDragModifier":46}],27:[function(require,module,exports){
+},{"./modifiers/BaseModifier":41,"./modifiers/ConstantRotationModifier":42,"./modifiers/LinearAccelerationModifier":43,"./modifiers/PlayerModifier":44,"./modifiers/VelocityDragModifier":45}],27:[function(require,module,exports){
 module.exports = {
     BaseObject: require("./objects/BaseObject"),
     BasePhysicalObject: require("./objects/BasePhysicalObject"),
@@ -54615,7 +54615,7 @@ module.exports = {
     AudioSourceObject: require("./objects/AudioSourceObject"),
     PlayerObject: require("./objects/PlayerObject")
 }
-},{"./objects/AudioSourceObject":47,"./objects/BaseObject":48,"./objects/BasePhysicalObject":49,"./objects/CollisionCloudObject":50,"./objects/PlayerObject":51,"./objects/PotreeObject":52,"./objects/TestObject":53}],28:[function(require,module,exports){
+},{"./objects/AudioSourceObject":46,"./objects/BaseObject":47,"./objects/BasePhysicalObject":48,"./objects/CollisionCloudObject":49,"./objects/PlayerObject":50,"./objects/PotreeObject":51,"./objects/TestObject":52}],28:[function(require,module,exports){
 var THREE = require("three")
 var ModifierArray = require("../arrays/ModifierArray")
 var {Serializable} = require("../Serialization")
@@ -54726,7 +54726,7 @@ function(scope){
 BaseObject.registerConstructor()
 
 module.exports = BaseObject
-},{"../Serialization":32,"../arrays/ModifierArray":39,"../utils/eulerShadowHandler":57,"../utils/vec3ShadowHandler":58,"../viewers/viewer":62,"three":5}],29:[function(require,module,exports){
+},{"../Serialization":31,"../arrays/ModifierArray":38,"../utils/eulerShadowHandler":56,"../utils/vec3ShadowHandler":57,"../viewers/viewer":61,"three":5}],29:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var {Serializable} = require("../Serialization")
 var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
@@ -54786,7 +54786,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
 BasePhysicalObject.registerConstructor()
 
 module.exports = BasePhysicalObject
-},{"../Serialization":32,"../utils/vec3ShadowHandler":58,"./BaseObject":28,"three":5}],30:[function(require,module,exports){
+},{"../Serialization":31,"../utils/vec3ShadowHandler":57,"./BaseObject":28,"three":5}],30:[function(require,module,exports){
 var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
@@ -55157,66 +55157,12 @@ class BezierPathAnimation{
 window.BezierPathAnimation = BezierPathAnimation;
 
 module.exports = PlayerObject
-},{"../Serialization":32,"../modifiers/PlayerModifier":45,"../modifiers/VelocityDragModifier":46,"../utils/argumentProcessor":56,"./BasePhysicalObject":29,"three":5}],31:[function(require,module,exports){
-const uuid = require("uuid")
-const _ = require("underscore")
-const argsProc = require("./utils/argumentProcessor")
-
-class Serializable {
-    constructor(args={}) {
-        var defaultArgs = {
-            "uuid": uuid.v4(),
-            "className": this.constructor.name,
-            "ignore": false,
-        }
-        this.args = argsProc(defaultArgs, args)
-    }
-    serialize() {
-        return this.args
-    } 
-    static deserialize(object) {
-        var constructor = manager.lookup(object["className"])
-        return new constructor(object)
-    }
-    static registerClass(constructor) {
-        manager.register(constructor)
-    }
-}
-
-class SerializableClassesManager {
-    constructor() {
-        this.classList = {}
-    }
-    register(newClass) {
-        if (newClass.prototype instanceof Serializable) {
-            this.classList[newClass.name] = newClass
-        } else {
-            throw "Attempted to register invalid class."
-        }
-    }
-    lookup(lookupClass) {
-        if (!(this.classList[lookupClass]==undefined)) {
-            return this.classList[lookupClass]
-        } else {
-            throw "Class not found!"
-        }
-    }
-}
-
-// Todo: Automatically register serializable classes using class decorators.
-//       Automatically serialize and deserialize "args" object recursively, also substitute serializable objects with a proxy. Move nested objects into the "global context", and when the nested object is to be deserialized, the proxy provides a reference to the object.
-//       Make it so that the scene itself is also a serializable (?)
-//       For each data type found in the "args" object, there should only be the need to write a serializer / deserializer once.
-
-var manager = new SerializableClassesManager()
-
-module.exports = Serializable
-},{"./utils/argumentProcessor":56,"underscore":6,"uuid":7}],32:[function(require,module,exports){
+},{"../Serialization":31,"../modifiers/PlayerModifier":44,"../modifiers/VelocityDragModifier":45,"../utils/argumentProcessor":55,"./BasePhysicalObject":29,"three":5}],31:[function(require,module,exports){
 module.exports = {
     Serializable: require("./SerializationLib/Serializable"),
     DeserializationObjectContainer: require("./SerializationLib/DeserializationObjectContainer")
 }
-},{"./SerializationLib/DeserializationObjectContainer":33,"./SerializationLib/Serializable":34}],33:[function(require,module,exports){
+},{"./SerializationLib/DeserializationObjectContainer":32,"./SerializationLib/Serializable":33}],32:[function(require,module,exports){
 var Serializable = require("./Serializable")
 // Keeps track of deserialized objects and its dependencies!
 function isUuidProxyArgsObj(elem) {
@@ -55373,7 +55319,7 @@ class DeserializationObjectContainer{
 }
 
 module.exports = DeserializationObjectContainer
-},{"./Serializable":34}],34:[function(require,module,exports){
+},{"./Serializable":33}],33:[function(require,module,exports){
 const uuid = require("uuid")
 const argsProcessor = require("./argsProcessor")
 const _ = require("underscore")
@@ -55589,7 +55535,6 @@ class Serializable {
                             scope.args[argName] = scope._args[argName]
                         })
                 }
-                
             }
         }
     }
@@ -55633,6 +55578,7 @@ class Serializable {
                 if (typeof val !== "boolean") {
                     throw TypeError(argName+" must be a boolean")
                 }
+                scope._args[argName] = val
             }
         }
     }
@@ -55656,7 +55602,20 @@ class Serializable {
             }
         }
     }
-    // Todo: Handler combiner!
+    static creationHelper() {
+        return {
+            "defaultArgs": {
+                "a": 1,
+                "b": 2
+            },
+            "argCheck": {
+                "a": checkA //returns something if it is not ok
+            },
+            "argType": {
+                "a": int
+            }
+        }
+    }
 }
 
 Serializable.registerConstructor()
@@ -55754,7 +55713,7 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
 }
 
 module.exports = Serializable
-},{"./argsProcessor":35,"underscore":6,"uuid":7}],35:[function(require,module,exports){
+},{"./argsProcessor":34,"underscore":6,"uuid":7}],34:[function(require,module,exports){
 const _ = require("underscore");
 const Serializable = require("./Serializable");
 function argsProcessor(defaultArgs, args) {
@@ -55775,7 +55734,7 @@ function argsProcessor(defaultArgs, args) {
 }
 
 module.exports = argsProcessor
-},{"./Serializable":34,"underscore":6}],36:[function(require,module,exports){
+},{"./Serializable":33,"underscore":6}],35:[function(require,module,exports){
 const argumentProcessor = require("./utils/ArgumentProcessor");
 
 module.exports = {
@@ -55784,7 +55743,7 @@ module.exports = {
     vec3ShadowHandler: require("./utils/vec3ShadowHandler"),
     eulerShadowHandler: require("./utils/eulerShadowHandler")
 }
-},{"./utils/ArgumentProcessor":54,"./utils/Subscription":55,"./utils/argumentProcessor":56,"./utils/eulerShadowHandler":57,"./utils/vec3ShadowHandler":58}],37:[function(require,module,exports){
+},{"./utils/ArgumentProcessor":53,"./utils/Subscription":54,"./utils/argumentProcessor":55,"./utils/eulerShadowHandler":56,"./utils/vec3ShadowHandler":57}],36:[function(require,module,exports){
 
 module.exports = {
     Arrays: require("./Arrays"),
@@ -55795,12 +55754,12 @@ module.exports = {
     Serialization: require("./Serialization")
 }
 
-},{"./Arrays":25,"./Modifiers":26,"./Objects":27,"./Serialization":32,"./Utils":36,"./Viewers":38}],38:[function(require,module,exports){
+},{"./Arrays":25,"./Modifiers":26,"./Objects":27,"./Serialization":31,"./Utils":35,"./Viewers":37}],37:[function(require,module,exports){
 module.exports = {
     Viewer: require("./viewers/Viewer"),
     EditorViewer: require("./viewers/EditorViewer")
 }
-},{"./viewers/EditorViewer":59,"./viewers/Viewer":60}],39:[function(require,module,exports){
+},{"./viewers/EditorViewer":58,"./viewers/Viewer":59}],38:[function(require,module,exports){
 var {Serializable} = require("../Serialization")
 var _ = require("underscore")
 var BaseModifier = require("../modifiers/BaseModifier")
@@ -55916,7 +55875,7 @@ class ModifierArray extends Serializable {
 }
 ModifierArray.registerConstructor()
 module.exports = ModifierArray
-},{"../Serialization":32,"../modifiers/BaseModifier":42,"underscore":6}],40:[function(require,module,exports){
+},{"../Serialization":31,"../modifiers/BaseModifier":41,"underscore":6}],39:[function(require,module,exports){
 var {Serializable} = require("../Serialization")
 var PlayerObject = require("../Objects/PlayerObject")
 class ObjectArray extends Serializable.createConstructor(
@@ -56072,7 +56031,7 @@ class OldObjectArray {
 }
 
 module.exports = ObjectArray
-},{"../Objects/PlayerObject":30,"../Serialization":32}],41:[function(require,module,exports){
+},{"../Objects/PlayerObject":30,"../Serialization":31}],40:[function(require,module,exports){
 // Modified!
 /**
  * @author Filipe Caixeta / http://filipecaixeta.com.br
@@ -56471,7 +56430,7 @@ PCDLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
 } );
 
 module.exports = PCDLoader
-},{"three":5}],42:[function(require,module,exports){
+},{"three":5}],41:[function(require,module,exports){
 var ModifierArray = require("../arrays/ModifierArray")
 var Serialization = require("../Serialization")
 
@@ -56514,7 +56473,7 @@ class BaseModifier extends Serialization.Serializable {
 BaseModifier.registerConstructor()
 
 module.exports = BaseModifier
-},{"../Serialization":32,"../arrays/ModifierArray":39}],43:[function(require,module,exports){
+},{"../Serialization":31,"../arrays/ModifierArray":38}],42:[function(require,module,exports){
 var BaseModifier = require("./BaseModifier")
 var THREE = require("three")
 var Serialization = require("../Serialization")
@@ -56550,7 +56509,7 @@ class ConstantRotationModifier extends BaseModifier {
 }
 ConstantRotationModifier.registerConstructor()
 module.exports = ConstantRotationModifier
-},{"../Serialization":32,"../utils/vec3ShadowHandler":58,"./BaseModifier":42,"three":5}],44:[function(require,module,exports){
+},{"../Serialization":31,"../utils/vec3ShadowHandler":57,"./BaseModifier":41,"three":5}],43:[function(require,module,exports){
 var THREE = require('three')
 var BaseModifier = require("./BaseModifier")
 var Serialization = require("../Serialization")
@@ -56584,7 +56543,7 @@ class LinearAccelerationModifier extends BaseModifier{
 }
 LinearAccelerationModifier.registerConstructor()
 module.exports = LinearAccelerationModifier
-},{"../Serialization":32,"../utils/vec3ShadowHandler":58,"./BaseModifier":42,"three":5}],45:[function(require,module,exports){
+},{"../Serialization":31,"../utils/vec3ShadowHandler":57,"./BaseModifier":41,"three":5}],44:[function(require,module,exports){
 var { Serializable } = require("../Serialization");
 var BaseModifier = require("./BaseModifier")
 var BasePhysicalObject = require("../objects/BasePhysicalObject")
@@ -56739,7 +56698,7 @@ PlayerModifier.registerConstructor()
 
 // Serializable.registerClass(PlayerModifier)
 module.exports = PlayerModifier
-},{"../Serialization":32,"../objects/BasePhysicalObject":49,"./BaseModifier":42,"three":5}],46:[function(require,module,exports){
+},{"../Serialization":31,"../objects/BasePhysicalObject":48,"./BaseModifier":41,"three":5}],45:[function(require,module,exports){
 var BaseModifier = require("./BaseModifier")
 var {Serializable} = require("../Serialization")
 
@@ -56774,12 +56733,11 @@ class VelocityDragModifier extends BaseModifier{
 VelocityDragModifier.registerConstructor()
 
 module.exports = VelocityDragModifier
-},{"../Serialization":32,"./BaseModifier":42}],47:[function(require,module,exports){
-BaseObject = require("./BaseObject")
-Serializable = require("../Serializable")
-argsProc = require("../utils/argumentProcessor")
+},{"../Serialization":31,"./BaseModifier":41}],46:[function(require,module,exports){
+var BasePhysicalObject = require("./BasePhysicalObject")
+var {Serializable} = require("../Serialization")
 var THREE = require("three")
-var audioLoader = new THREE.AudioLoader()
+
 
 /**
  * Convenience function to handle setters of AudioSourceObject class properties
@@ -56797,7 +56755,177 @@ function setWrapper(input, audioObject, storageVar, setFunction) {
     }
 }
 
-class AudioSourceObject extends BasePhysicalObject {
+class AudioSourceObject extends Serializable.createConstructor(
+    {
+        "audioSourceURL":"",
+        "delayLoadUntilInteraction": true,
+        "randomizeStart": false,
+        "autoStart": true,
+        "positional": true,
+        "loop": true,
+        "volume": 1,
+        "refDistance": 1,
+        "rolloffFactor": 1
+    },
+    function(scope) {
+
+    },
+    {
+        "audioSourceURL":Serializable.readOnlyHandler(),
+        "delayLoadUntilInteraction":Serializable.readOnlyHandler(),
+        "randomizeStart":Serializable.readOnlyHandler(),
+        "autoStart":Serializable.readOnlyHandler(),
+        "positional":Serializable.readOnlyHandler(),
+        "loop":{
+            "get":function(scope, argName) {
+                if (scope.audioObj!==undefined) {
+                    return scope.audioObj.getLoop()
+                } else {
+                    return scope._args[argName]
+                }
+            },
+            "set":function(scope, val, argName) {
+                if (typeof val !== "boolean") {
+                    throw new TypeError("loop argument must be boolean")
+                }
+                if (scope.audioObj!==undefined) {
+                    scope.audioObj.setLoop(val)
+                }
+                scope._args[argName]=val
+            }
+        },
+        "volume":{
+            "get":function(scope, argName) {
+                if (scope.audioObj!==undefined) {
+                    return scope.audioObj.getVolume()
+                } else {
+                    return scope._args[argName]
+                }
+            },
+            "set":function(scope, val, argName) {
+                if (typeof val !== "number"||val<0) {
+                    throw new TypeError("volume argument must be number equal or greater than 0")
+                }
+                if (scope.audioObj!==undefined) {
+                    scope.audioObj.setVolume(val)
+                }
+                scope._args[argName]=val
+            }
+        },
+        "refDistance":{
+            "get":function(scope, argName) {
+                if (scope.args.positional) {
+                    if (scope.audioObj!==undefined) {
+                        return scope.audioObj.getRefDistance()
+                    } else {
+                        return scope._args[argName]
+                    }
+                } else {
+                    return null
+                }
+            },
+            "set":function(scope, val, argName) {
+                if (typeof val !== "number"||val<0) {
+                    throw new TypeError("refDistance argument must be number equal or greater than 0")
+                }
+                if (scope.args.positional) {
+                    if (scope.audioObj!==undefined) {
+                        scope.audioObj.setRefDistance(val)
+                    }
+                    scope._args[argName] = val
+                } else {
+                    // console.warn("Attempt to set refDistance on non-positional AudioSourceObject.")
+                }
+            }
+        },
+        "rolloffFactor":{
+            "get":function(scope, argName) {
+                if (scope.args.positional) {
+                    if (scope.audioObj!==undefined) {
+                        return scope.audioObj.getRolloffFactor()
+                    } else {
+                        return scope._args[argName]
+                    }
+                } else {
+                    return null
+                }
+            },
+            "set":function(scope, val, argName) {
+                if (typeof val !== "number"||val<0) {
+                    throw new TypeError("rolloffFactor argument must be number equal or greater than 0")
+                }
+                if (scope.args.positional) {
+                    if (scope.audioObj!==undefined) {
+                        scope.audioObj.setRolloffFactor(val)
+                    }
+                    scope._args[argName] = val
+                } else {
+                    // console.warn("Attempt to set rolloffFactor on non-positional AudioSourceObject.")
+                }
+            }
+        }
+    },
+    function(scope) {
+
+        var audioLoader = new THREE.AudioLoader()
+        audioLoader.load(scope.args.audioSourceURL, (audioBuffer)=>{
+            scope.audioBuffer=audioBuffer
+            if (scope.constructor.name == AudioSourceObject.name) {
+                scope.declareAssetsLoaded()
+            }
+        })
+    },
+    BasePhysicalObject
+) {
+    load(viewer) {
+        super.load(viewer)
+
+        // Initialize the THREE.Audio / THREE.PositionalAudio object, depending on this.positional
+        if (this.args.positional) {
+            this.audioObj = new THREE.PositionalAudio(this.viewer.audioListener)
+            this.audioObj.setRefDistance(this.args.refDistance)
+            this.audioObj.setRolloffFactor(this.args.rolloffFactor)
+        } else {
+            this.audioObj = new THREE.Audio(this.viewer.audioListener)
+        }
+
+        // Create an offset to start the audio recording with if this.randomizeStart is true
+        if (this.args.randomizeStart) {
+            this.audioObj.offset = this.audioBuffer.duration * Math.random()
+        }
+
+        // Set audio type agnostic properties
+        this.audioObj.setVolume(this.args.volume)
+        this.audioObj.setLoop(this.args.loop)
+        this.audioObj.setBuffer(this.audioBuffer)
+        
+        // Add the audio object to the container
+        this.container.add(this.audioObj)
+
+        // Queue the audio to be played when the user first interacts with the page if autoplay is set to true
+        if (this.args.autoStart) {
+            this.viewer.queueForFirstInteraction(() => {
+                this.audioObj.play()
+            })
+        }
+    }
+
+    unload(viewer) {
+        super.unload(viewer)
+        this.container.remove(this.audioObj)
+    }
+
+    play() {
+        this.audioObj.play()
+    }
+
+    pause() {
+        this.audioObj.pause()
+    }
+}
+AudioSourceObject.registerConstructor()
+
+class OldAudioSourceObject extends BasePhysicalObject {
     constructor(args={}) {
         var defaultArgs = {
             "audioSourceURL":"",
@@ -56936,11 +57064,11 @@ class AudioSourceObject extends BasePhysicalObject {
 }
 // Serializable.registerClass(AudioSourceObject)
 module.exports = AudioSourceObject
-},{"../Serializable":31,"../utils/argumentProcessor":56,"./BaseObject":48,"three":5}],48:[function(require,module,exports){
+},{"../Serialization":31,"./BasePhysicalObject":48,"three":5}],47:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"../Serialization":32,"../arrays/ModifierArray":39,"../utils/eulerShadowHandler":57,"../utils/vec3ShadowHandler":58,"../viewers/viewer":62,"dup":28,"three":5}],49:[function(require,module,exports){
+},{"../Serialization":31,"../arrays/ModifierArray":38,"../utils/eulerShadowHandler":56,"../utils/vec3ShadowHandler":57,"../viewers/viewer":61,"dup":28,"three":5}],48:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"../Serialization":32,"../utils/vec3ShadowHandler":58,"./BaseObject":48,"dup":29,"three":5}],50:[function(require,module,exports){
+},{"../Serialization":31,"../utils/vec3ShadowHandler":57,"./BaseObject":47,"dup":29,"three":5}],49:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -57019,9 +57147,9 @@ class CollisionCloudObject extends Serializable.createConstructor(
 CollisionCloudObject.registerConstructor()
 
 module.exports = CollisionCloudObject
-},{"../Serialization":32,"../loaders/PCDLoader":41,"../utils/argumentProcessor":56,"./BaseObject":48,"yaot":22}],51:[function(require,module,exports){
+},{"../Serialization":31,"../loaders/PCDLoader":40,"../utils/argumentProcessor":55,"./BaseObject":47,"yaot":22}],50:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"../Serialization":32,"../modifiers/PlayerModifier":45,"../modifiers/VelocityDragModifier":46,"../utils/argumentProcessor":56,"./BasePhysicalObject":49,"dup":30,"three":5}],52:[function(require,module,exports){
+},{"../Serialization":31,"../modifiers/PlayerModifier":44,"../modifiers/VelocityDragModifier":45,"../utils/argumentProcessor":55,"./BasePhysicalObject":48,"dup":30,"three":5}],51:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -57123,7 +57251,7 @@ class OldPotreeObject extends BasePhysicalObject {
 // Serializable.registerClass(PotreeObject)
 
 module.exports = PotreeObject
-},{"../Serialization":32,"../utils/argumentProcessor":56,"./BasePhysicalObject":49}],53:[function(require,module,exports){
+},{"../Serialization":31,"../utils/argumentProcessor":55,"./BasePhysicalObject":48}],52:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
 var THREE = require("three")
@@ -57157,7 +57285,7 @@ class TestObject extends Serializable.createConstructor(
 TestObject.registerConstructor()
 
 module.exports = TestObject
-},{"../Serialization":32,"./BasePhysicalObject":49,"three":5}],54:[function(require,module,exports){
+},{"../Serialization":31,"./BasePhysicalObject":48,"three":5}],53:[function(require,module,exports){
 const _ = require("underscore")
 
 function argumentProcessor(defaultArgs, args) {
@@ -57177,7 +57305,7 @@ function argumentProcessor(defaultArgs, args) {
 }
 
 module.exports = argumentProcessor
-},{"underscore":6}],55:[function(require,module,exports){
+},{"underscore":6}],54:[function(require,module,exports){
 class Subscription {
     constructor() {
         this.subscribers = new Set()
@@ -57196,9 +57324,9 @@ class Subscription {
     }
 }
 module.exports = Subscription
-},{}],56:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54,"underscore":6}],57:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53,"underscore":6}],56:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function eulerShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -57244,7 +57372,7 @@ function eulerShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = eulerShadowHandler
-},{"../Serialization":32}],58:[function(require,module,exports){
+},{"../Serialization":31}],57:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function vec3ShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -57279,7 +57407,7 @@ function vec3ShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = vec3ShadowHandler
-},{"../Serialization":32}],59:[function(require,module,exports){
+},{"../Serialization":31}],58:[function(require,module,exports){
 var Viewer = require("./Viewer")
 var THREE = require("three")
 class EditorViewer extends Viewer {
@@ -57307,7 +57435,7 @@ class EditorViewer extends Viewer {
     }
 }
 module.exports = EditorViewer
-},{"./Viewer":60,"three":5}],60:[function(require,module,exports){
+},{"./Viewer":59,"three":5}],59:[function(require,module,exports){
 var THREE = require("three")
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var ThreeLoader = require('@pnext/three-loader')
@@ -57582,9 +57710,9 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../Serialization":32,"../arrays/ObjectArray":40,"../utils/Subscription":55,"./viewer.css":61,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],61:[function(require,module,exports){
+},{"../Serialization":31,"../arrays/ObjectArray":39,"../utils/Subscription":54,"./viewer.css":60,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":5}],60:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":2}],62:[function(require,module,exports){
-arguments[4][60][0].apply(exports,arguments)
-},{"../Serialization":32,"../arrays/ObjectArray":40,"../utils/Subscription":55,"./viewer.css":61,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":60,"three":5}]},{},[37])(37)
+},{"browserify-css":2}],61:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"../Serialization":31,"../arrays/ObjectArray":39,"../utils/Subscription":54,"./viewer.css":60,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":59,"three":5}]},{},[36])(36)
 });

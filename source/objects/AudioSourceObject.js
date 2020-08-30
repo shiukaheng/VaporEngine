@@ -1,8 +1,7 @@
-BaseObject = require("./BaseObject")
-Serializable = require("../Serializable")
-argsProc = require("../utils/argumentProcessor")
+var BasePhysicalObject = require("./BasePhysicalObject")
+var {Serializable} = require("../Serialization")
 var THREE = require("three")
-var audioLoader = new THREE.AudioLoader()
+
 
 /**
  * Convenience function to handle setters of AudioSourceObject class properties
@@ -20,7 +19,177 @@ function setWrapper(input, audioObject, storageVar, setFunction) {
     }
 }
 
-class AudioSourceObject extends BasePhysicalObject {
+class AudioSourceObject extends Serializable.createConstructor(
+    {
+        "audioSourceURL":"",
+        "delayLoadUntilInteraction": true,
+        "randomizeStart": false,
+        "autoStart": true,
+        "positional": true,
+        "loop": true,
+        "volume": 1,
+        "refDistance": 1,
+        "rolloffFactor": 1
+    },
+    function(scope) {
+
+    },
+    {
+        "audioSourceURL":Serializable.readOnlyHandler(),
+        "delayLoadUntilInteraction":Serializable.readOnlyHandler(),
+        "randomizeStart":Serializable.readOnlyHandler(),
+        "autoStart":Serializable.readOnlyHandler(),
+        "positional":Serializable.readOnlyHandler(),
+        "loop":{
+            "get":function(scope, argName) {
+                if (scope.audioObj!==undefined) {
+                    return scope.audioObj.getLoop()
+                } else {
+                    return scope._args[argName]
+                }
+            },
+            "set":function(scope, val, argName) {
+                if (typeof val !== "boolean") {
+                    throw new TypeError("loop argument must be boolean")
+                }
+                if (scope.audioObj!==undefined) {
+                    scope.audioObj.setLoop(val)
+                }
+                scope._args[argName]=val
+            }
+        },
+        "volume":{
+            "get":function(scope, argName) {
+                if (scope.audioObj!==undefined) {
+                    return scope.audioObj.getVolume()
+                } else {
+                    return scope._args[argName]
+                }
+            },
+            "set":function(scope, val, argName) {
+                if (typeof val !== "number"||val<0) {
+                    throw new TypeError("volume argument must be number equal or greater than 0")
+                }
+                if (scope.audioObj!==undefined) {
+                    scope.audioObj.setVolume(val)
+                }
+                scope._args[argName]=val
+            }
+        },
+        "refDistance":{
+            "get":function(scope, argName) {
+                if (scope.args.positional) {
+                    if (scope.audioObj!==undefined) {
+                        return scope.audioObj.getRefDistance()
+                    } else {
+                        return scope._args[argName]
+                    }
+                } else {
+                    return null
+                }
+            },
+            "set":function(scope, val, argName) {
+                if (typeof val !== "number"||val<0) {
+                    throw new TypeError("refDistance argument must be number equal or greater than 0")
+                }
+                if (scope.args.positional) {
+                    if (scope.audioObj!==undefined) {
+                        scope.audioObj.setRefDistance(val)
+                    }
+                    scope._args[argName] = val
+                } else {
+                    // console.warn("Attempt to set refDistance on non-positional AudioSourceObject.")
+                }
+            }
+        },
+        "rolloffFactor":{
+            "get":function(scope, argName) {
+                if (scope.args.positional) {
+                    if (scope.audioObj!==undefined) {
+                        return scope.audioObj.getRolloffFactor()
+                    } else {
+                        return scope._args[argName]
+                    }
+                } else {
+                    return null
+                }
+            },
+            "set":function(scope, val, argName) {
+                if (typeof val !== "number"||val<0) {
+                    throw new TypeError("rolloffFactor argument must be number equal or greater than 0")
+                }
+                if (scope.args.positional) {
+                    if (scope.audioObj!==undefined) {
+                        scope.audioObj.setRolloffFactor(val)
+                    }
+                    scope._args[argName] = val
+                } else {
+                    // console.warn("Attempt to set rolloffFactor on non-positional AudioSourceObject.")
+                }
+            }
+        }
+    },
+    function(scope) {
+
+        var audioLoader = new THREE.AudioLoader()
+        audioLoader.load(scope.args.audioSourceURL, (audioBuffer)=>{
+            scope.audioBuffer=audioBuffer
+            if (scope.constructor.name == AudioSourceObject.name) {
+                scope.declareAssetsLoaded()
+            }
+        })
+    },
+    BasePhysicalObject
+) {
+    load(viewer) {
+        super.load(viewer)
+
+        // Initialize the THREE.Audio / THREE.PositionalAudio object, depending on this.positional
+        if (this.args.positional) {
+            this.audioObj = new THREE.PositionalAudio(this.viewer.audioListener)
+            this.audioObj.setRefDistance(this.args.refDistance)
+            this.audioObj.setRolloffFactor(this.args.rolloffFactor)
+        } else {
+            this.audioObj = new THREE.Audio(this.viewer.audioListener)
+        }
+
+        // Create an offset to start the audio recording with if this.randomizeStart is true
+        if (this.args.randomizeStart) {
+            this.audioObj.offset = this.audioBuffer.duration * Math.random()
+        }
+
+        // Set audio type agnostic properties
+        this.audioObj.setVolume(this.args.volume)
+        this.audioObj.setLoop(this.args.loop)
+        this.audioObj.setBuffer(this.audioBuffer)
+        
+        // Add the audio object to the container
+        this.container.add(this.audioObj)
+
+        // Queue the audio to be played when the user first interacts with the page if autoplay is set to true
+        if (this.args.autoStart) {
+            this.viewer.queueForFirstInteraction(() => {
+                this.audioObj.play()
+            })
+        }
+    }
+
+    unload(viewer) {
+        super.unload(viewer)
+        this.container.remove(this.audioObj)
+    }
+
+    play() {
+        this.audioObj.play()
+    }
+
+    pause() {
+        this.audioObj.pause()
+    }
+}
+AudioSourceObject.registerConstructor()
+
+class OldAudioSourceObject extends BasePhysicalObject {
     constructor(args={}) {
         var defaultArgs = {
             "audioSourceURL":"",

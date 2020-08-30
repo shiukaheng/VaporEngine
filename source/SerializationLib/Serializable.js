@@ -213,7 +213,6 @@ class Serializable {
                             scope.args[argName] = scope._args[argName]
                         })
                 }
-                
             }
         }
     }
@@ -257,6 +256,7 @@ class Serializable {
                 if (typeof val !== "boolean") {
                     throw TypeError(argName+" must be a boolean")
                 }
+                scope._args[argName] = val
             }
         }
     }
@@ -280,7 +280,20 @@ class Serializable {
             }
         }
     }
-    // Todo: Handler combiner!
+    static creationHelper() {
+        return {
+            "defaultArgs": {
+                "a": 1,
+                "b": 2
+            },
+            "argCheck": {
+                "a": checkA //returns something if it is not ok
+            },
+            "argType": {
+                "a": int
+            }
+        }
+    }
 }
 
 Serializable.registerConstructor()
