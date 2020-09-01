@@ -42,6 +42,7 @@ class Viewer {
         this.sourceCamera = undefined
         this.rendererCamera = new THREE.PerspectiveCamera()
         this.scene.add(this.rendererCamera)
+        this.scene.add(new THREE.AmbientLight("white"))
         this.objects = new ObjectArray()
         this.objects.load(this)
         this.collisionList = []
