@@ -60556,9 +60556,9 @@ class Viewer {
         var height = this.containerElement.clientHeight
         
         try {
+            this.renderer.setSize(width, height)
             this.sourceCamera.aspect = width/height
             this.sourceCamera.updateProjectionMatrix()
-            this.renderer.setSize(width, height)
         }
         catch(error) {
             if (error instanceof TypeError) {
