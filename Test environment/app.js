@@ -24,6 +24,12 @@ if (query.magicCode !== undefined) {
     viewer.importNewJSON(query.magicCode)
 } else {
     button.addEventListener("click", ()=>{
+        if (inputElem.value==="Go away!") {
+            titleElem.textContent="Ok."
+            overlay.style.opacity = 0;
+            overlay.style.pointerEvents = "none";
+        }
+        return
         viewer.importNewJSON(inputElem.value, ()=>{
             console.log("test")
             overlay.style.opacity = 0;
