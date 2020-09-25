@@ -13,8 +13,27 @@ elem = document.getElementById("viewport-div")
 viewer = new Vapor.Viewers.Viewer(elem)
 
 var query = parseQuery(window.location.search)
-if (query.serializedCode !== undefined) {
-    viewer.importNewJSON(query.serializedCode)
+var overlay = document.getElementById("nocode-div")
+var button = document.getElementById("code-submit")
+var inputElem = document.getElementById("code-input")
+var titleElem = document.getElementById("title")
+
+if (query.magicCode !== undefined) {
+    overlay.style.visibility = "hidden"
+    overlay.style.pointerEvents = "none"
+    viewer.importNewJSON(query.magicCode)
+} else {
+    button.addEventListener("click", ()=>{
+        viewer.importNewJSON(inputElem.value, ()=>{
+            console.log("test")
+            overlay.style.opacity = 0;
+            overlay.style.pointerEvents = "none";
+        },
+        (e)=>{
+            titleElem.textContent="Oops. Thats an invalid code."
+            throw e
+        })
+    })
 }
 
 viewer.objects.queueAllAssetsLoaded(function() {

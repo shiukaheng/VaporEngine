@@ -60600,12 +60600,18 @@ class Viewer {
         return btoa(JSON.stringify(this.objects.serializeWithDependencies()))
     }
 
-    importNewJSON(json) {
+    importNewJSON(json, onSuccess=()=>{}, onFailure=()=>{}) {
         this.objects.unload()
-        var object = JSON.parse(atob(json))
+        try {
+            var object = JSON.parse(atob(json))
+        } catch (e) {
+            onFailure(e) // Only checks whether it is valid JSON
+            return
+        }
         this.deserializationContainer = new DeserializationObjectContainer()
         this.objects = this.deserializationContainer.deserializeWithDependencies(object)
         this.objects.load(this)
+        onSuccess()
     }
 
     cloneTest() {
