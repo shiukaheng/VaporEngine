@@ -28,22 +28,21 @@ if (query.magicCode !== undefined) {
             titleElem.textContent="Ok."
             overlay.style.opacity = 0;
             overlay.style.pointerEvents = "none";
-        }
-        return
+            return
+        }  
         viewer.importNewJSON(inputElem.value, ()=>{
-            console.log("test")
             overlay.style.opacity = 0;
             overlay.style.pointerEvents = "none";
         },
         (e)=>{
-            titleElem.textContent="Oops. Thats an invalid code."
+            titleElem.textContent="Oops. That's an invalid code."
             throw e
         })
     })
 }
 
+
 viewer.objects.queueAllAssetsLoaded(function() {
-    console.log("All loaded!")
     viewer.startRender()
     viewer.potree.pointBudget=10000000
 })

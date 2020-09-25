@@ -60435,19 +60435,21 @@ class Viewer {
             }
         }
         function onKeyDown(e) {
-            if (this.pointerlock) {
+            if (this.hasPointerLock) {
                 e.preventDefault()
                 e.stopPropagation()
                 keyHandler(e.keyCode, true)
             }
         }
+        var onKeyDown = onKeyDown.bind(this)
         function onKeyUp(e) {
-            if (this.pointerlock) {
+            if (this.hasPointerLock) {
                 e.preventDefault()
                 e.stopPropagation()
                 keyHandler(e.keyCode, false)
             }
         }
+        var onKeyUp = onKeyUp.bind(this)
         document.addEventListener('keydown', onKeyDown, false)
         document.addEventListener('keyup', onKeyUp, false)
         this.removeListeners = function() {
@@ -60458,9 +60460,13 @@ class Viewer {
         // Point controls input initialization
         this.pointerlock = false
         var scope = this
-        this.renderer.domElement.onclick = function() {
+        this.renderer.domElement.addEventListener("click", ()=>{
             scope.renderer.domElement.requestPointerLock()
-        }
+        })
+
+        document.addEventListener('pointerlockerror', (event) => {
+            console.log(event);
+        });
 
         // this.pointerControlsSubscribers = []
         // this.pointerControlsStateSubscribers = []
