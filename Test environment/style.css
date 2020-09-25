@@ -3,7 +3,100 @@ body {
     margin: 0;
 }
 
-div {
+#nocode-div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+
+    background: linear-gradient(255deg, #20e6b3, #e620b3);
+    background-size: 400% 400%;
+
+    -webkit-animation: AnimationName 30s ease infinite;
+    -moz-animation: AnimationName 30s ease infinite;
+    animation: AnimationName 30s ease infinite;
+
+    transition: opacity 1s;
+}
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:0% 86%}
+    50%{background-position:100% 15%}
+    100%{background-position:0% 86%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:0% 86%}
+    50%{background-position:100% 15%}
+    100%{background-position:0% 86%}
+}
+@keyframes AnimationName {
+    0%{background-position:0% 86%}
+    50%{background-position:100% 15%}
+    100%{background-position:0% 86%}
+}
+
+#nocode-div-nested {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    margin: 0;
+    align-items: center;
+
+    display:flex;
+    flex-direction: column;
+}
+
+#title {
+    font-size: 50px;
+    font-family: 'Heebo', sans-serif;
+    color:white;
+    text-align: center;
+}
+
+#input-container {
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+}
+
+#code-input {
+    height: 30px;
+    width: 200px;
+    background-color: transparent;
+    border: 0;
+    font-size:25px;
+    border-bottom: 2px solid white;
+    outline-width: 0;
+    color: white;
+    font-family: 'Heebo', sans-serif;
+}
+
+#code-submit {
+    height: 30px;
+    background-color: transparent;
+    border: white solid 2px;
+    outline-width: 0;
+    color: white;
+    border-radius: 30px;
+    font-family: 'Heebo', sans-serif;
+    padding: 0 0.5em 0 0.5em;
+    margin: 0 0 0 0.5em;
+    overflow: hidden;
+    cursor: pointer;
+    line-height: 30px;
+    transform: translateY(-3px);
+    transition: background-color 0.3s;
+}
+
+#code-submit:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+#viewport-div {
     height: 100%;
     width: 100%;
     background-color: transparent;

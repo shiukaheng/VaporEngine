@@ -63,14 +63,18 @@ class Viewer {
             }
         }
         function onKeyDown(e) {
-            e.preventDefault()
-            e.stopPropagation()
-            keyHandler(e.keyCode, true)
+            if (this.pointerlock) {
+                e.preventDefault()
+                e.stopPropagation()
+                keyHandler(e.keyCode, true)
+            }
         }
         function onKeyUp(e) {
-            e.preventDefault()
-            e.stopPropagation()
-            keyHandler(e.keyCode, false)
+            if (this.pointerlock) {
+                e.preventDefault()
+                e.stopPropagation()
+                keyHandler(e.keyCode, false)
+            }
         }
         document.addEventListener('keydown', onKeyDown, false)
         document.addEventListener('keyup', onKeyUp, false)
