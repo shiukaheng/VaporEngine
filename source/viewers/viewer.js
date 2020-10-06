@@ -197,24 +197,7 @@ class Viewer {
         }
     }
 
-    // External functions
-
-    /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
-    startRender() {
-        var scope = this
-        if (!this.pauseRenderFlag) {
-            requestAnimationFrame(function() {scope.startRender();})
-        } else {
-            scope.pauseRenderFlag = false
-        }
-        this.renderLoop()
-    }
-
-    /** Pauses rendering loop */
-    pauseRender() {
-        this.pauseRenderFlag = true
-    }
-
+    /** Callback function when container element for canvas is resized */
     onContainerElementResize() {
         var width = this.containerElement.clientWidth
         var height = this.containerElement.clientHeight
@@ -233,59 +216,7 @@ class Viewer {
         }
     }
 
-    getKeyState(keyCode) {
-        if (this.keyPressed[`key${keyCode}`]) {
-            return true
-        } else {
-            return false
-        }
-    }
-
-    add(object) {
-        this.objects.add(object)
-    }
-
-    remove(object) {
-        this.objects.remove(object)
-    }
-
-    queueForFirstInteraction(method) {
-        if (this.firstInteraction) {
-            method()
-        } else {
-            this.firstInteractionQueue.push(method)
-        }
-    }
-
-    updateFirstInteraction() {
-    }
-
-    exportJSON() {
-        return btoa(JSON.stringify(this.objects.serializeWithDependencies()))
-    }
-
-    importNewJSON(json, onSuccess=()=>{}, onFailure=()=>{}) {
-        this.objects.unload()
-        try {
-            var object = JSON.parse(atob(json))
-        } catch (e) {
-            onFailure(e) // Only checks whether it is valid JSON
-            return
-        }
-        this.deserializationContainer = new DeserializationObjectContainer()
-        this.objects = this.deserializationContainer.deserializeWithDependencies(object)
-        this.objects.load(this)
-        onSuccess()
-    }
-
-    cloneTest() {
-        this.importNewJSON(this.exportJSON())
-    }
-
-    changeCamera(camera) {
-        this.sourceCamera = camera
-        this.onContainerElementResize()
-    }
+    // Accessor functions
 
     set allowUserControl(bool) {
         if (typeof bool !== "boolean") {
@@ -313,6 +244,82 @@ class Viewer {
     get updatePlayerOnly() {
         return this._updatePlayerOnly
     }
+
+    // External functions
+
+    /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
+    startRender() {
+        var scope = this
+        if (!this.pauseRenderFlag) {
+            requestAnimationFrame(function() {scope.startRender();})
+        } else {
+            scope.pauseRenderFlag = false
+        }
+        this.renderLoop()
+    }
+
+    /** Pauses rendering loop */
+    pauseRender() {
+        this.pauseRenderFlag = true
+    }
+
+    /** Gets state of key */
+    getKeyState(keyCode) {
+        if (this.keyPressed[`key${keyCode}`]) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    /** Adds objects to viewer */
+    add(object) {
+        this.objects.add(object)
+    }
+
+    /** Removes objects to viewer */
+    remove(object) {
+        this.objects.remove(object)
+    }
+
+    /** Calls callback function once when user interacts with viewer in any way */
+    queueForFirstInteraction(method) {
+        if (this.firstInteraction) {
+            method()
+        } else {
+            this.firstInteractionQueue.push(method)
+        }
+    }
+
+    /** Exports serialized JSON of object array of viewer */
+    exportJSON() {
+        return btoa(JSON.stringify(this.objects.serializeWithDependencies()))
+    }
+
+    /** Clears viewer, then imports serialized JSON of object array of viewer */
+    importNewJSON(json, onSuccess=()=>{}, onFailure=()=>{}) {
+        this.objects.unload()
+        try {
+            var object = JSON.parse(atob(json))
+        } catch (e) {
+            onFailure(e) // Only checks whether it is valid JSON
+            return
+        }
+        this.deserializationContainer = new DeserializationObjectContainer()
+        this.objects = this.deserializationContainer.deserializeWithDependencies(object)
+        this.objects.load(this)
+        onSuccess()
+    }
+
+    /** Sets active camera to camera specified */
+    changeCamera(camera) {
+        this.sourceCamera = camera
+        this.onContainerElementResize()
+    }
+
+    // Todo:
+
+    // Replace importNewJSON and exportJSON functionality by integrating ViewerSave object
 
 }
 

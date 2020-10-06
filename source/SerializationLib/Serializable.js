@@ -2,6 +2,8 @@ const uuid = require("uuid")
 const argsProcessor = require("./argsProcessor")
 const _ = require("underscore")
 
+// Todo: Add type checking, predicate, description for each argument
+
 class SerializableClassesManager {
     constructor() {
         this.classList = {}
