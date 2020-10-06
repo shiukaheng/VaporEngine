@@ -8,8 +8,13 @@ var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 
 require("./viewer.css")
 
-class ViewerSave {
+class ViewerSaveContainer {
+    /**
+     *  Container that saves and loads viewer settings and scene
+     */
     constructor() {
+        // These values should not be opened or accessed, rather it should be handled by the Viewer class
+        this._openedInViewer = false
         this._metadata = {
             version: "1.0",
             activeCameraUUID: null,
@@ -17,19 +22,31 @@ class ViewerSave {
         }
         this._objects = new ObjectArray()
     }
+
+    /** Exports state into a serialized form */
     export() {
-
     }
+
+    /** Resets container and imports serialized state */
     import(serializedJSON) {
+        this.reset()
+        this.append(serializedJSON, true)
+    }
+
+    /** Adds content of serialized state to current container */
+    append(serializedJSON, cloneMeta=false) {
 
     }
-    append(serializedJSON) {
 
-    }
     reset() {
 
     }
+
     static decodeSerializedJSON(serializedJSON) {
+
+    }
+
+    static encodeObject(object) {
 
     }
 }
@@ -320,6 +337,8 @@ class Viewer {
     // Todo:
 
     // Replace importNewJSON and exportJSON functionality by integrating ViewerSave object
+    // Improve camera handling by explicitly using BaseCameraObjects, camera setting functionality, handling no camera
+        // In EditorViewer, modify the rendering loop so that it will always use an external camera and also visualize existing cameras using CameraHelpers
 
 }
 
