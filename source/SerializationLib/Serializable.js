@@ -2,14 +2,35 @@ const uuid = require("uuid")
 const argsProcessor = require("./argsProcessor")
 const _ = require("underscore")
 
+// Todo: Add type checking, predicate, description for each argument
+
 class SerializableClassesManager {
     constructor() {
         this.classList = {}
+        this.classArgMetaList = {}
     }
     register(newClass) {
         // console.log(newClass)
         if ((newClass.prototype instanceof Serializable)||(newClass===Serializable)) {
             this.classList[newClass.name] = newClass
+            var defaultInstance = new (newClass)()
+            var classArgMeta = {}
+            Object.keys(defaultInstance._args).forEach(key => {
+                classArgMeta[key] = {
+                    "defaultValue": defaultInstance._args[key],
+                    "predicate": x => {
+                        try {
+                            var testInstance = new (newClass)()
+                            testInstance.args[key] = x
+                        }
+                        catch {
+                            return false
+                        }
+                        return true
+                    }
+                }
+            })
+            this.classArgMetaList[newClass.name] = classArgMeta
         } else {
             throw new TypeError("attempt to register invalid class")
         }
@@ -20,6 +41,9 @@ class SerializableClassesManager {
         } else {
             throw new TypeError("unrecognized Serializable class")
         }
+    }
+    getArgMeta(lookupClass) {
+        
     }
 }
 
