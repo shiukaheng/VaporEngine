@@ -8,6 +8,32 @@ var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 
 require("./viewer.css")
 
+class ViewerSave {
+    constructor() {
+        this._metadata = {
+            version: "1.0",
+            activeCameraUUID: null,
+            potreePointBudget: 1000000,
+        }
+        this._objects = new ObjectArray()
+    }
+    export() {
+
+    }
+    import(serializedJSON) {
+
+    }
+    append(serializedJSON) {
+
+    }
+    reset() {
+
+    }
+    static decodeSerializedJSON(serializedJSON) {
+
+    }
+}
+
 /** Viewer class that binds to a container element */
 class Viewer {
     /**
@@ -147,22 +173,8 @@ class Viewer {
         
     }
 
-    /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
-    startRender() {
-        var scope = this
-        if (!this.pauseRenderFlag) {
-            requestAnimationFrame(function() {scope.startRender();})
-        } else {
-            scope.pauseRenderFlag = false
-        }
-        this.renderLoop()
-    }
+    // Internal functions
 
-    /** Pauses rendering loop */
-    pauseRender() {
-        this.pauseRenderFlag = true
-    }
-    
     /** Render loop */
     renderLoop() {
         var dt = this.renderClock.getDelta()
@@ -183,6 +195,24 @@ class Viewer {
                 this.skippedRender = true
             }
         }
+    }
+
+    // External functions
+
+    /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
+    startRender() {
+        var scope = this
+        if (!this.pauseRenderFlag) {
+            requestAnimationFrame(function() {scope.startRender();})
+        } else {
+            scope.pauseRenderFlag = false
+        }
+        this.renderLoop()
+    }
+
+    /** Pauses rendering loop */
+    pauseRender() {
+        this.pauseRenderFlag = true
     }
 
     onContainerElementResize() {
