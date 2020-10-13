@@ -84,6 +84,18 @@ class ObjectArray extends Serializable.createConstructor(
             }
         })
     }
+    lookupUUID(uuid) {
+        var returnObj
+        this.args.objects.forEach(object => {
+            if (object.args.uuid === uuid) {
+                returnObj = object
+            }
+        })
+        return returnObj
+    }
+    forEach(func) {
+        this.args.objects.forEach(func)
+    }
     get isLoaded() {
         return (this.viewer!==undefined)
     }

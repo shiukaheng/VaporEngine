@@ -8,6 +8,40 @@ var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 
 require("./viewer.css")
 
+class SettingsInterface{
+    constructor(viewer) {
+        this._viewer = viewer
+    }
+    _exportSettings() {
+        return {
+            version: this.version,
+            activeCameraUUID: this.activeCameraUUID,
+            potreePointBudget: this.potreePointBudget
+        }
+    }
+    _importSettings(settingDict) {
+        this.activeCameraUUID = this.activeCameraUUID
+        this.potreePointBudget = this.potreePointBudget
+    }
+
+    get version() {
+        return "1.0"
+    }
+    get activeCameraUUID() {
+        return this._viewer.sourceCamera.args.uuid
+    }
+    set activeCameraUUID(uuid) {
+        this._viewer.changeCamera(this._viewer.lookupUUID(uuid))
+        
+    }
+    get potreePointBudget() {
+        return this._viewer.potree.pointBudget
+    }
+    set potreePointBudget(pointBudget) {
+        this._viewer.potree.pointBudget = pointBudget
+    }
+}
+
 class ViewerSaveContainer {
     /**
      *  Container that saves and loads viewer settings and scene
@@ -86,6 +120,7 @@ class Viewer {
         this.rendererCamera = new THREE.PerspectiveCamera()
         this.scene.add(this.rendererCamera)
         this.scene.add(new THREE.AmbientLight("white"))
+        this.settings = new SettingsInterface(this)
         this.objects = new ObjectArray()
         this.objects.load(this)
         this.collisionList = []
@@ -306,6 +341,53 @@ class Viewer {
         } else {
             this.firstInteractionQueue.push(method)
         }
+    }
+
+    /** Exports save */
+    export() {
+        var rawSave = {
+            settings: this.settings._exportSettings(),
+            objects: this.objects
+        }
+        return btoa(JSON.stringify(Serializable.serializeElement(rawSave)))
+    }
+
+    /** Append objects from exported save */
+    append(save) {
+        var rawSave = this.deserializationContainer.deserializeWithDependencies(JSON.parse(atob(save)))
+        rawSave.objects.forEach(object => {
+            this.objects.add(object)
+        })
+    }
+
+    /** Clears all objects from viewer */
+    clear() {
+        this.objects.unload()
+        this.deserializationContainer = new DeserializationObjectContainer()
+        this.objects = new ObjectArray()
+        this.objects.load(this)
+    }
+
+    applySettingsFromSave(save) {
+        var rawSave = this.deserializationContainer.deserializeWithDependencies(JSON.parse(atob(save)))
+        this.settings.import(rawSave.settings)
+    }
+
+    /** Imports save */
+    import(save) {
+        if (save.settings.version !== this.settings.version) {
+            throw "Save file version not compatible."
+        }
+        this.objects.unload()
+        try {
+            var object = JSON.parse(atob(save))
+        } catch (e) {
+            throw "Error reading save"
+        }
+        this.deserializationContainer = new DeserializationObjectContainer()
+        var rawSave = this.deserializationContainer.deserializeWithDependencies(JSON.parse(atob(save)))
+        this.objects = rawSave.objects
+        this.objects.load(this)
     }
 
     /** Exports serialized JSON of object array of viewer */
