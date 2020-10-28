@@ -18,7 +18,8 @@ var button = document.getElementById("code-submit")
 var inputElem = document.getElementById("code-input")
 var titleElem = document.getElementById("title")
 
-if (query.magicCode !== undefined) {
+if (query.magicCode !== undefined ) {
+// if (true) {
     overlay.style.visibility = "hidden"
     overlay.style.pointerEvents = "none"
     viewer.importNewJSON(query.magicCode)

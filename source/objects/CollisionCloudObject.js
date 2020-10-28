@@ -16,22 +16,26 @@ class CollisionCloudObject extends Serializable.createConstructor(
         scope.rotationTransform = new THREE.Matrix4()
         scope._workingVector4 = new THREE.Vector4()
         scope._workingVector3 = new THREE.Vector3()
-        var loader = new PCDLoader();
-        loader.load(
-            pcdPath,
-            mesh => {
-                scope.cloud = mesh
-                scope.tree = createTree()
-                scope.tree.init(mesh.geometry.attributes.position.array)
-                scope.assetsLoaded = true
-                scope.declareAssetsLoaded()
-            }
-        )
     },
     {
         "visible": Serializable.readOnlyHandler()
     },
     function(scope) {
+        if (scope.args.pcdPath!=="") {
+            scope.loader = new PCDLoader();
+            scope.loader.load(
+                scope.args.pcdPath,
+                mesh => {
+                    scope.cloud = mesh
+                    scope.tree = createTree()
+                    scope.tree.init(mesh.geometry.attributes.position.array)
+                    scope.assetsLoaded = true
+                    scope.declareAssetsLoaded()
+                }
+            )
+        } else {
+            scope.declareAssetsLoaded()
+        }
 
     },
     BaseObject
