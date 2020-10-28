@@ -11,8 +11,10 @@
   "license": "MIT",
   "dependencies": {
     "@pnext/three-loader": "^0.2.0",
+    "babel-preset-es2015": "^6.24.1",
     "bezier-js": "^2.6.1",
     "css-element-queries": "^1.2.3",
+    "glslify": "^7.1.1",
     "gsap": "^3.2.6",
     "potree-core": "^1.0.7",
     "three": "^0.116.1",

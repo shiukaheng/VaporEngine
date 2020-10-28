@@ -6,5 +6,6 @@ module.exports = {
     CollisionCloudObject: require("./objects/CollisionCloudObject"),
     AudioSourceObject: require("./objects/AudioSourceObject"),
     PlayerObject: require("./objects/PlayerObject"),
-    NexusObject: require("./objects/NexusObject")
+    NexusObject: require("./objects/NexusObject"),
+    DepthkitObject: require("./objects/DepthkitObject")
 }

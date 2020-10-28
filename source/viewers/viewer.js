@@ -423,7 +423,7 @@ class Viewer {
     // Make 3D video functional WITH positional audio
     // Enter VR button
     // Add "enterVR" and "exitVR" method to viewer (hacky and must not be used later on in development)
-    // Hand tracking??
+    // Hand tracking??`
 
     // Replace importNewJSON and exportJSON functionality by integrating ViewerSave object
     // Improve camera handling by explicitly using BaseCameraObjects, camera setting functionality, handling no camera
