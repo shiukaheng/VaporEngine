@@ -98,7 +98,7 @@ class Viewer {
         this.containerElement = containerElement
 
         // Initialize renderer
-        this.renderer = new THREE.WebGLRenderer({antialias: true});
+        this.renderer = new THREE.WebGL1Renderer({antialias: true});
         this.renderer.domElement.className += "vaporViewer"
         this.containerElement.appendChild(this.renderer.domElement)
         this.renderer.setSize(this.containerElement.scrollWidth, this.containerElement.scrollHeight)
@@ -107,7 +107,7 @@ class Viewer {
         this.renderClock = new THREE.Clock() // clock to calculate time between frames, used for modifiers
 
         // Get required WebGL extensions
-        var gl = this.renderer.domElement.getContext('webgl')
+        var gl = this.renderer.getContext('webgl')
         Object.defineProperty(this, "splatCapable", {
             value: (gl.getExtension('EXT_frag_depth')&&gl.getExtension('WEBGL_depth_texture')&&gl.getExtension('OES_vertex_array_object')),
             writable: false

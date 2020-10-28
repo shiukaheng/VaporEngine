@@ -6,14 +6,16 @@ class PotreeObject extends Serializable.createConstructor(
     {
         "fileName": "",
         "baseUrl": "",
-        "pointShape":2
+        "pointShape":2,
+        "pointSizeType":2
     },
     function(scope) {
     },
     {
         "fileName": Serializable.readOnlyHandler(),
         "baseUrl": Serializable.readOnlyHandler(),
-        "pointShape": Serializable.readOnlyHandler()
+        "pointShape": Serializable.readOnlyHandler(),
+        "pointSizeType": Serializable.readOnlyHandler()
     },
     function(scope) {
         if (scope.constructor.name===PotreeObject.name) {
@@ -28,10 +30,10 @@ class PotreeObject extends Serializable.createConstructor(
         promise.then(
             pco => {
                 pco.material.shape = this.args.pointShape
+                pco.material.pointSizeType = this.args.pointSizeType
                 this.container.add(pco)
                 this.pco = pco
                 this.pco.material.size = Math.max(Math.abs(this.scale.x), Math.abs(this.scale.y), Math.abs(this.scale.z))
-                
                 this.viewer.potreePointClouds.push(this.pco)
             },
             function(e) {
@@ -49,7 +51,9 @@ class PotreeObject extends Serializable.createConstructor(
     }
     set scale(scale) {
         super.scale = scale
-        this.pco.material.size = Math.max(Math.abs(this.scale.x), Math.abs(this.scale.y), Math.abs(this.scale.z))
+        if (this.pco) {
+            this.pco.material.size = Math.max(Math.abs(this.scale.x), Math.abs(this.scale.y), Math.abs(this.scale.z))
+        }
     }
     get scale() {
         return super.scale
