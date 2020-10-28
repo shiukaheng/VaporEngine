@@ -418,9 +418,27 @@ class Viewer {
 
     // Todo:
 
+    // URGENT: Demo
+    // Enter VR button
+    // Add "enterVR" and "exitVR" method to viewer (hacky and must not be used later on in development)
+    // Make 3D video functional WITH positional audio
+    // Hand tracking??
+
     // Replace importNewJSON and exportJSON functionality by integrating ViewerSave object
     // Improve camera handling by explicitly using BaseCameraObjects, camera setting functionality, handling no camera
-        // In EditorViewer, modify the rendering loop so that it will always use an external camera and also visualize existing cameras using CameraHelpers
+    // In EditorViewer, modify the rendering loop so that it will always use an external camera and also visualize existing cameras using CameraHelpers
+    // Create and check argument setting / checking / default values
+    // Create editor
+    // Create point and pick object selection
+    // Use axis helper to help transformation, rotation and scaling
+    // Live argument modification (if does not allow modification, respawn object)
+    // Create events object that can be listened to (in viewer and objects)
+    // Switch player control modes on the viewer: types -> ["dummy", "fps", "ar", "vr", "touch", "joystick"]
+    // Create 3D video object based off of Depthkit
+    // Update Potree (long term)
+    // Create "methods" object for each SerializableObject, which makes interfacing with objects easier.
+    //   - show
+
 
 }
 

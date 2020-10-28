@@ -55407,14 +55407,35 @@ const uuid = require("uuid")
 const argsProcessor = require("./argsProcessor")
 const _ = require("underscore")
 
+// Todo: Add type checking, predicate, description for each argument
+
 class SerializableClassesManager {
     constructor() {
         this.classList = {}
+        this.classArgMetaList = {}
     }
     register(newClass) {
         // console.log(newClass)
         if ((newClass.prototype instanceof Serializable)||(newClass===Serializable)) {
             this.classList[newClass.name] = newClass
+            var defaultInstance = new (newClass)()
+            var classArgMeta = {}
+            Object.keys(defaultInstance._args).forEach(key => {
+                classArgMeta[key] = {
+                    "defaultValue": defaultInstance._args[key],
+                    "predicate": x => {
+                        try {
+                            var testInstance = new (newClass)()
+                            testInstance.args[key] = x
+                        }
+                        catch {
+                            return false
+                        }
+                        return true
+                    }
+                }
+            })
+            this.classArgMetaList[newClass.name] = classArgMeta
         } else {
             throw new TypeError("attempt to register invalid class")
         }
@@ -55425,6 +55446,9 @@ class SerializableClassesManager {
         } else {
             throw new TypeError("unrecognized Serializable class")
         }
+    }
+    getArgMeta(lookupClass) {
+        
     }
 }
 
@@ -56045,6 +56069,18 @@ class ObjectArray extends Serializable.createConstructor(
                 this.onAllAssetsLoadedQueue.delete(check)
             }
         })
+    }
+    lookupUUID(uuid) {
+        var returnObj
+        this.args.objects.forEach(object => {
+            if (object.args.uuid === uuid) {
+                returnObj = object
+            }
+        })
+        return returnObj
+    }
+    forEach(func) {
+        this.args.objects.forEach(func)
     }
     get isLoaded() {
         return (this.viewer!==undefined)
@@ -60380,6 +60416,83 @@ var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 
 require("./viewer.css")
 
+class SettingsInterface{
+    constructor(viewer) {
+        this._viewer = viewer
+    }
+    _exportSettings() {
+        return {
+            version: this.version,
+            activeCameraUUID: this.activeCameraUUID,
+            potreePointBudget: this.potreePointBudget
+        }
+    }
+    _importSettings(settingDict) {
+        this.activeCameraUUID = this.activeCameraUUID
+        this.potreePointBudget = this.potreePointBudget
+    }
+
+    get version() {
+        return "1.0"
+    }
+    get activeCameraUUID() {
+        return this._viewer.sourceCamera.args.uuid
+    }
+    set activeCameraUUID(uuid) {
+        this._viewer.changeCamera(this._viewer.lookupUUID(uuid))
+        
+    }
+    get potreePointBudget() {
+        return this._viewer.potree.pointBudget
+    }
+    set potreePointBudget(pointBudget) {
+        this._viewer.potree.pointBudget = pointBudget
+    }
+}
+
+class ViewerSaveContainer {
+    /**
+     *  Container that saves and loads viewer settings and scene
+     */
+    constructor() {
+        // These values should not be opened or accessed, rather it should be handled by the Viewer class
+        this._openedInViewer = false
+        this._metadata = {
+            version: "1.0",
+            activeCameraUUID: null,
+            potreePointBudget: 1000000,
+        }
+        this._objects = new ObjectArray()
+    }
+
+    /** Exports state into a serialized form */
+    export() {
+    }
+
+    /** Resets container and imports serialized state */
+    import(serializedJSON) {
+        this.reset()
+        this.append(serializedJSON, true)
+    }
+
+    /** Adds content of serialized state to current container */
+    append(serializedJSON, cloneMeta=false) {
+
+    }
+
+    reset() {
+
+    }
+
+    static decodeSerializedJSON(serializedJSON) {
+
+    }
+
+    static encodeObject(object) {
+
+    }
+}
+
 /** Viewer class that binds to a container element */
 class Viewer {
     /**
@@ -60415,6 +60528,7 @@ class Viewer {
         this.rendererCamera = new THREE.PerspectiveCamera()
         this.scene.add(this.rendererCamera)
         this.scene.add(new THREE.AmbientLight("white"))
+        this.settings = new SettingsInterface(this)
         this.objects = new ObjectArray()
         this.objects.load(this)
         this.collisionList = []
@@ -60519,22 +60633,8 @@ class Viewer {
         
     }
 
-    /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
-    startRender() {
-        var scope = this
-        if (!this.pauseRenderFlag) {
-            requestAnimationFrame(function() {scope.startRender();})
-        } else {
-            scope.pauseRenderFlag = false
-        }
-        this.renderLoop()
-    }
+    // Internal functions
 
-    /** Pauses rendering loop */
-    pauseRender() {
-        this.pauseRenderFlag = true
-    }
-    
     /** Render loop */
     renderLoop() {
         var dt = this.renderClock.getDelta()
@@ -60557,6 +60657,7 @@ class Viewer {
         }
     }
 
+    /** Callback function when container element for canvas is resized */
     onContainerElementResize() {
         var width = this.containerElement.clientWidth
         var height = this.containerElement.clientHeight
@@ -60575,59 +60676,7 @@ class Viewer {
         }
     }
 
-    getKeyState(keyCode) {
-        if (this.keyPressed[`key${keyCode}`]) {
-            return true
-        } else {
-            return false
-        }
-    }
-
-    add(object) {
-        this.objects.add(object)
-    }
-
-    remove(object) {
-        this.objects.remove(object)
-    }
-
-    queueForFirstInteraction(method) {
-        if (this.firstInteraction) {
-            method()
-        } else {
-            this.firstInteractionQueue.push(method)
-        }
-    }
-
-    updateFirstInteraction() {
-    }
-
-    exportJSON() {
-        return btoa(JSON.stringify(this.objects.serializeWithDependencies()))
-    }
-
-    importNewJSON(json, onSuccess=()=>{}, onFailure=()=>{}) {
-        this.objects.unload()
-        try {
-            var object = JSON.parse(atob(json))
-        } catch (e) {
-            onFailure(e) // Only checks whether it is valid JSON
-            return
-        }
-        this.deserializationContainer = new DeserializationObjectContainer()
-        this.objects = this.deserializationContainer.deserializeWithDependencies(object)
-        this.objects.load(this)
-        onSuccess()
-    }
-
-    cloneTest() {
-        this.importNewJSON(this.exportJSON())
-    }
-
-    changeCamera(camera) {
-        this.sourceCamera = camera
-        this.onContainerElementResize()
-    }
+    // Accessor functions
 
     set allowUserControl(bool) {
         if (typeof bool !== "boolean") {
@@ -60655,6 +60704,149 @@ class Viewer {
     get updatePlayerOnly() {
         return this._updatePlayerOnly
     }
+
+    // External functions
+
+    /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
+    startRender() {
+        var scope = this
+        if (!this.pauseRenderFlag) {
+            requestAnimationFrame(function() {scope.startRender();})
+        } else {
+            scope.pauseRenderFlag = false
+        }
+        this.renderLoop()
+    }
+
+    /** Pauses rendering loop */
+    pauseRender() {
+        this.pauseRenderFlag = true
+    }
+
+    /** Gets state of key */
+    getKeyState(keyCode) {
+        if (this.keyPressed[`key${keyCode}`]) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    /** Adds objects to viewer */
+    add(object) {
+        this.objects.add(object)
+    }
+
+    /** Removes objects to viewer */
+    remove(object) {
+        this.objects.remove(object)
+    }
+
+    /** Calls callback function once when user interacts with viewer in any way */
+    queueForFirstInteraction(method) {
+        if (this.firstInteraction) {
+            method()
+        } else {
+            this.firstInteractionQueue.push(method)
+        }
+    }
+
+    /** Exports save */
+    export() {
+        var rawSave = {
+            settings: this.settings._exportSettings(),
+            objects: this.objects
+        }
+        return btoa(JSON.stringify(Serializable.serializeElement(rawSave)))
+    }
+
+    /** Append objects from exported save */
+    append(save) {
+        var rawSave = this.deserializationContainer.deserializeWithDependencies(JSON.parse(atob(save)))
+        rawSave.objects.forEach(object => {
+            this.objects.add(object)
+        })
+    }
+
+    /** Clears all objects from viewer */
+    clear() {
+        this.objects.unload()
+        this.deserializationContainer = new DeserializationObjectContainer()
+        this.objects = new ObjectArray()
+        this.objects.load(this)
+    }
+
+    applySettingsFromSave(save) {
+        var rawSave = this.deserializationContainer.deserializeWithDependencies(JSON.parse(atob(save)))
+        this.settings.import(rawSave.settings)
+    }
+
+    /** Imports save */
+    import(save) {
+        if (save.settings.version !== this.settings.version) {
+            throw "Save file version not compatible."
+        }
+        this.objects.unload()
+        try {
+            var object = JSON.parse(atob(save))
+        } catch (e) {
+            throw "Error reading save"
+        }
+        this.deserializationContainer = new DeserializationObjectContainer()
+        var rawSave = this.deserializationContainer.deserializeWithDependencies(JSON.parse(atob(save)))
+        this.objects = rawSave.objects
+        this.objects.load(this)
+    }
+
+    /** Exports serialized JSON of object array of viewer */
+    exportJSON() {
+        return btoa(JSON.stringify(this.objects.serializeWithDependencies()))
+    }
+
+    /** Clears viewer, then imports serialized JSON of object array of viewer */
+    importNewJSON(json, onSuccess=()=>{}, onFailure=()=>{}) {
+        this.objects.unload()
+        try {
+            var object = JSON.parse(atob(json))
+        } catch (e) {
+            onFailure(e) // Only checks whether it is valid JSON
+            return
+        }
+        this.deserializationContainer = new DeserializationObjectContainer()
+        this.objects = this.deserializationContainer.deserializeWithDependencies(object)
+        this.objects.load(this)
+        onSuccess()
+    }
+
+    /** Sets active camera to camera specified */
+    changeCamera(camera) {
+        this.sourceCamera = camera
+        this.onContainerElementResize()
+    }
+
+    // Todo:
+
+    // URGENT: Demo
+    // Enter VR button
+    // Add "enterVR" and "exitVR" method to viewer (hacky and must not be used later on in development)
+    // Make 3D video functional WITH positional audio
+    // Hand tracking??
+
+    // Replace importNewJSON and exportJSON functionality by integrating ViewerSave object
+    // Improve camera handling by explicitly using BaseCameraObjects, camera setting functionality, handling no camera
+    // In EditorViewer, modify the rendering loop so that it will always use an external camera and also visualize existing cameras using CameraHelpers
+    // Create and check argument setting / checking / default values
+    // Create editor
+    // Create point and pick object selection
+    // Use axis helper to help transformation, rotation and scaling
+    // Live argument modification (if does not allow modification, respawn object)
+    // Create events object that can be listened to (in viewer and objects)
+    // Switch player control modes on the viewer: types -> ["dummy", "fps", "ar", "vr", "touch", "joystick"]
+    // Create 3D video object based off of Depthkit
+    // Update Potree (long term)
+    // Create "methods" object for each SerializableObject, which makes interfacing with objects easier.
+    //   - show
+
 
 }
 
