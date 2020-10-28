@@ -130,14 +130,17 @@ class AudioSourceObject extends Serializable.createConstructor(
         }
     },
     function(scope) {
-
-        var audioLoader = new THREE.AudioLoader()
-        audioLoader.load(scope.args.audioSourceURL, (audioBuffer)=>{
-            scope.audioBuffer=audioBuffer
-            if (scope.constructor.name == AudioSourceObject.name) {
-                scope.declareAssetsLoaded()
-            }
-        })
+        if (scope.args.audioSourceURL!=="") {
+            var audioLoader = new THREE.AudioLoader()
+            audioLoader.load(scope.args.audioSourceURL, (audioBuffer)=>{
+                scope.audioBuffer=audioBuffer
+                if (scope.constructor.name == AudioSourceObject.name) {
+                    scope.declareAssetsLoaded()
+                }
+            })
+        } else {
+            scope.declareAssetsLoaded()
+        }
     },
     BasePhysicalObject
 ) {
