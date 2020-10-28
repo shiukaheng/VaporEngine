@@ -52561,7 +52561,7 @@ class PlayerModifier extends BaseModifier{
 
         // Create camera
         this.camera = new THREE.PerspectiveCamera(90)
-        this.camera.rotation.y = Math.PI
+        // this.camera.rotation.y = Math.PI
         this.object.container.add(this.camera)
 
         this.setAsActive()
@@ -52587,7 +52587,7 @@ class PlayerModifier extends BaseModifier{
     }
     updatePosition(e) {
         this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
-        this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
+        this.controlObject.rotation.x -= e.movementY*this.mouseSensitivity
         this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
         if (this.controlObject.rotation.x > Math.PI/2) {
             this.controlObject.rotation.x = Math.PI/2
@@ -52599,8 +52599,8 @@ class PlayerModifier extends BaseModifier{
     }
     update(dt) {
         super.update(dt)
-        var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
-        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
+        var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(-this.speed)
+        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(-this.speed)
         if (this.pointerlock) {
             if (this.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
