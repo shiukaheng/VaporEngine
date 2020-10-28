@@ -419,9 +419,10 @@ class Viewer {
     // Todo:
 
     // URGENT: Demo
+    // Create pointShape, pointSize, autoPointSize arguments
+    // Make 3D video functional WITH positional audio
     // Enter VR button
     // Add "enterVR" and "exitVR" method to viewer (hacky and must not be used later on in development)
-    // Make 3D video functional WITH positional audio
     // Hand tracking??
 
     // Replace importNewJSON and exportJSON functionality by integrating ViewerSave object
@@ -437,7 +438,8 @@ class Viewer {
     // Create 3D video object based off of Depthkit
     // Update Potree (long term)
     // Create "methods" object for each SerializableObject, which makes interfacing with objects easier.
-    //   - show
+    //   - hide / show
+    // Create new serializable classes that will be replaced with dictionaries (but allow custom get / set / apply functionalities)
 
 
 }

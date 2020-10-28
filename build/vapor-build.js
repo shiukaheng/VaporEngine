@@ -59793,14 +59793,17 @@ class AudioSourceObject extends Serializable.createConstructor(
         }
     },
     function(scope) {
-
-        var audioLoader = new THREE.AudioLoader()
-        audioLoader.load(scope.args.audioSourceURL, (audioBuffer)=>{
-            scope.audioBuffer=audioBuffer
-            if (scope.constructor.name == AudioSourceObject.name) {
-                scope.declareAssetsLoaded()
-            }
-        })
+        if (scope.args.audioSourceURL!=="") {
+            var audioLoader = new THREE.AudioLoader()
+            audioLoader.load(scope.args.audioSourceURL, (audioBuffer)=>{
+                scope.audioBuffer=audioBuffer
+                if (scope.constructor.name == AudioSourceObject.name) {
+                    scope.declareAssetsLoaded()
+                }
+            })
+        } else {
+            scope.declareAssetsLoaded()
+        }
     },
     BasePhysicalObject
 ) {
@@ -60014,22 +60017,26 @@ class CollisionCloudObject extends Serializable.createConstructor(
         scope.rotationTransform = new THREE.Matrix4()
         scope._workingVector4 = new THREE.Vector4()
         scope._workingVector3 = new THREE.Vector3()
-        var loader = new PCDLoader();
-        loader.load(
-            pcdPath,
-            mesh => {
-                scope.cloud = mesh
-                scope.tree = createTree()
-                scope.tree.init(mesh.geometry.attributes.position.array)
-                scope.assetsLoaded = true
-                scope.declareAssetsLoaded()
-            }
-        )
     },
     {
         "visible": Serializable.readOnlyHandler()
     },
     function(scope) {
+        if (scope.args.pcdPath!=="") {
+            scope.loader = new PCDLoader();
+            scope.loader.load(
+                scope.args.pcdPath,
+                mesh => {
+                    scope.cloud = mesh
+                    scope.tree = createTree()
+                    scope.tree.init(mesh.geometry.attributes.position.array)
+                    scope.assetsLoaded = true
+                    scope.declareAssetsLoaded()
+                }
+            )
+        } else {
+            scope.declareAssetsLoaded()
+        }
 
     },
     BaseObject
@@ -60169,56 +60176,6 @@ class PotreeObject extends Serializable.createConstructor(
     }
 }
 PotreeObject.registerConstructor()
-
-class OldPotreeObject extends BasePhysicalObject {
-    constructor(args={}) {
-        super(argsProc(
-                {"fileName": "",
-                "baseUrl":"", 
-                "pointShape":2},
-                args
-             )
-        )
-        this.fileName = this.args.fileName
-        this.baseUrl = this.args.baseUrl
-        this.pointShape = this.args.pointShape
-        var promise = viewer.potree.loadPointCloud(this.fileName, url => `${this.baseUrl}${url}`)
-        promise.then(
-            pco => {
-                // console.log(pco)
-                pco.material.shape = this.pointShape
-                this.container.add(pco)
-                this.pco = pco
-                // console.log("potree load assets")
-                this.declareAssetsLoaded()
-            },
-            function() {
-                console.log(`Failed to load point cloud ${this.fileName}`)
-            }
-        )
-    }
-    load(viewer) {
-        this.viewer = viewer
-        // console.log("potree added")
-        viewer.potreePointClouds.push(this.pco)
-        super.load(viewer)
-    }
-    unload(viewer) {
-        super.unload(viewer)
-        if (this.pco) {
-            this.viewer.potreePointClouds.splice(this.viewer.potreePointClouds.indexOf(this.pco), 1)
-            this.container.remove(this.pco)
-        }
-    }
-    serialize() {
-        this.args.fileName = this.fileName
-        this.args.baseUrl = this.baseUrl
-        this.args.pointShape = this.pointShape
-        return super.serialize()
-    }
-}
-
-// Serializable.registerClass(PotreeObject)
 
 module.exports = PotreeObject
 },{"../Serialization":32,"../utils/argumentProcessor":60,"./BasePhysicalObject":52}],57:[function(require,module,exports){
@@ -60827,9 +60784,10 @@ class Viewer {
     // Todo:
 
     // URGENT: Demo
+    // Create pointShape, pointSize, autoPointSize arguments
+    // Make 3D video functional WITH positional audio
     // Enter VR button
     // Add "enterVR" and "exitVR" method to viewer (hacky and must not be used later on in development)
-    // Make 3D video functional WITH positional audio
     // Hand tracking??
 
     // Replace importNewJSON and exportJSON functionality by integrating ViewerSave object
@@ -60845,7 +60803,8 @@ class Viewer {
     // Create 3D video object based off of Depthkit
     // Update Potree (long term)
     // Create "methods" object for each SerializableObject, which makes interfacing with objects easier.
-    //   - show
+    //   - hide / show
+    // Create new serializable classes that will be replaced with dictionaries (but allow custom get / set / apply functionalities)
 
 
 }
