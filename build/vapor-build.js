@@ -52561,7 +52561,7 @@ class PlayerModifier extends BaseModifier{
 
         // Create camera
         this.camera = new THREE.PerspectiveCamera(90)
-        this.camera.rotation.y = Math.PI
+        // this.camera.rotation.y = Math.PI
         this.object.container.add(this.camera)
 
         this.setAsActive()
@@ -52587,7 +52587,7 @@ class PlayerModifier extends BaseModifier{
     }
     updatePosition(e) {
         this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
-        this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
+        this.controlObject.rotation.x -= e.movementY*this.mouseSensitivity
         this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
         if (this.controlObject.rotation.x > Math.PI/2) {
             this.controlObject.rotation.x = Math.PI/2
@@ -52599,8 +52599,8 @@ class PlayerModifier extends BaseModifier{
     }
     update(dt) {
         super.update(dt)
-        var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
-        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.speed)
+        var front = this.object.container.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(-this.speed)
+        var left = this.horizontal_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(-this.speed)
         if (this.pointerlock) {
             if (this.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
@@ -53225,9 +53225,9 @@ class Viewer {
         this.nearestInteractObject = undefined
 
         var gl = this.renderer.domElement.getContext('webgl')
-        gl.getExtension('EXT_frag_depth')
-        gl.getExtension('WEBGL_depth_texture')
-        gl.getExtension('OES_vertex_array_object')
+        // gl.getExtension('EXT_frag_depth')
+        // gl.getExtension('WEBGL_depth_texture')
+        // gl.getExtension('OES_vertex_array_object')
 
         this.potree = new ThreeLoader.Potree()
         this.potreePointClouds = []
@@ -53314,7 +53314,14 @@ class Viewer {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
-            this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+            if (this.renderer.xr.isPresenting) {
+                this.potree.updatePointClouds(this.potreePointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer)
+            } else {
+                this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+            }
+            
+            // Change behaviour when renderer.xr.isPresenting -> viewer.renderer.xr.getCamera(viewer.rendererCamera) -> get average and cull using that
+            
             this.renderer.render(this.scene, this.rendererCamera)
             this.skippedRender = false
         } else {
