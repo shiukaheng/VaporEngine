@@ -4,6 +4,7 @@ var ThreeLoader = require('@pnext/three-loader')
 var ObjectArray = require("../arrays/ObjectArray")
 var Subscription = require("../utils/Subscription")
 var {Serializable, DeserializationObjectContainer} = require("../Serialization")
+var VRButton = require("../utils/VRButton")
 
 
 require("./viewer.css")
@@ -224,7 +225,7 @@ class Viewer {
 
         // Enable XR
         this.renderer.xr.enabled = true
-        
+        document.body.appendChild(VRButton.createButton(this.renderer))
         
     }
 

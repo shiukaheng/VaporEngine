@@ -56,6 +56,6 @@ viewer.add(window.shop)
 
 
 viewer.objects.queueAllAssetsLoaded(function() {
-    viewer.startRender()
-    viewer.potree.pointBudget=10000000
+    // viewer.startRender()
+    // viewer.potree.pointBudget=10000000
 })
