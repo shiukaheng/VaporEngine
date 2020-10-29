@@ -46,9 +46,9 @@ class Viewer {
         this.nearestInteractObject = undefined
 
         var gl = this.renderer.domElement.getContext('webgl')
-        gl.getExtension('EXT_frag_depth')
-        gl.getExtension('WEBGL_depth_texture')
-        gl.getExtension('OES_vertex_array_object')
+        // gl.getExtension('EXT_frag_depth')
+        // gl.getExtension('WEBGL_depth_texture')
+        // gl.getExtension('OES_vertex_array_object')
 
         this.potree = new ThreeLoader.Potree()
         this.potreePointClouds = []
@@ -135,7 +135,14 @@ class Viewer {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
-            this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+            if (this.renderer.xr.isPresenting) {
+                this.potree.updatePointClouds(this.potreePointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer)
+            } else {
+                this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+            }
+            
+            // Change behaviour when renderer.xr.isPresenting -> viewer.renderer.xr.getCamera(viewer.rendererCamera) -> get average and cull using that
+            
             this.renderer.render(this.scene, this.rendererCamera)
             this.skippedRender = false
         } else {

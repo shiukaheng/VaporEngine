@@ -16,8 +16,11 @@ viewer.objects.waitUntilAllAssetsLoaded(function() {
     player.modifiers.add(new Vapor.Modifiers.PlayerModifier(0.5))
     player.modifiers.add(new Vapor.Modifiers.VelocityDragModifier())
     // player.modifiers.add(new Vapor.Modifiers.LinearAccelerationModifier(new THREE.Vector3(-0.5, -0.1, -0.1)))
-    viewer.potree.pointBudget = 10000000
+    viewer.potree.pointBudget = 5000000
     // Start experience
+    map.pco.material.pointSizeType = 0
+    player.container.position.y = -29.89
+    map.container.rotation.x = -0.55
     console.log("All loaded!")
     viewer.startRender()
 })
