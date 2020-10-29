@@ -23,7 +23,7 @@ class SerializableClassesManager {
                             var testInstance = new (newClass)()
                             testInstance.args[key] = x
                         }
-                        catch {
+                        catch(e) {
                             return false
                         }
                         return true

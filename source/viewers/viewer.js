@@ -316,18 +316,12 @@ class Viewer {
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
     startRender() {
-        var scope = this
-        if (!this.pauseRenderFlag) {
-            requestAnimationFrame(function() {scope.startRender();})
-        } else {
-            scope.pauseRenderFlag = false
-        }
-        this.renderLoop()
+        this.renderer.setAnimationLoop(this.renderLoop.bind(this))
     }
 
     /** Pauses rendering loop */
     pauseRender() {
-        this.pauseRenderFlag = true
+        this.renderer.setAnimationLoop(null)
     }
 
     /** Gets state of key */

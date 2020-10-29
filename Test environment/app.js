@@ -45,17 +45,20 @@ var titleElem = document.getElementById("title")
 // Debug stuff:
 overlay.style.visibility = "hidden"
 overlay.style.pointerEvents = "none"
-viewer.add(new Vapor.Objects.PlayerObject())
+window.player = new Vapor.Objects.PlayerObject()
+viewer.add(window.player)
+// window.player.position = {x: 0.24371145418086904, y: -1.4386158357237322, z: 0.4360854928179726}
+
 window.interview = new Vapor.Objects.DepthkitObject({"metaUrl":"barber.txt", "videoUrl":"barber.mp4", "displayMode":"mesh"})
-// viewer.add(window.interview)
-window.shop = new Vapor.Objects.PotreeObject({"fileName":"cloud.js", "baseUrl":"http://tlmhk.synology.me/data/TailorShop/", "pointShape":0, "pointSizeType":0})
-window.shop.scale = {x:0.1, y:0.1, z:0.1}
+viewer.add(window.interview)
+window.shop = new Vapor.Objects.PotreeObject({"fileName":"cloud.js", "baseUrl":"http://tlmhk.synology.me/data/TailorShopDenoise/", "pointShape":0, "pointSizeType":0})
+window.shop.scale = {x:0.05, y:0.05, z:0.05}
 window.shop.rotation.x = -0.54999
 // window.shop.rotation = {x:-0.5499, y:0, z:0} <-- Bug!
 viewer.add(window.shop)
 
 
 viewer.objects.queueAllAssetsLoaded(function() {
-    // viewer.startRender()
-    // viewer.potree.pointBudget=10000000
+    viewer.startRender()
+    viewer.potree.pointBudget=2000000
 })

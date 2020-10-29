@@ -41068,7 +41068,7 @@ function(scope){
 BaseObject.registerConstructor()
 
 module.exports = BaseObject
-},{"../Serialization":33,"../arrays/ModifierArray":40,"../utils/eulerShadowHandler":64,"../utils/vec3ShadowHandler":65,"../viewers/viewer":69,"three":6}],31:[function(require,module,exports){
+},{"../Serialization":33,"../arrays/ModifierArray":40,"../utils/eulerShadowHandler":65,"../utils/vec3ShadowHandler":66,"../viewers/viewer":70,"three":6}],31:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var {Serializable} = require("../Serialization")
 var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
@@ -41128,7 +41128,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
 BasePhysicalObject.registerConstructor()
 
 module.exports = BasePhysicalObject
-},{"../Serialization":33,"../utils/vec3ShadowHandler":65,"./BaseObject":30,"three":6}],32:[function(require,module,exports){
+},{"../Serialization":33,"../utils/vec3ShadowHandler":66,"./BaseObject":30,"three":6}],32:[function(require,module,exports){
 var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
@@ -41499,7 +41499,7 @@ class BezierPathAnimation{
 window.BezierPathAnimation = BezierPathAnimation;
 
 module.exports = PlayerObject
-},{"../Serialization":33,"../modifiers/PlayerModifier":47,"../modifiers/VelocityDragModifier":48,"../utils/argumentProcessor":63,"./BasePhysicalObject":31,"three":6}],33:[function(require,module,exports){
+},{"../Serialization":33,"../modifiers/PlayerModifier":47,"../modifiers/VelocityDragModifier":48,"../utils/argumentProcessor":64,"./BasePhysicalObject":31,"three":6}],33:[function(require,module,exports){
 module.exports = {
     Serializable: require("./SerializationLib/Serializable"),
     DeserializationObjectContainer: require("./SerializationLib/DeserializationObjectContainer")
@@ -41687,7 +41687,7 @@ class SerializableClassesManager {
                             var testInstance = new (newClass)()
                             testInstance.args[key] = x
                         }
-                        catch {
+                        catch(e) {
                             return false
                         }
                         return true
@@ -42109,7 +42109,7 @@ module.exports = {
     vec3ShadowHandler: require("./utils/vec3ShadowHandler"),
     eulerShadowHandler: require("./utils/eulerShadowHandler")
 }
-},{"./utils/ArgumentProcessor":61,"./utils/Subscription":62,"./utils/argumentProcessor":63,"./utils/eulerShadowHandler":64,"./utils/vec3ShadowHandler":65}],38:[function(require,module,exports){
+},{"./utils/ArgumentProcessor":61,"./utils/Subscription":62,"./utils/argumentProcessor":64,"./utils/eulerShadowHandler":65,"./utils/vec3ShadowHandler":66}],38:[function(require,module,exports){
 
 THREE = require("three")
 module.exports = {
@@ -42126,7 +42126,7 @@ module.exports = {
     Viewer: require("./viewers/Viewer"),
     EditorViewer: require("./viewers/EditorViewer")
 }
-},{"./viewers/EditorViewer":66,"./viewers/Viewer":67}],40:[function(require,module,exports){
+},{"./viewers/EditorViewer":67,"./viewers/Viewer":68}],40:[function(require,module,exports){
 var {Serializable} = require("../Serialization")
 var _ = require("underscore")
 var BaseModifier = require("../modifiers/BaseModifier")
@@ -43294,7 +43294,7 @@ class ConstantRotationModifier extends BaseModifier {
 }
 ConstantRotationModifier.registerConstructor()
 module.exports = ConstantRotationModifier
-},{"../Serialization":33,"../utils/vec3ShadowHandler":65,"./BaseModifier":44,"three":6}],46:[function(require,module,exports){
+},{"../Serialization":33,"../utils/vec3ShadowHandler":66,"./BaseModifier":44,"three":6}],46:[function(require,module,exports){
 var THREE = require('three')
 var BaseModifier = require("./BaseModifier")
 var Serialization = require("../Serialization")
@@ -43328,7 +43328,7 @@ class LinearAccelerationModifier extends BaseModifier{
 }
 LinearAccelerationModifier.registerConstructor()
 module.exports = LinearAccelerationModifier
-},{"../Serialization":33,"../utils/vec3ShadowHandler":65,"./BaseModifier":44,"three":6}],47:[function(require,module,exports){
+},{"../Serialization":33,"../utils/vec3ShadowHandler":66,"./BaseModifier":44,"three":6}],47:[function(require,module,exports){
 var { Serializable } = require("../Serialization");
 var BaseModifier = require("./BaseModifier")
 var BasePhysicalObject = require("../objects/BasePhysicalObject")
@@ -46661,9 +46661,9 @@ class OldAudioSourceObject extends BasePhysicalObject {
 module.exports = AudioSourceObject
 },{"../Serialization":33,"./BasePhysicalObject":54,"three":6}],53:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"../Serialization":33,"../arrays/ModifierArray":40,"../utils/eulerShadowHandler":64,"../utils/vec3ShadowHandler":65,"../viewers/viewer":69,"dup":30,"three":6}],54:[function(require,module,exports){
+},{"../Serialization":33,"../arrays/ModifierArray":40,"../utils/eulerShadowHandler":65,"../utils/vec3ShadowHandler":66,"../viewers/viewer":70,"dup":30,"three":6}],54:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"../Serialization":33,"../utils/vec3ShadowHandler":65,"./BaseObject":53,"dup":31,"three":6}],55:[function(require,module,exports){
+},{"../Serialization":33,"../utils/vec3ShadowHandler":66,"./BaseObject":53,"dup":31,"three":6}],55:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -46746,7 +46746,7 @@ class CollisionCloudObject extends Serializable.createConstructor(
 CollisionCloudObject.registerConstructor()
 
 module.exports = CollisionCloudObject
-},{"../Serialization":33,"../loaders/PCDLoader":43,"../utils/argumentProcessor":63,"./BaseObject":53,"yaot":24}],56:[function(require,module,exports){
+},{"../Serialization":33,"../loaders/PCDLoader":43,"../utils/argumentProcessor":64,"./BaseObject":53,"yaot":24}],56:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -46790,7 +46790,7 @@ class DepthkitObject extends Serializable.createConstructor(
 DepthkitObject.registerConstructor()
 
 module.exports = DepthkitObject
-},{"../Serialization":33,"../depthkit":42,"../utils/argumentProcessor":63,"./BasePhysicalObject":54,"three":6}],57:[function(require,module,exports){
+},{"../Serialization":33,"../depthkit":42,"../utils/argumentProcessor":64,"./BasePhysicalObject":54,"three":6}],57:[function(require,module,exports){
 var Nexus = require("../nexus/Nexus")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -46826,7 +46826,7 @@ NexusObject.registerConstructor()
 module.exports = NexusObject
 },{"../Serialization":33,"../nexus/Nexus":49,"./BasePhysicalObject":54}],58:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"../Serialization":33,"../modifiers/PlayerModifier":47,"../modifiers/VelocityDragModifier":48,"../utils/argumentProcessor":63,"./BasePhysicalObject":54,"dup":32,"three":6}],59:[function(require,module,exports){
+},{"../Serialization":33,"../modifiers/PlayerModifier":47,"../modifiers/VelocityDragModifier":48,"../utils/argumentProcessor":64,"./BasePhysicalObject":54,"dup":32,"three":6}],59:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -46891,7 +46891,7 @@ class PotreeObject extends Serializable.createConstructor(
 PotreeObject.registerConstructor()
 
 module.exports = PotreeObject
-},{"../Serialization":33,"../utils/argumentProcessor":63,"./BasePhysicalObject":54}],60:[function(require,module,exports){
+},{"../Serialization":33,"../utils/argumentProcessor":64,"./BasePhysicalObject":54}],60:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
 var THREE = require("three")
@@ -46965,8 +46965,183 @@ class Subscription {
 }
 module.exports = Subscription
 },{}],63:[function(require,module,exports){
+/**
+ * @author mrdoob / http://mrdoob.com
+ * @author Mugen87 / https://github.com/Mugen87
+ */
+
+var VRButton = {
+
+	createButton: function ( renderer, options ) {
+
+        console.log("VRButton called!")
+
+		if ( options ) {
+
+			console.error( 'THREE.VRButton: The "options" parameter has been removed. Please set the reference space type via renderer.xr.setReferenceSpaceType() instead.' );
+
+		}
+
+		function showEnterVR( /*device*/ ) {
+
+			var currentSession = null;
+
+			function onSessionStarted( session ) {
+
+				session.addEventListener( 'end', onSessionEnded );
+
+				renderer.xr.setSession( session );
+				button.textContent = 'EXIT VR';
+
+				currentSession = session;
+
+			}
+
+			function onSessionEnded( /*event*/ ) {
+
+				currentSession.removeEventListener( 'end', onSessionEnded );
+
+				button.textContent = 'ENTER VR';
+
+				currentSession = null;
+
+			}
+
+			//
+
+			button.style.display = '';
+
+			button.style.cursor = 'pointer';
+			button.style.left = 'calc(50% - 50px)';
+			button.style.width = '100px';
+
+			button.textContent = 'ENTER VR';
+
+			button.onmouseenter = function () {
+
+				button.style.opacity = '1.0';
+
+			};
+
+			button.onmouseleave = function () {
+
+				button.style.opacity = '0.5';
+
+			};
+
+			button.onclick = function () {
+
+				if ( currentSession === null ) {
+
+					// WebXR's requestReferenceSpace only works if the corresponding feature
+					// was requested at session creation time. For simplicity, just ask for
+					// the interesting ones as optional features, but be aware that the
+					// requestReferenceSpace call will fail if it turns out to be unavailable.
+					// ('local' is always available for immersive sessions and doesn't need to
+					// be requested separately.)
+
+					var sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor' ] };
+					navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
+
+				} else {
+
+					currentSession.end();
+
+				}
+
+			};
+
+		}
+
+		function disableButton() {
+
+			button.style.display = '';
+
+			button.style.cursor = 'auto';
+			button.style.left = 'calc(50% - 75px)';
+			button.style.width = '150px';
+
+			button.onmouseenter = null;
+			button.onmouseleave = null;
+
+			button.onclick = null;
+
+		}
+
+		function showWebXRNotFound() {
+
+			disableButton();
+
+			button.textContent = 'VR NOT SUPPORTED';
+
+		}
+
+		function stylizeElement( element ) {
+
+			element.style.position = 'absolute';
+			element.style.bottom = '20px';
+			element.style.padding = '12px 6px';
+			element.style.border = '1px solid #fff';
+			element.style.borderRadius = '4px';
+			element.style.background = 'rgba(0,0,0,0.1)';
+			element.style.color = '#fff';
+			element.style.font = 'normal 13px sans-serif';
+			element.style.textAlign = 'center';
+			element.style.opacity = '0.5';
+			element.style.outline = 'none';
+			element.style.zIndex = '999';
+
+		}
+
+		if ( 'xr' in navigator ) {
+
+			var button = document.createElement( 'button' );
+			button.style.display = 'none';
+
+			stylizeElement( button );
+
+			navigator.xr.isSessionSupported( 'immersive-vr' ).then( function ( supported ) {
+
+				supported ? showEnterVR() : showWebXRNotFound();
+
+			} );
+
+			return button;
+
+		} else {
+
+			var message = document.createElement( 'a' );
+
+			if ( window.isSecureContext === false ) {
+
+				message.href = document.location.href.replace( /^http:/, 'https:' );
+				message.innerHTML = 'WEBXR NEEDS HTTPS'; // TODO Improve message
+
+			} else {
+
+				message.href = 'https://immersiveweb.dev/';
+				message.innerHTML = 'WEBXR NOT AVAILABLE';
+
+			}
+
+			message.style.left = 'calc(50% - 90px)';
+			message.style.width = '180px';
+			message.style.textDecoration = 'none';
+
+			stylizeElement( message );
+
+			return message;
+
+		}
+
+	}
+
+};
+
+module.exports = VRButton;
+},{}],64:[function(require,module,exports){
 arguments[4][61][0].apply(exports,arguments)
-},{"dup":61,"underscore":7}],64:[function(require,module,exports){
+},{"dup":61,"underscore":7}],65:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function eulerShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -47012,7 +47187,7 @@ function eulerShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = eulerShadowHandler
-},{"../Serialization":33}],65:[function(require,module,exports){
+},{"../Serialization":33}],66:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function vec3ShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -47047,7 +47222,7 @@ function vec3ShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = vec3ShadowHandler
-},{"../Serialization":33}],66:[function(require,module,exports){
+},{"../Serialization":33}],67:[function(require,module,exports){
 var Viewer = require("./Viewer")
 var THREE = require("three")
 class EditorViewer extends Viewer {
@@ -47075,13 +47250,14 @@ class EditorViewer extends Viewer {
     }
 }
 module.exports = EditorViewer
-},{"./Viewer":67,"three":6}],67:[function(require,module,exports){
+},{"./Viewer":68,"three":6}],68:[function(require,module,exports){
 var THREE = require("three")
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var ThreeLoader = require('@pnext/three-loader')
 var ObjectArray = require("../arrays/ObjectArray")
 var Subscription = require("../utils/Subscription")
 var {Serializable, DeserializationObjectContainer} = require("../Serialization")
+var VRButton = require("../utils/VRButton")
 
 
 require("./viewer.css")
@@ -47299,7 +47475,10 @@ class Viewer {
         this._allowUserControl = true
         this._updatePlayerOnly = false
         this.deserializationContainer = new DeserializationObjectContainer()
-        
+
+        // Enable XR
+        this.renderer.xr.enabled = true
+        document.body.appendChild(VRButton.createButton(this.renderer))
         
     }
 
@@ -47313,11 +47492,22 @@ class Viewer {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
+            // Copy source camera to renderer camera, this is so that the rendering camera never actually changes.
             this.rendererCamera.copy(this.sourceCamera)
             this.rendererCamera.position.setFromMatrixPosition(this.sourceCamera.matrixWorld)
             this.rendererCamera.rotation.setFromRotationMatrix(this.sourceCamera.matrixWorld)
-            this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+
+            // Point culling for Potree clouds
+            if (this.renderer.xr.isPresenting) {
+                this.potree.updatePointClouds(this.potreePointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer) // This works but this.renderer.getCamera is undocumented. Maybe there's a better away?
+            } else {
+                this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+            }
+
+            // Render stuff
             this.renderer.render(this.scene, this.rendererCamera)
+
+            // Update flags
             this.skippedRender = false
         } else {
             if (!this.skippedRender) {
@@ -47379,18 +47569,12 @@ class Viewer {
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
     startRender() {
-        var scope = this
-        if (!this.pauseRenderFlag) {
-            requestAnimationFrame(function() {scope.startRender();})
-        } else {
-            scope.pauseRenderFlag = false
-        }
-        this.renderLoop()
+        this.renderer.setAnimationLoop(this.renderLoop.bind(this))
     }
 
     /** Pauses rendering loop */
     pauseRender() {
-        this.pauseRenderFlag = true
+        this.renderer.setAnimationLoop(null)
     }
 
     /** Gets state of key */
@@ -47525,9 +47709,9 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../Serialization":33,"../arrays/ObjectArray":41,"../utils/Subscription":62,"./viewer.css":68,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":6}],68:[function(require,module,exports){
+},{"../Serialization":33,"../arrays/ObjectArray":41,"../utils/Subscription":62,"../utils/VRButton":63,"./viewer.css":69,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":6}],69:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":2}],69:[function(require,module,exports){
-arguments[4][67][0].apply(exports,arguments)
-},{"../Serialization":33,"../arrays/ObjectArray":41,"../utils/Subscription":62,"./viewer.css":68,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":67,"three":6}]},{},[38])(38)
+},{"browserify-css":2}],70:[function(require,module,exports){
+arguments[4][68][0].apply(exports,arguments)
+},{"../Serialization":33,"../arrays/ObjectArray":41,"../utils/Subscription":62,"../utils/VRButton":63,"./viewer.css":69,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":68,"three":6}]},{},[38])(38)
 });
