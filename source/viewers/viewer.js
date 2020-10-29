@@ -221,6 +221,9 @@ class Viewer {
         this._allowUserControl = true
         this._updatePlayerOnly = false
         this.deserializationContainer = new DeserializationObjectContainer()
+
+        // Enable XR
+        this.renderer.xr.enabled = true
         
         
     }
@@ -235,11 +238,22 @@ class Viewer {
             if (this.skippedRender) {
                 this.onContainerElementResize()
             }
+            // Copy source camera to renderer camera, this is so that the rendering camera never actually changes.
             this.rendererCamera.copy(this.sourceCamera)
             this.rendererCamera.position.setFromMatrixPosition(this.sourceCamera.matrixWorld)
             this.rendererCamera.rotation.setFromRotationMatrix(this.sourceCamera.matrixWorld)
-            this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+
+            // Point culling for Potree clouds
+            if (this.renderer.xr.isPresenting) {
+                this.potree.updatePointClouds(this.potreePointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer) // This works but this.renderer.getCamera is undocumented. Maybe there's a better away?
+            } else {
+                this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+            }
+
+            // Render stuff
             this.renderer.render(this.scene, this.rendererCamera)
+
+            // Update flags
             this.skippedRender = false
         } else {
             if (!this.skippedRender) {
