@@ -252,7 +252,12 @@ class Viewer {
             }
 
             // Render stuff
-            this.renderer.render(this.scene, this.rendererCamera)
+            if (this.renderer.xr.isPresenting) {
+                this.renderer.render(this.scene, this.sourceCamera)
+            } else {
+                this.renderer.render(this.scene, this.rendererCamera) // Somehow, the XR camera doesnt follow the rendererCamera..
+            }
+            
 
             // Update flags
             this.skippedRender = false

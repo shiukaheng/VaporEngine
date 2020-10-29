@@ -43402,7 +43402,7 @@ class PlayerModifier extends BaseModifier{
 
         // Create camera
         this.camera = new THREE.PerspectiveCamera(90)
-        this.camera.rotation.y = Math.PI
+        // this.camera.rotation.y = Math.PI
         this.object.container.add(this.camera)
 
         this.setAsActive()
@@ -43416,7 +43416,7 @@ class PlayerModifier extends BaseModifier{
     pointerControlsUpdate(e) {
         if (this.args.enabled&&!this.object.bypassModifiers&&this.object.viewer.allowUserControl) {
             this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
-            this.controlObject.rotation.x += e.movementY*this.mouseSensitivity
+            this.controlObject.rotation.x -= e.movementY*this.mouseSensitivity
             this.controlObject.rotation.y -= e.movementX*this.mouseSensitivity
             this.updateRotationFromControlObject()
         }
@@ -43434,9 +43434,9 @@ class PlayerModifier extends BaseModifier{
     update(dt) {
         super.update(dt)
         this.direction_helper.rotation.y = this.controlObject.rotation.y
-        var front = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.args.acceleration*dt)
+        var front = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(-this.args.acceleration*dt)
         this.direction_helper.rotation.y = this.controlObject.rotation.y + Math.PI/2
-        var left = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(this.args.acceleration*dt)
+        var left = this.direction_helper.getWorldDirection(new THREE.Vector3()).clone().multiplyScalar(-this.args.acceleration*dt)
         if (this.object.viewer.hasPointerLock) {
             if (this.object.viewer.getKeyState(87)) {
                 this.object.addVelocity(front)
@@ -47505,7 +47505,12 @@ class Viewer {
             }
 
             // Render stuff
-            this.renderer.render(this.scene, this.rendererCamera)
+            if (this.renderer.xr.isPresenting) {
+                this.renderer.render(this.scene, this.sourceCamera)
+            } else {
+                this.renderer.render(this.scene, this.rendererCamera) // Somehow, the XR camera doesnt follow the rendererCamera..
+            }
+            
 
             // Update flags
             this.skippedRender = false
