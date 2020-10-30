@@ -53,9 +53,9 @@ window.interview = new Vapor.Objects.DepthkitObject({"metaUrl":"barber.txt", "vi
 window.interview.position.x = 1.24371145418086904
 window.interview.position.y = -0.4386158357237322
 window.interview.position.z = -1
-// window.interview.scale.x=10
-// window.interview.scale.y=10
-// window.interview.scale.z=10
+// // window.interview.scale.x=10
+// // window.interview.scale.y=10
+// // window.interview.scale.z=10
 viewer.add(window.interview)
 
 window.shop = new Vapor.Objects.PotreeObject({"fileName":"cloud.js", "baseUrl":"http://tlmhk.synology.me/data/TailorShopDenoise/", "pointShape":0, "pointSizeType":0})
