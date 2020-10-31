@@ -99,7 +99,7 @@ class Viewer {
         this.containerElement = containerElement
 
         // Initialize renderer
-        this.renderer = new THREE.WebGL1Renderer({antialias: true});
+        this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.domElement.className += "vaporViewer"
         this.containerElement.appendChild(this.renderer.domElement)
         this.renderer.setSize(this.containerElement.scrollWidth, this.containerElement.scrollHeight)

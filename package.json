@@ -2,7 +2,7 @@
   "name": "vapor",
   "version": "1.0.0",
   "description": "Game engine for The Lost Metropolis project",
-  "main": "vapor.js",
+  "main": "Vapor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "watchify -t browserify-css ./source/Vapor.js --standalone Vapor -o ./build/vapor-build.js"
@@ -10,7 +10,8 @@
   "author": "heng",
   "license": "MIT",
   "dependencies": {
-    "@pnext/three-loader": "^0.2.0",
+    "@pnext/three-loader": "^0.2.2",
+    "@shiukaheng/three-loader-fx": "^0.2.2",
     "babel-preset-es2015": "^6.24.1",
     "bezier-js": "^2.6.1",
     "css-element-queries": "^1.2.3",
