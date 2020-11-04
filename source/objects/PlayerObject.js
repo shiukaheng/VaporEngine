@@ -151,6 +151,10 @@ class PlayerObject extends Serializable.createConstructor(
     get isPlayerObject() {
         return true
     }
+    set fov(fov) {
+        this.playerModifier.camera.fov = fov
+        this.playerModifier.camera.updateProjectionMatrix()
+    }
 }
 PlayerObject.registerConstructor()
 
@@ -368,3 +372,5 @@ class BezierPathAnimation{
 window.BezierPathAnimation = BezierPathAnimation;
 
 module.exports = PlayerObject
+
+// Todo: Properly handle setting fov, and make it a serializable argument

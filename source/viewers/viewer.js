@@ -244,6 +244,7 @@ class Viewer {
             this.rendererCamera.copy(this.sourceCamera)
             this.rendererCamera.position.setFromMatrixPosition(this.sourceCamera.matrixWorld)
             this.rendererCamera.rotation.setFromRotationMatrix(this.sourceCamera.matrixWorld)
+            this.rendererCamera.fov = this.sourceCamera.fov
 
             // Point culling for Potree clouds
             if (this.renderer.xr.isPresenting) {
