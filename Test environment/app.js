@@ -58,7 +58,7 @@ window.player.position = {x: 0.24371145418086904, y: -1.4386158357237322, z: 0.4
 // // // window.interview.scale.z=10
 // viewer.add(window.interview)
 
-window.shop = new Vapor.Objects.PotreeObject({"fileName":"cloud.js", "baseUrl":"http://tlmhk.synology.me/data/TailorShopDenoise/", "pointShape":0, "pointSizeType":0})
+window.shop = new Vapor.Objects.PotreeObject({"fileName":"cloud.js", "baseUrl":"http://tlmhk.synology.me/data/TailorShopDenoise2/", "pointShape":0, "pointSizeType":2})
 window.shop.scale = {x:0.05, y:0.05, z:0.05}
 window.shop.rotation.x = -0.54999
 // window.shop.rotation = {x:-0.5499, y:0, z:0} <-- Bug!

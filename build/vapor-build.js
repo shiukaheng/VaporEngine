@@ -42276,7 +42276,7 @@ class ObjectArray extends Serializable.createConstructor(
     _queueLoadObject(object) {
         object.objectArray = this
         object.queueOnAssetLoaded(()=>{
-            object.load(viewer)
+            object.load(this.viewer)
             this.updateAssetsLoaded()
         })        
     } // what happens to object.objectArray if unloaded before assets are loaded?
@@ -47345,7 +47345,7 @@ class Viewer {
      * Used to construct a viewer
      * @param {Element} containerElement [Canvas element that the viewer will render to]
      */
-    constructor(containerElement) {
+    constructor(containerElement, createVRButtonFlag=true) {
         // Set default variables for renderer
         this.pauseRenderFlag = false
         this.skippedRender = false
@@ -47478,8 +47478,9 @@ class Viewer {
 
         // Enable XR
         this.renderer.xr.enabled = true
-        document.body.appendChild(VRButton.createButton(this.renderer))
-        
+        if (createVRButtonFlag===true) {
+            document.body.appendChild(VRButton.createButton(this.renderer))
+        }        
     }
 
     // Internal functions

@@ -31,7 +31,7 @@ class ObjectArray extends Serializable.createConstructor(
     _queueLoadObject(object) {
         object.objectArray = this
         object.queueOnAssetLoaded(()=>{
-            object.load(viewer)
+            object.load(this.viewer)
             this.updateAssetsLoaded()
         })        
     } // what happens to object.objectArray if unloaded before assets are loaded?
