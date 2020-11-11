@@ -456,6 +456,9 @@ class Viewer {
     // Create "methods" object for each SerializableObject, which makes interfacing with objects easier.
     //   - hide / show
     // Create new serializable classes that will be replaced with dictionaries (but allow custom get / set / apply functionalities)
+    
+    // Create a camera override system with lock (so no two overrides can be performed at the same time AND so it could be trace-able)
+    // Create a camera switching mode so that Desktop - VR - AR could be switched in between smoothly
 
 
 }

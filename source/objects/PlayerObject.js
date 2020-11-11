@@ -155,6 +155,9 @@ class PlayerObject extends Serializable.createConstructor(
         this.playerModifier.camera.fov = fov
         this.playerModifier.camera.updateProjectionMatrix()
     }
+    get fov() {
+        return this.playerModifier.camera.fov
+    }
 }
 PlayerObject.registerConstructor()
 

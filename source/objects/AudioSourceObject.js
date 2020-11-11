@@ -150,8 +150,8 @@ class AudioSourceObject extends Serializable.createConstructor(
         // Initialize the THREE.Audio / THREE.PositionalAudio object, depending on this.positional
         if (this.args.positional) {
             this.audioObj = new THREE.PositionalAudio(this.viewer.audioListener)
-            this.audioObj.setRefDistance(this.args.refDistance)
-            this.audioObj.setRolloffFactor(this.args.rolloffFactor)
+            this.audioObj.setRefDistance(this._args.refDistance)
+            this.audioObj.setRolloffFactor(this._args.rolloffFactor)
         } else {
             this.audioObj = new THREE.Audio(this.viewer.audioListener)
         }
@@ -162,8 +162,8 @@ class AudioSourceObject extends Serializable.createConstructor(
         }
 
         // Set audio type agnostic properties
-        this.audioObj.setVolume(this.args.volume)
-        this.audioObj.setLoop(this.args.loop)
+        this.audioObj.setVolume(this._args.volume)
+        this.audioObj.setLoop(this._args.loop)
         this.audioObj.setBuffer(this.audioBuffer)
         
         // Add the audio object to the container
