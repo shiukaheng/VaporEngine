@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap');
+
+.vapor-editor-button {
+    background-color: white;
+    height: 1em;
+    padding: 0.4em 1em 0.5em 1em;
+    font-size: 18px;
+    font-family: "Roboto", sans-serif;
+    transition: background-color 0.1s, opacity 0.1s;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.vapor-editor-button:hover {
+    background-color: rgba(255,255,255,0.7);
+}
+
+.vapor-editor-disabled.vapor-editor-button,
+.vapor-editor-disabled *.vapor-editor-button {
+    cursor: default;
+    opacity: 0.5;
+    background-color: white;
+}
+
+.vapor-editor-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    background-color: rgba(255,255,255,0.5);
+    z-index: 2;
+    padding: 30px 30px 30px 30px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box; 
+    -webkit-box-sizing: border-box; 
+    pointer-events: none;
+}
+
+.vapor-editor-button-row {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    height: max-content;
+}
+
+.vapor-editor-button-row .vapor-editor-button {
+    margin: 0 1em 0 0;
+}
+
+.vapor-editor-button-row-stack {
+    display: flex;
+    flex-direction: column;
+}
+
+.vapor-editor-button-row-stack .vapor-editor-button-row {
+    margin-bottom: 1em;
+}

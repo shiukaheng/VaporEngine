@@ -1,6 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Vapor = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 !function(t,e){"object"==typeof exports&&"object"==typeof module?module.exports=e(require("three")):"function"==typeof define&&define.amd?define("potree",["three"],e):"object"==typeof exports?exports.potree=e(require("three")):t.potree=e(t.three)}(window,(function(t){return function(t){var e={};function n(i){if(e[i])return e[i].exports;var o=e[i]={i:i,l:!1,exports:{}};return t[i].call(o.exports,o,o.exports,n),o.l=!0,o.exports}return n.m=t,n.c=e,n.d=function(t,e,i){n.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:i})},n.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},n.t=function(t,e){if(1&e&&(t=n(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var i=Object.create(null);if(n.r(i),Object.defineProperty(i,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var o in t)n.d(i,o,function(e){return t[e]}.bind(null,o));return i},n.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return n.d(e,"a",e),e},n.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},n.p="",n(n.s=27)}([function(e,n){e.exports=t},function(t,e,n){"use strict";var i,o,r,a,s;n.d(e,"d",(function(){return i})),n.d(e,"c",(function(){return o})),n.d(e,"e",(function(){return r})),n.d(e,"b",(function(){return a})),n.d(e,"a",(function(){return s})),function(t){t[t.FIXED=0]="FIXED",t[t.ATTENUATED=1]="ATTENUATED",t[t.ADAPTIVE=2]="ADAPTIVE"}(i||(i={})),function(t){t[t.SQUARE=0]="SQUARE",t[t.CIRCLE=1]="CIRCLE",t[t.PARABOLOID=2]="PARABOLOID"}(o||(o={})),function(t){t[t.OCTREE=0]="OCTREE",t[t.KDTREE=1]="KDTREE"}(r||(r={})),function(t){t[t.FIXED=0]="FIXED",t[t.ATTENUATED=1]="ATTENUATED"}(a||(a={})),function(t){t[t.RGB=0]="RGB",t[t.COLOR=1]="COLOR",t[t.DEPTH=2]="DEPTH",t[t.HEIGHT=3]="HEIGHT",t[t.ELEVATION=3]="ELEVATION",t[t.INTENSITY=4]="INTENSITY",t[t.INTENSITY_GRADIENT=5]="INTENSITY_GRADIENT",t[t.LOD=6]="LOD",t[t.LEVEL_OF_DETAIL=6]="LEVEL_OF_DETAIL",t[t.POINT_INDEX=7]="POINT_INDEX",t[t.CLASSIFICATION=8]="CLASSIFICATION",t[t.RETURN_NUMBER=9]="RETURN_NUMBER",t[t.SOURCE=10]="SOURCE",t[t.NORMAL=11]="NORMAL",t[t.PHONG=12]="PHONG",t[t.RGB_HEIGHT=13]="RGB_HEIGHT",t[t.COMPOSITE=50]="COMPOSITE"}(s||(s={}))},function(t,e,n){"use strict";n.d(e,"g",(function(){return o})),n.d(e,"h",(function(){return r})),n.d(e,"i",(function(){return a})),n.d(e,"b",(function(){return s})),n.d(e,"c",(function(){return u})),n.d(e,"d",(function(){return l})),n.d(e,"e",(function(){return c})),n.d(e,"f",(function(){return f})),n.d(e,"j",(function(){return d})),n.d(e,"k",(function(){return p})),n.d(e,"l",(function(){return h})),n.d(e,"a",(function(){return v}));var i=n(0),o=0,r=0,a=1,s=50,u=50,l=2,c=15,f=1e6,d=2,p=4,h="PerspectiveCamera",v=new i.Color(0,0,0)},function(t,e,n){"use strict";var i;n.d(e,"c",(function(){return i})),n.d(e,"b",(function(){return o})),n.d(e,"a",(function(){return s})),n.d(e,"d",(function(){return u})),function(t){t[t.POSITION_CARTESIAN=0]="POSITION_CARTESIAN",t[t.COLOR_PACKED=1]="COLOR_PACKED",t[t.COLOR_FLOATS_1=2]="COLOR_FLOATS_1",t[t.COLOR_FLOATS_255=3]="COLOR_FLOATS_255",t[t.NORMAL_FLOATS=4]="NORMAL_FLOATS",t[t.FILLER=5]="FILLER",t[t.INTENSITY=6]="INTENSITY",t[t.CLASSIFICATION=7]="CLASSIFICATION",t[t.NORMAL_SPHEREMAPPED=8]="NORMAL_SPHEREMAPPED",t[t.NORMAL_OCT16=9]="NORMAL_OCT16",t[t.NORMAL=10]="NORMAL"}(i||(i={}));var o={DATA_TYPE_DOUBLE:{ordinal:0,size:8},DATA_TYPE_FLOAT:{ordinal:1,size:4},DATA_TYPE_INT8:{ordinal:2,size:1},DATA_TYPE_UINT8:{ordinal:3,size:1},DATA_TYPE_INT16:{ordinal:4,size:2},DATA_TYPE_UINT16:{ordinal:5,size:2},DATA_TYPE_INT32:{ordinal:6,size:4},DATA_TYPE_UINT32:{ordinal:7,size:4},DATA_TYPE_INT64:{ordinal:8,size:8},DATA_TYPE_UINT64:{ordinal:9,size:8}};function r(t,e,n){return{name:t,type:e,numElements:n,byteSize:n*e.size}}var a=r(i.COLOR_PACKED,o.DATA_TYPE_INT8,4),s={POSITION_CARTESIAN:r(i.POSITION_CARTESIAN,o.DATA_TYPE_FLOAT,3),RGBA_PACKED:a,COLOR_PACKED:a,RGB_PACKED:r(i.COLOR_PACKED,o.DATA_TYPE_INT8,3),NORMAL_FLOATS:r(i.NORMAL_FLOATS,o.DATA_TYPE_FLOAT,3),FILLER_1B:r(i.FILLER,o.DATA_TYPE_UINT8,1),INTENSITY:r(i.INTENSITY,o.DATA_TYPE_UINT16,1),CLASSIFICATION:r(i.CLASSIFICATION,o.DATA_TYPE_UINT8,1),NORMAL_SPHEREMAPPED:r(i.NORMAL_SPHEREMAPPED,o.DATA_TYPE_UINT8,2),NORMAL_OCT16:r(i.NORMAL_OCT16,o.DATA_TYPE_UINT8,2),NORMAL:r(i.NORMAL,o.DATA_TYPE_FLOAT,3)},u=function(){function t(t){void 0===t&&(t=[]),this.attributes=[],this.byteSize=0,this.size=0;for(var e=0;e<t.length;e++){var n=t[e],i=s[n];this.attributes.push(i),this.byteSize+=i.byteSize,this.size++}}return t.prototype.add=function(t){this.attributes.push(t),this.byteSize+=t.byteSize,this.size++},t.prototype.hasColors=function(){return void 0!==this.attributes.find(l)},t.prototype.hasNormals=function(){return void 0!==this.attributes.find(c)},t}();function l(t){return t.name===i.COLOR_PACKED}function c(t){var e=t.name;return e===i.NORMAL_SPHEREMAPPED||e===i.NORMAL_FLOATS||e===i.NORMAL||e===i.NORMAL_OCT16}},function(t,e,n){"use strict";n.r(e);var i=n(18);n.d(e,"BlurMaterial",(function(){return i.a}));var o=n(6);n.d(e,"ClipMode",(function(){return o.a}));var r=n(1);n.d(e,"PointSizeType",(function(){return r.d})),n.d(e,"PointShape",(function(){return r.c})),n.d(e,"TreeType",(function(){return r.e})),n.d(e,"PointOpacityType",(function(){return r.b})),n.d(e,"PointColorType",(function(){return r.a}));var a=n(24);n.d(e,"PointCloudMaterial",(function(){return a.a}));var s=n(5);n.d(e,"generateDataTexture",(function(){return s.b})),n.d(e,"generateGradientTexture",(function(){return s.c})),n.d(e,"generateClassificationTexture",(function(){return s.a}));var u=n(19);for(var l in u)["default","BlurMaterial","ClipMode","PointSizeType","PointShape","TreeType","PointOpacityType","PointColorType","PointCloudMaterial","generateDataTexture","generateGradientTexture","generateClassificationTexture"].indexOf(l)<0&&function(t){n.d(e,t,(function(){return u[t]}))}(l);var c=n(17);n.d(e,"GRAYSCALE",(function(){return c.a})),n.d(e,"INFERNO",(function(){return c.b})),n.d(e,"PLASMA",(function(){return c.c})),n.d(e,"RAINBOW",(function(){return c.d})),n.d(e,"SPECTRAL",(function(){return c.e})),n.d(e,"VIRIDIS",(function(){return c.f})),n.d(e,"YELLOW_GREEN",(function(){return c.g}))},function(t,e,n){"use strict";n.d(e,"b",(function(){return o})),n.d(e,"c",(function(){return r})),n.d(e,"a",(function(){return a}));var i=n(0);function o(t,e,n){for(var o=t*e,r=new Uint8Array(4*o),a=Math.floor(255*n.r),s=Math.floor(255*n.g),u=Math.floor(255*n.b),l=0;l<o;l++)r[3*l]=a,r[3*l+1]=s,r[3*l+2]=u;var c=new i.DataTexture(r,t,e,i.RGBAFormat);return c.needsUpdate=!0,c.magFilter=i.NearestFilter,c}function r(t){var e=document.createElement("canvas");e.width=64,e.height=64;var n=e.getContext("2d");n.rect(0,0,64,64);for(var o=n.createLinearGradient(0,0,64,64),r=0;r<t.length;r++){var a=t[r];o.addColorStop(a[0],"#"+a[1].getHexString())}n.fillStyle=o,n.fill();var s=new i.CanvasTexture(e);return s.needsUpdate=!0,s.minFilter=i.LinearFilter,s}function a(t){for(var e=new Uint8Array(262144),n=0;n<256;n++)for(var o=0;o<256;o++){var r=n+256*o,a=void 0;a=t[n]?t[n]:t[n%32]?t[n%32]:t.DEFAULT,e[4*r+0]=255*a.x,e[4*r+1]=255*a.y,e[4*r+2]=255*a.z,e[4*r+3]=255*a.w}var s=new i.DataTexture(e,256,256,i.RGBAFormat);return s.magFilter=i.NearestFilter,s.needsUpdate=!0,s}},function(t,e,n){"use strict";var i;n.d(e,"a",(function(){return i})),function(t){t[t.DISABLED=0]="DISABLED",t[t.CLIP_OUTSIDE=1]="CLIP_OUTSIDE",t[t.HIGHLIGHT_INSIDE=2]="HIGHLIGHT_INSIDE"}(i||(i={}))},function(t,e,n){"use strict";function i(t){return parseInt(t.charAt(t.length-1),10)}function o(t,e){var n=t.name,i=e.name;return n.length!==i.length?n.length-i.length:n<i?-1:n>i?1:0}n.d(e,"b",(function(){return i})),n.d(e,"a",(function(){return o}))},function(t,e,n){"use strict";n.d(e,"a",(function(){return o})),n.d(e,"b",(function(){return r}));var i=n(0);function o(t,e){return(new i.Box3).setFromPoints([new i.Vector3(t.min.x,t.min.y,t.min.z).applyMatrix4(e),new i.Vector3(t.min.x,t.min.y,t.min.z).applyMatrix4(e),new i.Vector3(t.max.x,t.min.y,t.min.z).applyMatrix4(e),new i.Vector3(t.min.x,t.max.y,t.min.z).applyMatrix4(e),new i.Vector3(t.min.x,t.min.y,t.max.z).applyMatrix4(e),new i.Vector3(t.min.x,t.max.y,t.max.z).applyMatrix4(e),new i.Vector3(t.max.x,t.max.y,t.min.z).applyMatrix4(e),new i.Vector3(t.max.x,t.min.y,t.max.z).applyMatrix4(e),new i.Vector3(t.max.x,t.max.y,t.max.z).applyMatrix4(e)])}function r(t,e){var n=t.min.clone(),o=t.max.clone(),r=(new i.Vector3).subVectors(o,n);return(1&e)>0?n.z+=r.z/2:o.z-=r.z/2,(2&e)>0?n.y+=r.y/2:o.y-=r.y/2,(4&e)>0?n.x+=r.x/2:o.x-=r.x/2,new i.Box3(n,o)}},function(t,e,n){"use strict";n.d(e,"a",(function(){return i}));var i=function(){function t(t){this.versionMinor=0,this.version=t;var e=-1===t.indexOf(".")?t.length:t.indexOf(".");this.versionMajor=parseInt(t.substr(0,e),10),this.versionMinor=parseInt(t.substr(e+1),10),isNaN(this.versionMinor)&&(this.versionMinor=0)}return t.prototype.newerThan=function(e){var n=new t(e);return this.versionMajor>n.versionMajor||this.versionMajor===n.versionMajor&&this.versionMinor>n.versionMinor},t.prototype.equalOrHigher=function(e){var n=new t(e);return this.versionMajor>n.versionMajor||this.versionMajor===n.versionMajor&&this.versionMinor>=n.versionMinor},t.prototype.upTo=function(t){return!this.newerThan(t)},t}()},function(t,e,n){"use strict";n.d(e,"a",(function(){return s}));var i=n(0),o=n(2),r=n(4);function a(t,e,n){return Math.min(Math.max(e,t),n)}var s=function(){function t(){}return t.prototype.dispose=function(){this.pickState&&(this.pickState.material.dispose(),this.pickState.renderTarget.dispose())},t.prototype.pick=function(e,n,i,r,s){if(void 0===s&&(s={}),0===r.length)return null;var u=this.pickState?this.pickState:this.pickState=t.getPickState(),l=u.material,c=e.getPixelRatio(),f=Math.ceil(e.domElement.clientWidth*c),d=Math.ceil(e.domElement.clientHeight*c);t.updatePickRenderTarget(this.pickState,f,d);var p=t.helperVec3;s.pixelPosition?p.copy(s.pixelPosition):(p.addVectors(n.position,i.direction).project(n),p.x=(p.x+1)*f*.5,p.y=(p.y+1)*d*.5);var h=Math.floor((s.pickWindowSize||o.e)*c),v=(h-1)/2,m=Math.floor(a(p.x-v,0,f)),g=Math.floor(a(p.y-v,0,d));t.prepareRender(e,m,g,h,l,u);var y=t.render(e,n,l,r,i,u,s);l.clearVisibleNodeTextureOffsets();var b=t.readPixels(e,m,g,h),_=t.findHit(b,h);return t.getPickPoint(_,y)},t.prepareRender=function(t,e,n,r,a,s){t.setScissor(e,n,r,r),t.setScissorTest(!0),t.state.buffers.depth.setTest(a.depthTest),t.state.buffers.depth.setMask(a.depthWrite),t.state.setBlending(i.NoBlending),t.setRenderTarget(s.renderTarget);var u=t.getClearColor(),l=t.getClearAlpha();t.setClearColor(o.a,0),t.clear(!0,!0,!0),t.setClearColor(u,l)},t.render=function(e,n,i,o,r,a,s){for(var u=[],l=function(o){var l=t.nodesOnRay(o,r);if(!l.length)return"continue";t.updatePickMaterial(i,o.material,s),i.updateMaterial(o,l,n,e),s.onBeforePickRender&&s.onBeforePickRender(i,a.renderTarget),a.scene.children=t.createTempNodes(o,l,i,u.length),e.render(a.scene,n),l.forEach((function(t){return u.push({node:t,octree:o})}))},c=0,f=o;c<f.length;c++){l(f[c])}return u},t.nodesOnRay=function(e,n){for(var i=[],o=n.clone(),r=0,a=e.visibleNodes;r<a.length;r++){var s=a[r],u=t.helperSphere.copy(s.boundingSphere).applyMatrix4(e.matrixWorld);o.intersectsSphere(u)&&i.push(s)}return i},t.readPixels=function(t,e,n,i){var o=new Uint8Array(4*i*i);return t.readRenderTargetPixels(t.getRenderTarget(),e,n,i,i,o),t.setScissorTest(!1),t.setRenderTarget(null),o},t.createTempNodes=function(t,e,n,o){for(var a=[],s=0;s<e.length;s++){var u=e[s],l=u.sceneNode,c=new i.Points(l.geometry,n);c.matrix=l.matrix,c.matrixWorld=l.matrixWorld,c.matrixAutoUpdate=!1,c.frustumCulled=!1;var f=o+s+1;f>255&&console.error("More than 255 nodes for pick are not supported."),c.onBeforeRender=r.PointCloudMaterial.makeOnBeforeRender(t,u,f),a.push(c)}return a},t.updatePickMaterial=function(t,e,n){t.pointSizeType=e.pointSizeType,t.shape=e.shape,t.size=e.size,t.minSize=e.minSize,t.maxSize=e.maxSize,t.classification=e.classification,t.useFilterByNormal=e.useFilterByNormal,t.filterByNormalThreshold=e.filterByNormalThreshold,n.pickOutsideClipRegion?t.clipMode=r.ClipMode.DISABLED:(t.clipMode=e.clipMode,t.setClipBoxes(e.clipMode===r.ClipMode.CLIP_OUTSIDE?e.clipBoxes:[]))},t.updatePickRenderTarget=function(e,n,i){e.renderTarget.width===n&&e.renderTarget.height===i||(e.renderTarget.dispose(),e.renderTarget=t.makePickRenderTarget(),e.renderTarget.setSize(n,i))},t.makePickRenderTarget=function(){return new i.WebGLRenderTarget(1,1,{minFilter:i.LinearFilter,magFilter:i.NearestFilter,format:i.RGBAFormat})},t.findHit=function(t,e){for(var n=new Uint32Array(t.buffer),i=Number.MAX_VALUE,o=null,r=0;r<e;r++)for(var a=0;a<e;a++){var s=r+a*e,u=Math.pow(r-(e-1)/2,2)+Math.pow(a-(e-1)/2,2),l=t[4*s+3];t[4*s+3]=0;var c=n[s];l>0&&u<i&&(o={pIndex:c,pcIndex:l-1},i=u)}return o},t.getPickPoint=function(e,n){if(!e)return null;var i={},o=n[e.pcIndex]&&n[e.pcIndex].node.sceneNode;if(!o)return null;i.pointCloud=n[e.pcIndex].octree;var r=o.geometry.attributes;for(var a in r)if(r.hasOwnProperty(a)){var s=r[a];if("position"===a)t.addPositionToPickPoint(i,e,s,o);else if("normal"===a)t.addNormalToPickPoint(i,e,s,o);else if("indices"===a);else if(1===s.itemSize)i[a]=s.array[e.pIndex];else{for(var u=[],l=0;l<s.itemSize;l++)u.push(s.array[s.itemSize*e.pIndex+l]);i[a]=u}}return i},t.addPositionToPickPoint=function(t,e,n,o){t.position=(new i.Vector3).fromBufferAttribute(n,e.pIndex).applyMatrix4(o.matrixWorld)},t.addNormalToPickPoint=function(t,e,n,o){var r=(new i.Vector3).fromBufferAttribute(n,e.pIndex),a=new i.Vector4(r.x,r.y,r.z,0).applyMatrix4(o.matrixWorld);r.set(a.x,a.y,a.z),t.normal=r},t.getPickState=function(){var e=new i.Scene;e.autoUpdate=!1;var n=new r.PointCloudMaterial;return n.pointColorType=r.PointColorType.POINT_INDEX,{renderTarget:t.makePickRenderTarget(),material:n,scene:e}},t.helperVec3=new i.Vector3,t.helperSphere=new i.Sphere,t}()},function(t,e,n){"use strict";n.d(e,"a",(function(){return u}));var i,o=n(0),r=n(8),a=n(7),s=(i=function(t,e){return(i=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,e){t.__proto__=e}||function(t,e){for(var n in e)e.hasOwnProperty(n)&&(t[n]=e[n])})(t,e)},function(t,e){function n(){this.constructor=t}i(t,e),t.prototype=null===e?Object.create(e):(n.prototype=e.prototype,new n)}),u=function(t){function e(n,i,r){var s=t.call(this)||this;return s.id=e.idCount++,s.level=0,s.spacing=0,s.hasChildren=!1,s.children=[null,null,null,null,null,null,null,null],s.mean=new o.Vector3,s.numPoints=0,s.loaded=!1,s.loading=!1,s.failed=!1,s.parent=null,s.oneTimeDisposeHandlers=[],s.isLeafNode=!0,s.isTreeNode=!1,s.isGeometryNode=!0,s.name=n,s.index=Object(a.b)(n),s.pcoGeometry=i,s.boundingBox=r,s.tightBoundingBox=r.clone(),s.boundingSphere=r.getBoundingSphere(new o.Sphere),s}return s(e,t),e.prototype.dispose=function(){this.geometry&&this.parent&&(this.geometry.dispose(),this.geometry=void 0,this.loaded=!1,this.oneTimeDisposeHandlers.forEach((function(t){return t()})),this.oneTimeDisposeHandlers=[])},e.prototype.getUrl=function(){var t=this.pcoGeometry,e=t.loader.version,n=[t.octreeDir];return t.loader&&e.equalOrHigher("1.5")?(n.push(this.getHierarchyBaseUrl()),n.push(this.name)):(e.equalOrHigher("1.4")||e.upTo("1.3"))&&n.push(this.name),n.join("/")},e.prototype.getHierarchyUrl=function(){return this.pcoGeometry.octreeDir+"/"+this.getHierarchyBaseUrl()+"/"+this.name+".hrc"},e.prototype.addChild=function(t){this.children[t.index]=t,this.isLeafNode=!1,t.parent=this},e.prototype.traverse=function(t,e){void 0===e&&(e=!0);for(var n,i=e?[this]:[];void 0!==(n=i.pop());){t(n);for(var o=0,r=n.children;o<r.length;o++){var a=r[o];null!==a&&i.push(a)}}},e.prototype.load=function(){var t=this;return this.canLoad()?(this.loading=!0,this.pcoGeometry.numNodesLoading++,this.pcoGeometry.needsUpdate=!0,(this.pcoGeometry.loader.version.equalOrHigher("1.5")&&this.level%this.pcoGeometry.hierarchyStepSize==0&&this.hasChildren?this.loadHierachyThenPoints():this.loadPoints()).catch((function(e){throw t.loading=!1,t.failed=!0,t.pcoGeometry.numNodesLoading--,e}))):Promise.resolve()},e.prototype.canLoad=function(){return!this.loading&&!this.loaded&&!this.pcoGeometry.disposed&&!this.pcoGeometry.loader.disposed&&this.pcoGeometry.numNodesLoading<this.pcoGeometry.maxNumNodesLoading},e.prototype.loadPoints=function(){return this.pcoGeometry.needsUpdate=!0,this.pcoGeometry.loader.load(this)},e.prototype.loadHierachyThenPoints=function(){var t=this;return this.level%this.pcoGeometry.hierarchyStepSize!=0?Promise.resolve():Promise.resolve(this.pcoGeometry.loader.getUrl(this.getHierarchyUrl())).then((function(e){return t.pcoGeometry.xhrRequest(e,{mode:"cors"})})).then((function(t){return t.arrayBuffer()})).then((function(e){return t.loadHierarchy(t,e)}))},e.prototype.getHierarchyBaseUrl=function(){for(var t=this.pcoGeometry.hierarchyStepSize,e=this.name.substr(1),n=Math.floor(e.length/t),i="r/",o=0;o<n;o++)i+=e.substr(o*t,t)+"/";return i.slice(0,-1)},e.prototype.loadHierarchy=function(t,e){var n=this,i=new DataView(e),o=this.getNodeData(t.name,0,i);t.numPoints=o.numPoints;for(var r=[o],a=[],s=5;r.length>0;)for(var u=r.shift(),l=1,c=0;c<8&&s+1<e.byteLength;c++){if(0!=(u.children&l)){var f=this.getNodeData(u.name+c,s,i);a.push(f),r.push(f),s+=5}l*=2}t.pcoGeometry.needsUpdate=!0;var d=new Map;d.set(t.name,t),a.forEach((function(e){return n.addNode(e,t.pcoGeometry,d)})),t.loadPoints()},e.prototype.getNodeData=function(t,e,n){return{children:n.getUint8(e),numPoints:n.getUint32(e+1,!0),name:t}},e.prototype.addNode=function(t,n,i){var o=t.name,s=t.numPoints,u=t.children,l=Object(a.b)(o),c=o.substring(0,o.length-1),f=i.get(c),d=o.length-1,p=new e(o,n,Object(r.b)(f.boundingBox,l));p.level=d,p.numPoints=s,p.hasChildren=u>0,p.spacing=n.spacing/Math.pow(2,d),f.addChild(p),i.set(o,p)},e.idCount=0,e}(o.EventDispatcher)},function(t,e,n){"use strict";n.d(e,"a",(function(){return o}));var i=n(3),o=function(){function t(t,e,n,o,r){this.loader=t,this.boundingBox=e,this.tightBoundingBox=n,this.offset=o,this.xhrRequest=r,this.disposed=!1,this.needsUpdate=!0,this.octreeDir="",this.hierarchyStepSize=-1,this.nodes={},this.numNodesLoading=0,this.maxNumNodesLoading=3,this.spacing=0,this.pointAttributes=new i.d([]),this.projection=null,this.url=null}return t.prototype.dispose=function(){this.loader.dispose(),this.root.traverse((function(t){return t.dispose()})),this.disposed=!0},t.prototype.addNodeLoadedCallback=function(t){this.loader.callbacks.push(t)},t.prototype.clearNodeLoadedCallbacks=function(){this.loader.callbacks=[]},t}()},function(t,e,n){"use strict";n.d(e,"a",(function(){return a}));var i,o=n(0),r=(i=function(t,e){return(i=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,e){t.__proto__=e}||function(t,e){for(var n in e)e.hasOwnProperty(n)&&(t[n]=e[n])})(t,e)},function(t,e){function n(){this.constructor=t}i(t,e),t.prototype=null===e?Object.create(e):(n.prototype=e.prototype,new n)}),a=function(t){function e(e,n){var i=t.call(this)||this;return i.pcIndex=void 0,i.boundingBoxNode=null,i.loaded=!0,i.isTreeNode=!0,i.isGeometryNode=!1,i.geometryNode=e,i.sceneNode=n,i.children=e.children.slice(),i}return r(e,t),e.prototype.dispose=function(){this.geometryNode.dispose()},e.prototype.disposeSceneNode=function(){var t=this.sceneNode;if(t.geometry instanceof o.BufferGeometry){var e=t.geometry.attributes;for(var n in e)"position"===n&&delete e[n].array,delete e[n];t.geometry.dispose(),t.geometry=void 0}},e.prototype.traverse=function(t,e){this.geometryNode.traverse(t,e)},Object.defineProperty(e.prototype,"id",{get:function(){return this.geometryNode.id},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"name",{get:function(){return this.geometryNode.name},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"level",{get:function(){return this.geometryNode.level},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"isLeafNode",{get:function(){return this.geometryNode.isLeafNode},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"numPoints",{get:function(){return this.geometryNode.numPoints},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"index",{get:function(){return this.geometryNode.index},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"boundingSphere",{get:function(){return this.geometryNode.boundingSphere},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"boundingBox",{get:function(){return this.geometryNode.boundingBox},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"spacing",{get:function(){return this.geometryNode.spacing},enumerable:!1,configurable:!0}),e}(o.EventDispatcher)},function(t,e,n){"use strict";n.d(e,"a",(function(){return d}));var i,o=n(0),r=n(2),a=n(4),s=n(13),u=n(10),l=n(15),c=n(8),f=(i=function(t,e){return(i=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,e){t.__proto__=e}||function(t,e){for(var n in e)e.hasOwnProperty(n)&&(t[n]=e[n])})(t,e)},function(t,e){function n(){this.constructor=t}i(t,e),t.prototype=null===e?Object.create(e):(n.prototype=e.prototype,new n)}),d=function(t){function e(e,n,i){var s=t.call(this)||this;return s.disposed=!1,s.level=0,s.maxLevel=1/0,s.minNodePixelSize=r.c,s.root=null,s.boundingBoxNodes=[],s.visibleNodes=[],s.visibleGeometry=[],s.numVisiblePoints=0,s.showBoundingBox=!1,s.visibleBounds=new o.Box3,s.name="",s.potree=e,s.root=n.root,s.pcoGeometry=n,s.boundingBox=n.boundingBox,s.boundingSphere=s.boundingBox.getBoundingSphere(new o.Sphere),s.position.copy(n.offset),s.updateMatrix(),s.material=i||new a.PointCloudMaterial,s.initMaterial(s.material),s}return f(e,t),e.prototype.initMaterial=function(t){this.updateMatrixWorld(!0);var e=Object(c.a)(this.pcoGeometry.tightBoundingBox||this.getBoundingBoxWorld(),this.matrixWorld),n=e.min,i=e.max,o=i.z-n.z;t.heightMin=n.z-.2*o,t.heightMax=i.z+.2*o},e.prototype.dispose=function(){var t=this;this.root&&this.root.dispose(),this.pcoGeometry.root.traverse((function(e){return t.potree.lru.remove(e)})),this.pcoGeometry.dispose(),this.material.dispose(),this.visibleNodes=[],this.visibleGeometry=[],this.picker&&(this.picker.dispose(),this.picker=void 0),this.disposed=!0},Object.defineProperty(e.prototype,"pointSizeType",{get:function(){return this.material.pointSizeType},set:function(t){this.material.pointSizeType=t},enumerable:!1,configurable:!0}),e.prototype.toTreeNode=function(t,e){var n=new o.Points(t.geometry,this.material),i=new s.a(t,n);return n.name=t.name,n.position.copy(t.boundingBox.min),n.frustumCulled=!1,n.onBeforeRender=a.PointCloudMaterial.makeOnBeforeRender(this,i),e?(e.sceneNode.add(n),e.children[t.index]=i,t.oneTimeDisposeHandlers.push((function(){i.disposeSceneNode(),e.sceneNode.remove(i.sceneNode),e.children[t.index]=t}))):(this.root=i,this.add(n)),i},e.prototype.updateVisibleBounds=function(){var t=this.visibleBounds;t.min.set(1/0,1/0,1/0),t.max.set(-1/0,-1/0,-1/0);for(var e=0,n=this.visibleNodes;e<n.length;e++){var i=n[e];i.isLeafNode&&(t.expandByPoint(i.boundingBox.min),t.expandByPoint(i.boundingBox.max))}},e.prototype.updateBoundingBoxes=function(){if(this.showBoundingBox&&this.parent){var t=this.parent.getObjectByName("bbroot");t||((t=new o.Object3D).name="bbroot",this.parent.add(t));for(var e=[],n=0,i=this.visibleNodes;n<i.length;n++){var r=i[n];void 0!==r.boundingBoxNode&&r.isLeafNode&&e.push(r.boundingBoxNode)}t.children=e}},e.prototype.updateMatrixWorld=function(t){!0===this.matrixAutoUpdate&&this.updateMatrix(),!0!==this.matrixWorldNeedsUpdate&&!0!==t||(this.parent?this.matrixWorld.multiplyMatrices(this.parent.matrixWorld,this.matrix):this.matrixWorld.copy(this.matrix),this.matrixWorldNeedsUpdate=!1,t=!0)},e.prototype.hideDescendants=function(t){var e=[];for(i(t);e.length>0;){var n=e.shift();n.visible=!1,i(n)}function i(t){for(var n=0,i=t.children;n<i.length;n++){var o=i[n];o.visible&&e.push(o)}}},e.prototype.moveToOrigin=function(){this.position.set(0,0,0),this.position.set(0,0,0).sub(this.getBoundingBoxWorld().getCenter(new o.Vector3))},e.prototype.moveToGroundPlane=function(){this.position.y+=-this.getBoundingBoxWorld().min.y},e.prototype.getBoundingBoxWorld=function(){return this.updateMatrixWorld(!0),Object(c.a)(this.boundingBox,this.matrixWorld)},e.prototype.getVisibleExtent=function(){return this.visibleBounds.applyMatrix4(this.matrixWorld)},e.prototype.pick=function(t,e,n,i){return void 0===i&&(i={}),this.picker=this.picker||new u.a,this.picker.pick(t,e,n,[this],i)},Object.defineProperty(e.prototype,"progress",{get:function(){return 0===this.visibleGeometry.length?0:this.visibleNodes.length/this.visibleGeometry.length},enumerable:!1,configurable:!0}),e}(l.a)},function(t,e,n){"use strict";n.d(e,"a",(function(){return a}));var i,o=n(0),r=(i=function(t,e){return(i=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,e){t.__proto__=e}||function(t,e){for(var n in e)e.hasOwnProperty(n)&&(t[n]=e[n])})(t,e)},function(t,e){function n(){this.constructor=t}i(t,e),t.prototype=null===e?Object.create(e):(n.prototype=e.prototype,new n)}),a=function(t){function e(){var e=null!==t&&t.apply(this,arguments)||this;return e.root=null,e}return r(e,t),e.prototype.initialized=function(){return null!==this.root},e}(o.Object3D)},function(t,e,n){"use strict";n.d(e,"a",(function(){return a}));var i=n(0),o=n(3),r=n(9),a=function(){function t(t){var e=t.getUrl,n=void 0===e?function(t){return Promise.resolve(t)}:e,i=t.version,o=t.boundingBox,a=t.scale,s=t.xhrRequest;this.disposed=!1,this.workers=[],this.version="string"==typeof i?new r.a(i):i,this.xhrRequest=s,this.getUrl=n,this.boundingBox=o,this.scale=a,this.callbacks=[]}return t.prototype.dispose=function(){this.workers.forEach((function(t){return t.terminate()})),this.workers=[],this.disposed=!0},t.prototype.load=function(t){var e=this;return t.loaded||this.disposed?Promise.resolve():Promise.resolve(this.getUrl(this.getNodeUrl(t))).then((function(t){return e.xhrRequest(t,{mode:"cors"})})).then((function(t){return t.arrayBuffer()})).then((function(n){return new Promise((function(i){return e.parse(t,n,i)}))}))},t.prototype.getNodeUrl=function(t){var e=t.getUrl();return this.version.equalOrHigher("1.4")&&(e+=".bin"),e},t.prototype.parse=function(t,e,n){var o=this;if(this.disposed)n();else{var r=this.getWorker(),a=t.pcoGeometry.pointAttributes,s=e.byteLength/a.byteSize;this.version.upTo("1.5")&&(t.numPoints=s),r.onmessage=function(e){if(o.disposed)n();else{var a=e.data,u=t.geometry=t.geometry||new i.BufferGeometry;u.boundingBox=t.boundingBox,o.addBufferAttributes(u,a.attributeBuffers),o.addIndices(u,a.indices),o.addNormalAttribute(u,s),t.mean=(new i.Vector3).fromArray(a.mean),t.tightBoundingBox=o.getTightBoundingBox(a.tightBoundingBox),t.loaded=!0,t.loading=!1,t.failed=!1,t.pcoGeometry.numNodesLoading--,t.pcoGeometry.needsUpdate=!0,o.releaseWorker(r),o.callbacks.forEach((function(e){return e(t)})),n()}};var u={buffer:e,pointAttributes:a,version:this.version.version,min:t.boundingBox.min.toArray(),offset:t.pcoGeometry.offset.toArray(),scale:this.scale,spacing:t.spacing,hasChildren:t.hasChildren};r.postMessage(u,[u.buffer])}},t.prototype.getWorker=function(){var t=this.workers.pop();return t||new(n(32))},t.prototype.releaseWorker=function(t){this.workers.push(t)},t.prototype.getTightBoundingBox=function(t){var e=t.min,n=t.max,o=new i.Box3((new i.Vector3).fromArray(e),(new i.Vector3).fromArray(n));return o.max.sub(o.min),o.min.set(0,0,0),o},t.prototype.addBufferAttributes=function(t,e){var n=this;Object.keys(e).forEach((function(r){var a=e[r].buffer;n.isAttribute(r,o.c.POSITION_CARTESIAN)?t.setAttribute("position",new i.BufferAttribute(new Float32Array(a),3)):n.isAttribute(r,o.c.COLOR_PACKED)?t.setAttribute("color",new i.BufferAttribute(new Uint8Array(a),3,!0)):n.isAttribute(r,o.c.INTENSITY)?t.setAttribute("intensity",new i.BufferAttribute(new Float32Array(a),1)):n.isAttribute(r,o.c.CLASSIFICATION)?t.setAttribute("classification",new i.BufferAttribute(new Uint8Array(a),1)):(n.isAttribute(r,o.c.NORMAL_SPHEREMAPPED)||n.isAttribute(r,o.c.NORMAL_OCT16)||n.isAttribute(r,o.c.NORMAL))&&t.setAttribute("normal",new i.BufferAttribute(new Float32Array(a),3))}))},t.prototype.addIndices=function(t,e){var n=new i.Uint8BufferAttribute(e,4);n.normalized=!0,t.setAttribute("indices",n)},t.prototype.addNormalAttribute=function(t,e){if(!t.getAttribute("normal")){var n=new Float32Array(3*e);t.setAttribute("normal",new i.BufferAttribute(new Float32Array(n),3))}},t.prototype.isAttribute=function(t,e){return parseInt(t,10)===e},t}()},function(t,e,n){"use strict";n.d(e,"a",(function(){return o})),n.d(e,"b",(function(){return r})),n.d(e,"c",(function(){return a})),n.d(e,"d",(function(){return s})),n.d(e,"e",(function(){return u})),n.d(e,"f",(function(){return l})),n.d(e,"g",(function(){return c}));var i=n(0),o=[[0,new i.Color(0,0,0)],[1,new i.Color(1,1,1)]],r=[[0,new i.Color(.077,.042,.206)],[.1,new i.Color(.225,.036,.388)],[.2,new i.Color(.373,.074,.432)],[.3,new i.Color(.522,.128,.42)],[.4,new i.Color(.665,.182,.37)],[.5,new i.Color(.797,.255,.287)],[.6,new i.Color(.902,.364,.184)],[.7,new i.Color(.969,.516,.063)],[.8,new i.Color(.988,.683,.072)],[.9,new i.Color(.961,.859,.298)],[1,new i.Color(.988,.998,.645)]],a=[[0,new i.Color(.241,.015,.61)],[.1,new i.Color(.387,.001,.654)],[.2,new i.Color(.524,.025,.653)],[.3,new i.Color(.651,.125,.596)],[.4,new i.Color(.752,.227,.513)],[.5,new i.Color(.837,.329,.431)],[.6,new i.Color(.907,.435,.353)],[.7,new i.Color(.963,.554,.272)],[.8,new i.Color(.992,.681,.195)],[.9,new i.Color(.987,.822,.144)],[1,new i.Color(.94,.975,.131)]],s=[[0,new i.Color(.278,0,.714)],[1/6,new i.Color(0,0,1)],[2/6,new i.Color(0,1,1)],[.5,new i.Color(0,1,0)],[4/6,new i.Color(1,1,0)],[5/6,new i.Color(1,.64,0)],[1,new i.Color(1,0,0)]],u=[[0,new i.Color(.3686,.3098,.6353)],[.1,new i.Color(.1961,.5333,.7412)],[.2,new i.Color(.4,.7608,.6471)],[.3,new i.Color(.6706,.8667,.6431)],[.4,new i.Color(.902,.9608,.5961)],[.5,new i.Color(1,1,.749)],[.6,new i.Color(.9961,.8784,.5451)],[.7,new i.Color(.9922,.6824,.3804)],[.8,new i.Color(.9569,.4275,.2627)],[.9,new i.Color(.8353,.2431,.3098)],[1,new i.Color(.6196,.0039,.2588)]],l=[[0,new i.Color(.267,.005,.329)],[.1,new i.Color(.283,.141,.458)],[.2,new i.Color(.254,.265,.53)],[.3,new i.Color(.207,.372,.553)],[.4,new i.Color(.164,.471,.558)],[.5,new i.Color(.128,.567,.551)],[.6,new i.Color(.135,.659,.518)],[.7,new i.Color(.267,.749,.441)],[.8,new i.Color(.478,.821,.318)],[.9,new i.Color(.741,.873,.15)],[1,new i.Color(.993,.906,.144)]],c=[[0,new i.Color(.1647,.2824,.3451)],[.1,new i.Color(.1338,.3555,.4227)],[.2,new i.Color(.061,.4319,.4864)],[.3,new i.Color(0,.5099,.5319)],[.4,new i.Color(0,.5881,.5569)],[.5,new i.Color(.137,.665,.5614)],[.6,new i.Color(.2906,.7395,.5477)],[.7,new i.Color(.4453,.8099,.5201)],[.8,new i.Color(.6102,.8748,.485)],[.9,new i.Color(.7883,.9323,.4514)],[1,new i.Color(.9804,.9804,.4314)]]},function(t,e,n){"use strict";n.d(e,"a",(function(){return a}));var i,o=n(0),r=(i=function(t,e){return(i=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,e){t.__proto__=e}||function(t,e){for(var n in e)e.hasOwnProperty(n)&&(t[n]=e[n])})(t,e)},function(t,e){function n(){this.constructor=t}i(t,e),t.prototype=null===e?Object.create(e):(n.prototype=e.prototype,new n)}),a=function(t){function e(){var e=null!==t&&t.apply(this,arguments)||this;return e.vertexShader=n(28),e.fragmentShader=n(29),e.uniforms={screenWidth:{type:"f",value:0},screenHeight:{type:"f",value:0},map:{type:"t",value:null}},e}return r(e,t),e}(o.ShaderMaterial)},function(t,e){},function(t,e,n){"use strict";n.d(e,"a",(function(){return f}));var i=n(0),o=n(3),r=n(12),a=n(11),s=n(8),u=n(7),l=n(9),c=n(16);function f(t,e,n){return Promise.resolve(e(t)).then((function(t){return n(t,{mode:"cors"}).then((function(t){return t.json()})).then(function(t,e,n){return function(f){var d=function(t){var e=new i.Vector3(t.boundingBox.lx,t.boundingBox.ly,t.boundingBox.lz),n=new i.Vector3(t.boundingBox.ux,t.boundingBox.uy,t.boundingBox.uz),o=new i.Box3(e,n),r=o.clone(),a=e.clone();if(t.tightBoundingBox){var s=t.tightBoundingBox,u=s.lx,l=s.ly,c=s.lz,f=s.ux,d=s.uy,p=s.uz;r.min.set(u,l,c),r.max.set(f,d,p)}return o.min.sub(a),o.max.sub(a),r.min.sub(a),r.max.sub(a),{offset:a,boundingBox:o,tightBoundingBox:r}}(f),p=d.offset,h=d.boundingBox,v=d.tightBoundingBox,m=new c.a({getUrl:e,version:f.version,boundingBox:h,scale:f.scale,xhrRequest:n}),g=new r.a(m,h,v,p,n);g.url=t,g.octreeDir=f.octreeDir,g.needsUpdate=!0,g.spacing=f.spacing,g.hierarchyStepSize=f.hierarchyStepSize,g.projection=f.projection,g.offset=p,g.pointAttributes=new o.d(f.pointAttributes);var y={},b=new l.a(f.version);return function(t,e,n,i){var o=new a.a("r",t,t.boundingBox);o.hasChildren=!0,o.spacing=t.spacing,i.upTo("1.5")?o.numPoints=e.hierarchy[0][1]:o.numPoints=0;return t.root=o,n.r=o,t.root.load()}(g,f,y,b).then((function(){return b.upTo("1.4")&&function(t,e,n){for(var i=1;i<e.hierarchy.length;i++){var o=e.hierarchy[i],r=o[0],l=o[1],c=(m=r,{index:Object(u.b)(m),parentName:m.substring(0,m.length-1),level:m.length-1}),f=c.index,d=c.level,p=n[c.parentName],h=Object(s.b)(p.boundingBox,f),v=new a.a(r,t,h);v.level=d,v.numPoints=l,v.spacing=t.spacing/Math.pow(2,v.level),n[r]=v,p.addChild(v)}var m}(g,f,y),g.nodes=y,g}))}}(t,e,n))}))}},function(t,e){},function(t,e){},function(t,e,n){"use strict";n.d(e,"b",(function(){return x})),n.d(e,"a",(function(){return T}));var i=n(0),o=n(2),r=document.createElement("canvas").getContext("webgl"),a={SHADER_INTERPOLATION:s("EXT_frag_depth")&&u(8),SHADER_SPLATS:s("EXT_frag_depth")&&s("OES_texture_float")&&u(8),SHADER_EDL:s("OES_texture_float")&&u(8),precision:function(){if(null===r)return"";var t=r.getShaderPrecisionFormat(r.VERTEX_SHADER,r.HIGH_FLOAT),e=r.getShaderPrecisionFormat(r.VERTEX_SHADER,r.MEDIUM_FLOAT),n=r.getShaderPrecisionFormat(r.FRAGMENT_SHADER,r.HIGH_FLOAT),i=r.getShaderPrecisionFormat(r.FRAGMENT_SHADER,r.MEDIUM_FLOAT),o=t&&n&&t.precision>0&&n.precision>0,a=e&&i&&e.precision>0&&i.precision>0;return o?"highp":a?"mediump":"lowp"}()};function s(t){return null!==r&&Boolean(r.getExtension(t))}function u(t){return null!==r&&r.getParameter(r.MAX_VARYING_VECTORS)>=t}var l=n(25),c=n(4),f=n(14),d=n(10);function p(t){return null!=t&&t.isGeometryNode}function h(t){return null!=t&&t.isTreeNode}var v,m=n(26),g=(v=function(t,e){return(v=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,e){t.__proto__=e}||function(t,e){for(var n in e)e.hasOwnProperty(n)&&(t[n]=e[n])})(t,e)},function(t,e){function n(){this.constructor=t}v(t,e),t.prototype=null===e?Object.create(e):(n.prototype=e.prototype,new n)}),y=function(t){function e(e,n){void 0===n&&(n=new i.Color(16776960));var o=new Uint16Array([0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7]),r=new Float32Array([e.min.x,e.min.y,e.min.z,e.max.x,e.min.y,e.min.z,e.max.x,e.min.y,e.max.z,e.min.x,e.min.y,e.max.z,e.min.x,e.max.y,e.min.z,e.max.x,e.max.y,e.min.z,e.max.x,e.max.y,e.max.z,e.min.x,e.max.y,e.max.z]),a=new i.BufferGeometry;a.setIndex(new i.BufferAttribute(o,1)),a.setAttribute("position",new i.BufferAttribute(r,3));var s=new i.LineBasicMaterial({color:n});return t.call(this,a,s)||this}return g(e,t),e}(i.LineSegments),b=function(t){this.node=t,this.next=null,this.previous=null},_=function(){function t(t){void 0===t&&(t=1e6),this.pointBudget=t,this.first=null,this.last=null,this.numPoints=0,this.items=new Map}return Object.defineProperty(t.prototype,"size",{get:function(){return this.items.size},enumerable:!1,configurable:!0}),t.prototype.has=function(t){return this.items.has(t.id)},t.prototype.touch=function(t){if(t.loaded){var e=this.items.get(t.id);e?this.touchExisting(e):this.addNew(t)}},t.prototype.addNew=function(t){var e=new b(t);e.previous=this.last,this.last=e,e.previous&&(e.previous.next=e),this.first||(this.first=e),this.items.set(t.id,e),this.numPoints+=t.numPoints},t.prototype.touchExisting=function(t){t.previous?t.next&&(t.previous.next=t.next,t.next.previous=t.previous,t.previous=this.last,t.next=null,this.last=t,t.previous&&(t.previous.next=t)):t.next&&(this.first=t.next,this.first.previous=null,t.previous=this.last,t.next=null,this.last=t,t.previous&&(t.previous.next=t))},t.prototype.remove=function(t){var e=this.items.get(t.id);e&&(1===this.items.size?(this.first=null,this.last=null):(e.previous||(this.first=e.next,this.first.previous=null),e.next||(this.last=e.previous,this.last.next=null),e.previous&&e.next&&(e.previous.next=e.next,e.next.previous=e.previous)),this.items.delete(t.id),this.numPoints-=t.numPoints)},t.prototype.getLRUItem=function(){return this.first?this.first.node:void 0},t.prototype.freeMemory=function(){if(!(this.items.size<=1))for(;this.numPoints>2*this.pointBudget;){var t=this.getLRUItem();t&&this.disposeSubtree(t)}},t.prototype.disposeSubtree=function(t){var e=[t];t.traverse((function(t){t.loaded&&e.push(t)}));for(var n=0,i=e;n<i.length;n++){var o=i[n];o.dispose(),this.remove(o)}},t}(),x=function(t,e,n,i){this.pointCloudIndex=t,this.weight=e,this.node=n,this.parent=i},T=function(){function t(){var t,e,n;this._pointBudget=o.f,this._rendererSize=new i.Vector2,this.maxNumNodesLoading=o.k,this.features=a,this.lru=new _(this._pointBudget),this.updateVisibilityStructures=(t=new i.Matrix4,e=new i.Matrix4,n=new i.Matrix4,function(o,r){for(var a=[],s=[],u=new m.BinaryHeap((function(t){return 1/t.weight})),l=0;l<o.length;l++){var c=o[l];if(c.initialized()){c.numVisiblePoints=0,c.visibleNodes=[],c.visibleGeometry=[],r.updateMatrixWorld(!1);var f=r.matrixWorldInverse,d=c.matrixWorld;if(t.identity().multiply(r.projectionMatrix).multiply(f).multiply(d),a.push((new i.Frustum).setFromProjectionMatrix(t)),e.getInverse(d),n.identity().multiply(e).multiply(r.matrixWorld),s.push((new i.Vector3).setFromMatrixPosition(n)),c.visible&&null!==c.root){var p=Number.MAX_VALUE;u.push(new x(l,p,c.root))}h(c.root)&&c.hideDescendants(c.root.sceneNode);for(var v=0,g=c.boundingBoxNodes;v<g.length;v++)g[v].visible=!1}}return{frustums:a,cameraPositions:s,priorityQueue:u}})}return t.prototype.loadPointCloud=function(t,e,n){var i=this;return void 0===n&&(n=function(t,e){return fetch(t,e)}),Object(l.loadPOC)(t,e,n).then((function(t){return new f.a(i,t)}))},t.prototype.updatePointClouds=function(t,e,n){for(var i=this.updateVisibility(t,e,n),o=0;o<t.length;o++){var r=t[o];r.disposed||(r.material.updateMaterial(r,r.visibleNodes,e,n),r.updateVisibleBounds(),r.updateBoundingBoxes())}return this.lru.freeMemory(),i},t.pick=function(e,n,i,o,r){return void 0===r&&(r={}),t.picker=t.picker||new d.a,t.picker.pick(n,i,o,e,r)},Object.defineProperty(t.prototype,"pointBudget",{get:function(){return this._pointBudget},set:function(t){t!==this._pointBudget&&(this._pointBudget=t,this.lru.pointBudget=t,this.lru.freeMemory())},enumerable:!1,configurable:!0}),t.prototype.updateVisibility=function(t,e,n){for(var i,r=0,a=[],s=[],u=this.updateVisibilityStructures(t,e),l=u.frustums,c=u.cameraPositions,f=u.priorityQueue,d=0,v=!1,m=!1;void 0!==(i=f.pop());){var g=i.node;if(r+g.numPoints>this.pointBudget)break;var y=i.pointCloudIndex,b=t[y],_=void 0!==b.maxLevel?b.maxLevel:1/0;if(!(g.level>_||!l[y].intersectsBox(g.boundingBox)||this.shouldClip(b,g.boundingBox))){r+=g.numPoints,b.numVisiblePoints+=g.numPoints;var x=i.parent;if(p(g)&&(!x||h(x)))if(g.loaded&&d<o.j)g=b.toTreeNode(g,x),d++;else{if(g.failed){m=!0;continue}g.loaded&&d>=o.j&&(v=!0),s.push(g),b.visibleGeometry.push(g)}h(g)&&(this.updateTreeNodeVisibility(b,g,a),b.visibleGeometry.push(g.geometryNode));var T=.5*n.getSize(this._rendererSize).height*n.getPixelRatio();this.updateChildVisibility(i,f,b,g,c[y],e,T)}}for(var A=Math.min(this.maxNumNodesLoading,s.length),O=[],w=0;w<A;w++)O.push(s[w].load());return{visibleNodes:a,numVisiblePoints:r,exceededMaxLoadsToGPU:v,nodeLoadFailed:m,nodeLoadPromises:O}},t.prototype.updateTreeNodeVisibility=function(t,e,n){this.lru.touch(e.geometryNode);var i=e.sceneNode;i.visible=!0,i.material=t.material,i.updateMatrix(),i.matrixWorld.multiplyMatrices(t.matrixWorld,i.matrix),n.push(e),t.visibleNodes.push(e),this.updateBoundingBoxVisibility(t,e)},t.prototype.updateChildVisibility=function(t,e,n,i,r,a,s){for(var u=i.children,l=0;l<u.length;l++){var c=u[l];if(null!==c){var f=c.boundingSphere,d=f.center.distanceTo(r),p=f.radius,h=0;if(a.type===o.l){var v=a.fov*Math.PI/180;h=s/(Math.tan(v/2)*d)}else{var m=a;h=2*s/(m.top-m.bottom)}var g=p*h;if(!(g<n.minNodePixelSize)){var y=d<p?Number.MAX_VALUE:g+1/d;e.push(new x(t.pointCloudIndex,y,c,i))}}}},t.prototype.updateBoundingBoxVisibility=function(t,e){if(t.showBoundingBox&&!e.boundingBoxNode){var n=new y(e.boundingBox);n.matrixAutoUpdate=!1,t.boundingBoxNodes.push(n),e.boundingBoxNode=n,e.boundingBoxNode.matrix.copy(t.matrixWorld)}else t.showBoundingBox&&e.boundingBoxNode?(e.boundingBoxNode.visible=!0,e.boundingBoxNode.matrix.copy(t.matrixWorld)):!t.showBoundingBox&&e.boundingBoxNode&&(e.boundingBoxNode.visible=!1)},t.prototype.shouldClip=function(t,e){var n=t.material;if(0===n.numClipBoxes||n.clipMode!==c.ClipMode.CLIP_OUTSIDE)return!1;var o=e.clone();t.updateMatrixWorld(!0),o.applyMatrix4(t.matrixWorld);for(var r=n.clipBoxes,a=0;a<r.length;a++){var s=r[a].matrix,u=new i.Box3(new i.Vector3(-.5,-.5,-.5),new i.Vector3(.5,.5,.5)).applyMatrix4(s);if(o.intersectsBox(u))return!1}return!0},t}()},function(t,e,n){"use strict";n.d(e,"a",(function(){return N}));var i,o,r,a,s,u,l,c=n(0),f=n(2),d=n(7),p={0:new c.Vector4(.5,.5,.5,1),1:new c.Vector4(.5,.5,.5,1),2:new c.Vector4(.63,.32,.18,1),3:new c.Vector4(0,1,0,1),4:new c.Vector4(0,.8,0,1),5:new c.Vector4(0,.6,0,1),6:new c.Vector4(1,.66,0,1),7:new c.Vector4(1,0,1,1),8:new c.Vector4(1,0,0,1),9:new c.Vector4(0,0,1,1),12:new c.Vector4(1,1,0,1),DEFAULT:new c.Vector4(.3,.6,.6,.5)},h=n(6),v=n(1),m=n(17),g=n(5),y=(i=function(t,e){return(i=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,e){t.__proto__=e}||function(t,e){for(var n in e)e.hasOwnProperty(n)&&(t[n]=e[n])})(t,e)},function(t,e){function n(){this.constructor=t}i(t,e),t.prototype=null===e?Object.create(e):(n.prototype=e.prototype,new n)}),b=function(t,e,n,i){var o,r=arguments.length,a=r<3?e:null===i?i=Object.getOwnPropertyDescriptor(e,n):i;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)a=Reflect.decorate(t,e,n,i);else for(var s=t.length-1;s>=0;s--)(o=t[s])&&(a=(r<3?o(a):r>3?o(e,n,a):o(e,n))||a);return r>3&&a&&Object.defineProperty(e,n,a),a},_=((o={})[v.e.OCTREE]="tree_type_octree",o[v.e.KDTREE]="tree_type_kdtree",o),x=((r={})[v.d.FIXED]="fixed_point_size",r[v.d.ATTENUATED]="attenuated_point_size",r[v.d.ADAPTIVE]="adaptive_point_size",r),T=((a={})[v.b.ATTENUATED]="attenuated_opacity",a[v.b.FIXED]="fixed_opacity",a),A=((s={})[v.c.SQUARE]="square_point_shape",s[v.c.CIRCLE]="circle_point_shape",s[v.c.PARABOLOID]="paraboloid_point_shape",s),O=((u={})[v.a.RGB]="color_type_rgb",u[v.a.COLOR]="color_type_color",u[v.a.DEPTH]="color_type_depth",u[v.a.HEIGHT]="color_type_height",u[v.a.INTENSITY]="color_type_intensity",u[v.a.INTENSITY_GRADIENT]="color_type_intensity_gradient",u[v.a.LOD]="color_type_lod",u[v.a.POINT_INDEX]="color_type_point_index",u[v.a.CLASSIFICATION]="color_type_classification",u[v.a.RETURN_NUMBER]="color_type_return_number",u[v.a.SOURCE]="color_type_source",u[v.a.NORMAL]="color_type_normal",u[v.a.PHONG]="color_type_phong",u[v.a.RGB_HEIGHT]="color_type_rgb_height",u[v.a.COMPOSITE]="color_type_composite",u),w=((l={})[h.a.DISABLED]="clip_disabled",l[h.a.CLIP_OUTSIDE]="clip_outside",l[h.a.HIGHLIGHT_INSIDE]="clip_highlight_inside",l),N=function(t){function e(e){void 0===e&&(e={});var n=t.call(this)||this;n.lights=!1,n.fog=!1,n.numClipBoxes=0,n.clipBoxes=[],n.visibleNodeTextureOffsets=new Map,n._gradient=m.e,n.gradientTexture=Object(g.c)(n._gradient),n._classification=p,n.classificationTexture=Object(g.a)(n._classification),n.uniforms={bbSize:S("fv",[0,0,0]),blendDepthSupplement:S("f",0),blendHardness:S("f",2),classificationLUT:S("t",n.classificationTexture||new c.Texture),clipBoxCount:S("f",0),clipBoxes:S("Matrix4fv",[]),depthMap:S("t",null),diffuse:S("fv",[1,1,1]),fov:S("f",1),gradient:S("t",n.gradientTexture||new c.Texture),heightMax:S("f",1),heightMin:S("f",0),intensityBrightness:S("f",0),intensityContrast:S("f",0),intensityGamma:S("f",1),intensityRange:S("fv",[0,65e3]),isLeafNode:S("b",0),level:S("f",0),maxSize:S("f",f.b),minSize:S("f",f.d),octreeSize:S("f",0),opacity:S("f",1),pcIndex:S("f",0),rgbBrightness:S("f",f.g),rgbContrast:S("f",f.h),rgbGamma:S("f",f.i),screenHeight:S("f",1),screenWidth:S("f",1),size:S("f",1),spacing:S("f",1),toModel:S("Matrix4f",[]),transition:S("f",.5),uColor:S("c",new c.Color(16777215)),visibleNodes:S("t",n.visibleNodesTexture||new c.Texture),vnStart:S("f",0),wClassification:S("f",0),wElevation:S("f",0),wIntensity:S("f",0),wReturnNumber:S("f",0),wRGB:S("f",1),wSourceID:S("f",0),opacityAttenuation:S("f",1),filterByNormalThreshold:S("f",0)},n.useClipBox=!1,n.weighted=!1,n.pointColorType=v.a.RGB,n.pointSizeType=v.d.ADAPTIVE,n.clipMode=h.a.DISABLED,n.useEDL=!1,n.shape=v.c.SQUARE,n.treeType=v.e.OCTREE,n.pointOpacityType=v.b.FIXED,n.useFilterByNormal=!1,n.attributes={position:{type:"fv",value:[]},color:{type:"fv",value:[]},normal:{type:"fv",value:[]},intensity:{type:"f",value:[]},classification:{type:"f",value:[]},returnNumber:{type:"f",value:[]},numberOfReturns:{type:"f",value:[]},pointSourceID:{type:"f",value:[]},indices:{type:"fv",value:[]}};var i=n.visibleNodesTexture=Object(g.b)(2048,1,new c.Color(16777215));return i.minFilter=c.NearestFilter,i.magFilter=c.NearestFilter,n.setUniform("visibleNodes",i),n.treeType=P(e.treeType,v.e.OCTREE),n.size=P(e.size,1),n.minSize=P(e.minSize,2),n.maxSize=P(e.maxSize,50),n.classification=p,n.defaultAttributeValues.normal=[0,0,0],n.defaultAttributeValues.classification=[0,0,0],n.defaultAttributeValues.indices=[0,0,0,0],n.vertexColors=!0,n.updateShaderSource(),n}return y(e,t),e.prototype.dispose=function(){t.prototype.dispose.call(this),this.gradientTexture&&(this.gradientTexture.dispose(),this.gradientTexture=void 0),this.visibleNodesTexture&&(this.visibleNodesTexture.dispose(),this.visibleNodesTexture=void 0),this.clearVisibleNodeTextureOffsets(),this.classificationTexture&&(this.classificationTexture.dispose(),this.classificationTexture=void 0),this.depthMap&&(this.depthMap.dispose(),this.depthMap=void 0)},e.prototype.clearVisibleNodeTextureOffsets=function(){this.visibleNodeTextureOffsets.clear()},e.prototype.updateShaderSource=function(){this.vertexShader=this.applyDefines(n(30).default),this.fragmentShader=this.applyDefines(n(31).default),1===this.opacity?(this.blending=c.NoBlending,this.transparent=!1,this.depthTest=!0,this.depthWrite=!0,this.depthFunc=c.LessEqualDepth):this.opacity<1&&!this.useEDL&&(this.blending=c.AdditiveBlending,this.transparent=!0,this.depthTest=!1,this.depthWrite=!0),this.weighted&&(this.blending=c.AdditiveBlending,this.transparent=!0,this.depthTest=!0,this.depthWrite=!1,this.depthFunc=c.LessEqualDepth),this.needsUpdate=!0},e.prototype.applyDefines=function(t){var e=[];function n(t){t&&e.push("#define "+t)}return n(_[this.treeType]),n(x[this.pointSizeType]),n(A[this.shape]),n(O[this.pointColorType]),n(w[this.clipMode]),n(T[this.pointOpacityType]),this.rgbGamma===f.i&&this.rgbBrightness===f.g&&this.rgbContrast===f.h||n("use_rgb_gamma_contrast_brightness"),this.useFilterByNormal&&n("use_filter_by_normal"),this.useEDL&&n("use_edl"),this.weighted&&n("weighted_splats"),this.numClipBoxes>0&&n("use_clip_box"),n("MAX_POINT_LIGHTS 0"),n("MAX_DIR_LIGHTS 0"),e.push(t),e.join("\n")},e.prototype.setClipBoxes=function(t){if(t){this.clipBoxes=t;var e=this.numClipBoxes!==t.length&&(0===t.length||0===this.numClipBoxes);this.numClipBoxes=t.length,this.setUniform("clipBoxCount",this.numClipBoxes),e&&this.updateShaderSource();for(var n=16*this.numClipBoxes,i=new Float32Array(n),o=0;o<this.numClipBoxes;o++)i.set(t[o].inverse.elements,16*o);for(o=0;o<n;o++)isNaN(i[o])&&(i[o]=1/0);this.setUniform("clipBoxes",i)}},Object.defineProperty(e.prototype,"gradient",{get:function(){return this._gradient},set:function(t){this._gradient!==t&&(this._gradient=t,this.gradientTexture=Object(g.c)(this._gradient),this.setUniform("gradient",this.gradientTexture))},enumerable:!1,configurable:!0}),Object.defineProperty(e.prototype,"classification",{get:function(){return this._classification},set:function(t){for(var e={},n=0,i=Object.keys(t);n<i.length;n++){e[s=i[n]]=t[s].clone()}var o=!1;if(void 0===this._classification)o=!1;else{o=Object.keys(e).length===Object.keys(this._classification).length;for(var r=0,a=Object.keys(e);r<a.length;r++){var s=a[r];o=(o=o&&void 0!==this._classification[s])&&e[s].equals(this._classification[s])}}o||(this._classification=e,this.recomputeClassification())},enumerable:!1,configurable:!0}),e.prototype.recomputeClassification=function(){this.classificationTexture=Object(g.a)(this._classification),this.setUniform("classificationLUT",this.classificationTexture)},Object.defineProperty(e.prototype,"elevationRange",{get:function(){return[this.heightMin,this.heightMax]},set:function(t){this.heightMin=t[0],this.heightMax=t[1]},enumerable:!1,configurable:!0}),e.prototype.getUniform=function(t){return void 0===this.uniforms?void 0:this.uniforms[t].value},e.prototype.setUniform=function(t,e){if(void 0!==this.uniforms){var n=this.uniforms[t];"c"===n.type?n.value.copy(e):e!==n.value&&(n.value=e)}},e.prototype.updateMaterial=function(t,n,i,o){var r=o.getPixelRatio();i.type===f.l?this.fov=i.fov*(Math.PI/180):this.fov=Math.PI/2,this.screenWidth=o.domElement.clientWidth*r,this.screenHeight=o.domElement.clientHeight*r;var a=Math.max(t.scale.x,t.scale.y,t.scale.z);this.spacing=t.pcoGeometry.spacing*a,this.octreeSize=t.pcoGeometry.boundingBox.getSize(e.helperVec3).x,this.pointSizeType!==v.d.ADAPTIVE&&this.pointColorType!==v.a.LOD||this.updateVisibilityTextureData(n)},e.prototype.updateVisibilityTextureData=function(t){t.sort(d.a);var e=new Uint8Array(4*t.length),n=new Array(t.length).fill(1/0);this.visibleNodeTextureOffsets.clear();for(var i=0;i<t.length;i++){var o=t[i];if(this.visibleNodeTextureOffsets.set(o.name,i),i>0){var r=o.name.slice(0,-1),a=this.visibleNodeTextureOffsets.get(r),s=i-a;n[a]=Math.min(n[a],s);var u=4*a;e[u]=e[u]|1<<o.index,e[u+1]=n[a]>>8,e[u+2]=n[a]%256}e[4*i+3]=o.name.length}var l=this.visibleNodesTexture;l&&(l.image.data.set(e),l.needsUpdate=!0)},e.makeOnBeforeRender=function(t,e,n){return function(i,o,r,a,s){var u=s,l=u.uniforms;l.level.value=e.level,l.isLeafNode.value=e.isLeafNode;var c=u.visibleNodeTextureOffsets.get(e.name);void 0!==c&&(l.vnStart.value=c),l.pcIndex.value=void 0!==n?n:t.visibleNodes.indexOf(e),s.uniformsNeedUpdate=!0}},e.helperVec3=new c.Vector3,b([C("bbSize")],e.prototype,"bbSize",void 0),b([C("depthMap")],e.prototype,"depthMap",void 0),b([C("fov")],e.prototype,"fov",void 0),b([C("heightMax")],e.prototype,"heightMax",void 0),b([C("heightMin")],e.prototype,"heightMin",void 0),b([C("intensityBrightness")],e.prototype,"intensityBrightness",void 0),b([C("intensityContrast")],e.prototype,"intensityContrast",void 0),b([C("intensityGamma")],e.prototype,"intensityGamma",void 0),b([C("intensityRange")],e.prototype,"intensityRange",void 0),b([C("maxSize")],e.prototype,"maxSize",void 0),b([C("minSize")],e.prototype,"minSize",void 0),b([C("octreeSize")],e.prototype,"octreeSize",void 0),b([C("opacity",!0)],e.prototype,"opacity",void 0),b([C("rgbBrightness",!0)],e.prototype,"rgbBrightness",void 0),b([C("rgbContrast",!0)],e.prototype,"rgbContrast",void 0),b([C("rgbGamma",!0)],e.prototype,"rgbGamma",void 0),b([C("screenHeight")],e.prototype,"screenHeight",void 0),b([C("screenWidth")],e.prototype,"screenWidth",void 0),b([C("size")],e.prototype,"size",void 0),b([C("spacing")],e.prototype,"spacing",void 0),b([C("transition")],e.prototype,"transition",void 0),b([C("uColor")],e.prototype,"color",void 0),b([C("wClassification")],e.prototype,"weightClassification",void 0),b([C("wElevation")],e.prototype,"weightElevation",void 0),b([C("wIntensity")],e.prototype,"weightIntensity",void 0),b([C("wReturnNumber")],e.prototype,"weightReturnNumber",void 0),b([C("wRGB")],e.prototype,"weightRGB",void 0),b([C("wSourceID")],e.prototype,"weightSourceID",void 0),b([C("opacityAttenuation")],e.prototype,"opacityAttenuation",void 0),b([C("filterByNormalThreshold")],e.prototype,"filterByNormalThreshold",void 0),b([I()],e.prototype,"useClipBox",void 0),b([I()],e.prototype,"weighted",void 0),b([I()],e.prototype,"pointColorType",void 0),b([I()],e.prototype,"pointSizeType",void 0),b([I()],e.prototype,"clipMode",void 0),b([I()],e.prototype,"useEDL",void 0),b([I()],e.prototype,"shape",void 0),b([I()],e.prototype,"treeType",void 0),b([I()],e.prototype,"pointOpacityType",void 0),b([I()],e.prototype,"useFilterByNormal",void 0),e}(c.RawShaderMaterial);function S(t,e){return{type:t,value:e}}function P(t,e){return void 0===t?e:t}function C(t,e){return void 0===e&&(e=!1),function(n,i){Object.defineProperty(n,i,{get:function(){return this.getUniform(t)},set:function(n){n!==this.getUniform(t)&&(this.setUniform(t,n),e&&this.updateShaderSource())}})}}function I(){return function(t,e){var n="_"+e.toString();Object.defineProperty(t,e,{get:function(){return this[n]},set:function(t){t!==this[n]&&(this[n]=t,this.updateShaderSource())}})}}},function(t,e,n){"use strict";n(16);var i=n(20);n.d(e,"loadPOC",(function(){return i.a}));n(21)},function(t,e,n){"use strict";function i(t){this.content=[],this.scoreFunction=t}Object.defineProperty(e,"__esModule",{value:!0}),e.BinaryHeap=i,i.prototype={push:function(t){this.content.push(t),this.bubbleUp(this.content.length-1)},pop:function(){var t=this.content[0],e=this.content.pop();return this.content.length>0&&(this.content[0]=e,this.sinkDown(0)),t},remove:function(t){for(var e=this.content.length,n=0;n<e;n++)if(this.content[n]==t){var i=this.content.pop();if(n==e-1)break;this.content[n]=i,this.bubbleUp(n),this.sinkDown(n);break}},size:function(){return this.content.length},bubbleUp:function(t){for(var e=this.content[t],n=this.scoreFunction(e);t>0;){var i=Math.floor((t+1)/2)-1,o=this.content[i];if(n>=this.scoreFunction(o))break;this.content[i]=e,this.content[t]=o,t=i}},sinkDown:function(t){for(var e=this.content.length,n=this.content[t],i=this.scoreFunction(n);;){var o=2*(t+1),r=o-1,a=null;if(r<e){var s=this.content[r],u=this.scoreFunction(s);u<i&&(a=r)}if(o<e){var l=this.content[o];this.scoreFunction(l)<(null==a?i:u)&&(a=o)}if(null==a)break;this.content[t]=this.content[a],this.content[a]=n,t=a}}}},function(t,e,n){"use strict";n.r(e);var i=n(4);for(var o in i)["default"].indexOf(o)<0&&function(t){n.d(e,t,(function(){return i[t]}))}(o);var r=n(3);n.d(e,"PointAttributeName",(function(){return r.c})),n.d(e,"POINT_ATTRIBUTE_TYPES",(function(){return r.b})),n.d(e,"POINT_ATTRIBUTES",(function(){return r.a})),n.d(e,"PointAttributes",(function(){return r.d}));var a=n(11);n.d(e,"PointCloudOctreeGeometryNode",(function(){return a.a}));var s=n(12);n.d(e,"PointCloudOctreeGeometry",(function(){return s.a}));var u=n(13);n.d(e,"PointCloudOctreeNode",(function(){return u.a}));var l=n(10);n.d(e,"PointCloudOctreePicker",(function(){return l.a}));var c=n(14);n.d(e,"PointCloudOctree",(function(){return c.a}));var f=n(15);n.d(e,"PointCloudTree",(function(){return f.a}));var d=n(23);n.d(e,"QueueItem",(function(){return d.b})),n.d(e,"Potree",(function(){return d.a}));var p=n(22);for(var o in p)["default","PointAttributeName","POINT_ATTRIBUTE_TYPES","POINT_ATTRIBUTES","PointAttributes","PointCloudOctreeGeometryNode","PointCloudOctreeGeometry","PointCloudOctreeNode","PointCloudOctreePicker","PointCloudOctree","PointCloudTree","QueueItem","Potree"].indexOf(o)<0&&function(t){n.d(e,t,(function(){return p[t]}))}(o);var h=n(9);n.d(e,"Version",(function(){return h.a}))},function(t,e,n){"use strict";n.r(e),e.default="precision highp float;\nprecision highp int;\n\nattribute vec3 position;\nattribute vec2 uv;\n\nuniform mat4 modelViewMatrix;\nuniform mat4 projectionMatrix;\n\nvarying vec2 vUv;\n\nvoid main() {\n    vUv = uv;\n\n    gl_Position =   projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n}"},function(t,e,n){"use strict";n.r(e),e.default="precision highp float;\nprecision highp int;\n\nuniform mat4 projectionMatrix;\n\nuniform float screenWidth;\nuniform float screenHeight;\n\nuniform sampler2D map;\n\nvarying vec2 vUv;\n\nvoid main() {\n\n\tfloat dx = 1.0 / screenWidth;\n\tfloat dy = 1.0 / screenHeight;\n\n\tvec3 color = vec3(0.0, 0.0, 0.0);\n\tcolor += texture2D(map, vUv + vec2(-dx, -dy)).rgb;\n\tcolor += texture2D(map, vUv + vec2(  0, -dy)).rgb;\n\tcolor += texture2D(map, vUv + vec2(+dx, -dy)).rgb;\n\tcolor += texture2D(map, vUv + vec2(-dx,   0)).rgb;\n\tcolor += texture2D(map, vUv + vec2(  0,   0)).rgb;\n\tcolor += texture2D(map, vUv + vec2(+dx,   0)).rgb;\n\tcolor += texture2D(map, vUv + vec2(-dx,  dy)).rgb;\n\tcolor += texture2D(map, vUv + vec2(  0,  dy)).rgb;\n\tcolor += texture2D(map, vUv + vec2(+dx,  dy)).rgb;\n    \n\tcolor = color / 9.0;\n\t\n\tgl_FragColor = vec4(color, 1.0);\n\t\n\t\n}"},function(t,e,n){"use strict";n.r(e),e.default="precision highp float;\nprecision highp int;\n\n#define max_clip_boxes 30\n\nattribute vec3 position;\nattribute vec3 color;\nattribute vec3 normal;\nattribute float intensity;\nattribute float classification;\nattribute float returnNumber;\nattribute float numberOfReturns;\nattribute float pointSourceID;\nattribute vec4 indices;\n\nuniform mat4 modelMatrix;\nuniform mat4 modelViewMatrix;\nuniform mat4 projectionMatrix;\nuniform mat4 viewMatrix;\nuniform mat3 normalMatrix;\n\nuniform float pcIndex;\n\nuniform float screenWidth;\nuniform float screenHeight;\nuniform float fov;\nuniform float spacing;\n\n#if defined use_clip_box\n\tuniform mat4 clipBoxes[max_clip_boxes];\n#endif\n\nuniform float heightMin;\nuniform float heightMax;\nuniform float size; // pixel size factor\nuniform float minSize; // minimum pixel size\nuniform float maxSize; // maximum pixel size\nuniform float octreeSize;\nuniform vec3 bbSize;\nuniform vec3 uColor;\nuniform float opacity;\nuniform float clipBoxCount;\nuniform float level;\nuniform float vnStart;\nuniform bool isLeafNode;\n\nuniform float filterByNormalThreshold;\nuniform vec2 intensityRange;\nuniform float opacityAttenuation;\nuniform float intensityGamma;\nuniform float intensityContrast;\nuniform float intensityBrightness;\nuniform float rgbGamma;\nuniform float rgbContrast;\nuniform float rgbBrightness;\nuniform float transition;\nuniform float wRGB;\nuniform float wIntensity;\nuniform float wElevation;\nuniform float wClassification;\nuniform float wReturnNumber;\nuniform float wSourceID;\n\nuniform sampler2D visibleNodes;\nuniform sampler2D gradient;\nuniform sampler2D classificationLUT;\nuniform sampler2D depthMap;\n\nvarying vec3 vColor;\n\n#if !defined(color_type_point_index)\n\tvarying float vOpacity;\n#endif\n\n#if defined(weighted_splats)\n\tvarying float vLinearDepth;\n#endif\n\n#if !defined(paraboloid_point_shape) && defined(use_edl)\n\tvarying float vLogDepth;\n#endif\n\n#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape)\n\tvarying vec3 vViewPosition;\n#endif\n\n#if defined(weighted_splats) || defined(paraboloid_point_shape)\n\tvarying float vRadius;\n#endif\n\n#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0)\n\tvarying vec3 vNormal;\n#endif\n\n\n// ---------------------\n// OCTREE\n// ---------------------\n\n#if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_octree)\n\n/**\n * Rounds the specified number to the closest integer.\n */\nfloat round(float number){\n\treturn floor(number + 0.5);\n}\n\n/**\n * Gets the number of 1-bits up to inclusive index position.\n * \n * number is treated as if it were an integer in the range 0-255\n */\nint numberOfOnes(int number, int index) {\n\tint numOnes = 0;\n\tint tmp = 128;\n\tfor (int i = 7; i >= 0; i--) {\n\n\t\tif (number >= tmp) {\n\t\t\tnumber = number - tmp;\n\n\t\t\tif (i <= index) {\n\t\t\t\tnumOnes++;\n\t\t\t}\n\t\t}\n\n\t\ttmp = tmp / 2;\n\t}\n\n\treturn numOnes;\n}\n\n/**\n * Checks whether the bit at index is 1.0\n *\n * number is treated as if it were an integer in the range 0-255\n */\nbool isBitSet(int number, int index){\n\n\t// weird multi else if due to lack of proper array, int and bitwise support in WebGL 1.0\n\tint powi = 1;\n\tif (index == 0) {\n\t\tpowi = 1;\n\t} else if (index == 1) {\n\t\tpowi = 2;\n\t} else if (index == 2) {\n\t\tpowi = 4;\n\t} else if (index == 3) {\n\t\tpowi = 8;\n\t} else if (index == 4) {\n\t\tpowi = 16;\n\t} else if (index == 5) {\n\t\tpowi = 32;\n\t} else if (index == 6) {\n\t\tpowi = 64;\n\t} else if (index == 7) {\n\t\tpowi = 128;\n\t}\n\n\tint ndp = number / powi;\n\n\treturn mod(float(ndp), 2.0) != 0.0;\n}\n\n/**\n * Gets the the LOD at the point position.\n */\nfloat getLOD() {\n\tvec3 offset = vec3(0.0, 0.0, 0.0);\n\tint iOffset = int(vnStart);\n\tfloat depth = level;\n\n\tfor (float i = 0.0; i <= 30.0; i++) {\n\t\tfloat nodeSizeAtLevel = octreeSize  / pow(2.0, i + level + 0.0);\n\t\t\n\t\tvec3 index3d = (position-offset) / nodeSizeAtLevel;\n\t\tindex3d = floor(index3d + 0.5);\n\t\tint index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));\n\t\t\n\t\tvec4 value = texture2D(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0));\n\t\tint mask = int(round(value.r * 255.0));\n\n\t\tif (isBitSet(mask, index)) {\n\t\t\t// there are more visible child nodes at this position\n\t\t\tint advanceG = int(round(value.g * 255.0)) * 256;\n\t\t\tint advanceB = int(round(value.b * 255.0));\n\t\t\tint advanceChild = numberOfOnes(mask, index - 1);\n\t\t\tint advance = advanceG + advanceB + advanceChild;\n\n\t\t\tiOffset = iOffset + advance;\n\n\t\t\tdepth++;\n\t\t} else {\n\t\t\treturn value.a * 255.0; // no more visible child nodes at this position\n\t\t}\n\t\t\n\t\toffset = offset + (vec3(1.0, 1.0, 1.0) * nodeSizeAtLevel * 0.5) * index3d;  \n\t}\n\t\t\n\treturn depth;\n}\n\nfloat getPointSizeAttenuation() {\n\treturn 0.5 * pow(2.0, getLOD());\n}\n\n#endif\n\n// ---------------------\n// KD-TREE\n// ---------------------\n\n#if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_kdtree)\n\nfloat getLOD() {\n\tvec3 offset = vec3(0.0, 0.0, 0.0);\n\tfloat intOffset = 0.0;\n\tfloat depth = 0.0;\n\t\t\t\n\tvec3 size = bbSize;\t\n\tvec3 pos = position;\n\t\t\n\tfor (float i = 0.0; i <= 1000.0; i++) {\n\t\t\n\t\tvec4 value = texture2D(visibleNodes, vec2(intOffset / 2048.0, 0.0));\n\t\t\n\t\tint children = int(value.r * 255.0);\n\t\tfloat next = value.g * 255.0;\n\t\tint split = int(value.b * 255.0);\n\t\t\n\t\tif (next == 0.0) {\n\t\t \treturn depth;\n\t\t}\n\t\t\n\t\tvec3 splitv = vec3(0.0, 0.0, 0.0);\n\t\tif (split == 1) {\n\t\t\tsplitv.x = 1.0;\n\t\t} else if (split == 2) {\n\t\t \tsplitv.y = 1.0;\n\t\t} else if (split == 4) {\n\t\t \tsplitv.z = 1.0;\n\t\t}\n\t\t\n\t\tintOffset = intOffset + next;\n\t\t\n\t\tfloat factor = length(pos * splitv / size);\n\t\tif (factor < 0.5) {\n\t\t \t// left\n\t\t\tif (children == 0 || children == 2) {\n\t\t\t\treturn depth;\n\t\t\t}\n\t\t} else {\n\t\t\t// right\n\t\t\tpos = pos - size * splitv * 0.5;\n\t\t\tif (children == 0 || children == 1) {\n\t\t\t\treturn depth;\n\t\t\t}\n\t\t\tif (children == 3) {\n\t\t\t\tintOffset = intOffset + 1.0;\n\t\t\t}\n\t\t}\n\t\tsize = size * ((1.0 - (splitv + 1.0) / 2.0) + 0.5);\n\t\t\n\t\tdepth++;\n\t}\n\t\t\n\t\t\n\treturn depth;\t\n}\n\nfloat getPointSizeAttenuation() {\n\treturn 0.5 * pow(1.3, getLOD());\n}\n\n#endif\n\n// formula adapted from: http://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/\nfloat getContrastFactor(float contrast) {\n\treturn (1.0158730158730156 * (contrast + 1.0)) / (1.0158730158730156 - contrast);\n}\n\nvec3 getRGB() {\n\t#if defined(use_rgb_gamma_contrast_brightness)\n\t  vec3 rgb = color;\n\t\trgb = pow(rgb, vec3(rgbGamma));\n\t\trgb = rgb + rgbBrightness;\n\t\trgb = (rgb - 0.5) * getContrastFactor(rgbContrast) + 0.5;\n\t\trgb = clamp(rgb, 0.0, 1.0);\n\t\treturn rgb;\n\t#else\n\t\treturn color;\n\t#endif\n}\n\nfloat getIntensity() {\n\tfloat w = (intensity - intensityRange.x) / (intensityRange.y - intensityRange.x);\n\tw = pow(w, intensityGamma);\n\tw = w + intensityBrightness;\n\tw = (w - 0.5) * getContrastFactor(intensityContrast) + 0.5;\n\tw = clamp(w, 0.0, 1.0);\n\t\n\treturn w;\n}\n\nvec3 getElevation() {\n\tvec4 world = modelMatrix * vec4( position, 1.0 );\n\tfloat w = (world.z - heightMin) / (heightMax-heightMin);\n\tvec3 cElevation = texture2D(gradient, vec2(w,1.0-w)).rgb;\n\t\n\treturn cElevation;\n}\n\nvec4 getClassification() {\n\tvec2 uv = vec2(classification / 255.0, 0.5);\n\tvec4 classColor = texture2D(classificationLUT, uv);\n\t\n\treturn classColor;\n}\n\nvec3 getReturnNumber() {\n\tif (numberOfReturns == 1.0) {\n\t\treturn vec3(1.0, 1.0, 0.0);\n\t} else {\n\t\tif (returnNumber == 1.0) {\n\t\t\treturn vec3(1.0, 0.0, 0.0);\n\t\t} else if (returnNumber == numberOfReturns) {\n\t\t\treturn vec3(0.0, 0.0, 1.0);\n\t\t} else {\n\t\t\treturn vec3(0.0, 1.0, 0.0);\n\t\t}\n\t}\n}\n\nvec3 getSourceID() {\n\tfloat w = mod(pointSourceID, 10.0) / 10.0;\n\treturn texture2D(gradient, vec2(w, 1.0 - w)).rgb;\n}\n\nvec3 getCompositeColor() {\n\tvec3 c;\n\tfloat w;\n\n\tc += wRGB * getRGB();\n\tw += wRGB;\n\t\n\tc += wIntensity * getIntensity() * vec3(1.0, 1.0, 1.0);\n\tw += wIntensity;\n\t\n\tc += wElevation * getElevation();\n\tw += wElevation;\n\t\n\tc += wReturnNumber * getReturnNumber();\n\tw += wReturnNumber;\n\t\n\tc += wSourceID * getSourceID();\n\tw += wSourceID;\n\t\n\tvec4 cl = wClassification * getClassification();\n\tc += cl.a * cl.rgb;\n\tw += wClassification * cl.a;\n\n\tc = c / w;\n\t\n\tif (w == 0.0) {\n\t\tgl_Position = vec4(100.0, 100.0, 100.0, 0.0);\n\t}\n\t\n\treturn c;\n}\n\nvoid main() {\n\tvec4 mvPosition = modelViewMatrix * vec4(position, 1.0);\n\n\tgl_Position = projectionMatrix * mvPosition;\n\n\t#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape)\n\t\tvViewPosition = mvPosition.xyz;\n\t#endif\n\n\t#if defined weighted_splats\n\t\tvLinearDepth = gl_Position.w;\n\t#endif\n\n\t#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0)\n\t\tvNormal = normalize(normalMatrix * normal);\n\t#endif\n\n\t#if !defined(paraboloid_point_shape) && defined(use_edl)\n\t\tvLogDepth = log2(-mvPosition.z);\n\t#endif\n\n\t// ---------------------\n\t// POINT SIZE\n\t// ---------------------\n\n\tfloat pointSize = 1.0;\n\tfloat slope = tan(fov / 2.0);\n\tfloat projFactor =  -0.5 * screenHeight / (slope * mvPosition.z);\n\n\t#if defined fixed_point_size\n\t\tpointSize = size;\n\t#elif defined attenuated_point_size\n\t\tpointSize = size * spacing * projFactor;\n\t#elif defined adaptive_point_size\n\t\tfloat worldSpaceSize = 2.0 * size * spacing / getPointSizeAttenuation();\n\t\tpointSize = worldSpaceSize * projFactor;\n\t#endif\n\n\tpointSize = max(minSize, pointSize);\n\tpointSize = min(maxSize, pointSize);\n\n\t#if defined(weighted_splats) || defined(paraboloid_point_shape)\n\t\tvRadius = pointSize / projFactor;\n\t#endif\n\t\n\tgl_PointSize = pointSize;\n\n\t// ---------------------\n\t// OPACITY\n\t// ---------------------\n\n\t#ifndef color_type_point_index\n\t\t#ifdef attenuated_opacity\n\t\t\tvOpacity = opacity * exp(-length(-mvPosition.xyz) / opacityAttenuation);\n\t\t#else\n\t\t\tvOpacity = opacity;\n\t\t#endif\n\t#endif\n\n\t// ---------------------\n\t// FILTERING\n\t// ---------------------\n\n\t#ifdef use_filter_by_normal\n\t\tif(abs((modelViewMatrix * vec4(normal, 0.0)).z) > filterByNormalThreshold) {\n\t\t\t// Move point outside clip space space to discard it.\n\t\t\tgl_Position = vec4(0.0, 0.0, 2.0, 1.0);\n\t\t}\n\t#endif\n\n\t// ---------------------\n\t// POINT COLOR\n\t// ---------------------\t\n\n\t#ifdef color_type_rgb\n\t\tvColor = getRGB();\n\t#elif defined color_type_height\n\t\tvColor = getElevation();\n\t#elif defined color_type_rgb_height\n\t\tvec3 cHeight = getElevation();\n\t\tvColor = (1.0 - transition) * getRGB() + transition * cHeight;\n\t#elif defined color_type_depth\n\t\tfloat linearDepth = -mvPosition.z ;\n\t\tfloat expDepth = (gl_Position.z / gl_Position.w) * 0.5 + 0.5;\n\t\tvColor = vec3(linearDepth, expDepth, 0.0);\n\t#elif defined color_type_intensity\n\t\tfloat w = getIntensity();\n\t\tvColor = vec3(w, w, w);\n\t#elif defined color_type_intensity_gradient\n\t\tfloat w = getIntensity();\n\t\tvColor = texture2D(gradient, vec2(w, 1.0 - w)).rgb;\n\t#elif defined color_type_color\n\t\tvColor = uColor;\n\t#elif defined color_type_lod\n\tfloat w = getLOD() / 10.0;\n\tvColor = texture2D(gradient, vec2(w, 1.0 - w)).rgb;\n\t#elif defined color_type_point_index\n\t\tvColor = indices.rgb;\n\t#elif defined color_type_classification\n\t  vec4 cl = getClassification(); \n\t\tvColor = cl.rgb;\n\t#elif defined color_type_return_number\n\t\tvColor = getReturnNumber();\n\t#elif defined color_type_source\n\t\tvColor = getSourceID();\n\t#elif defined color_type_normal\n\t\tvColor = (modelMatrix * vec4(normal, 0.0)).xyz;\n\t#elif defined color_type_phong\n\t\tvColor = color;\n\t#elif defined color_type_composite\n\t\tvColor = getCompositeColor();\n\t#endif\n\t\n\t#if !defined color_type_composite && defined color_type_classification\n\t\tif (cl.a == 0.0) {\n\t\t\tgl_Position = vec4(100.0, 100.0, 100.0, 0.0);\n\t\t\treturn;\n\t\t}\n\t#endif\n\n\t// ---------------------\n\t// CLIPPING\n\t// ---------------------\n\n\t#if defined use_clip_box\n\t\tbool insideAny = false;\n\t\tfor (int i = 0; i < max_clip_boxes; i++) {\n\t\t\tif (i == int(clipBoxCount)) {\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\n\t\t\tvec4 clipPosition = clipBoxes[i] * modelMatrix * vec4(position, 1.0);\n\t\t\tbool inside = -0.5 <= clipPosition.x && clipPosition.x <= 0.5;\n\t\t\tinside = inside && -0.5 <= clipPosition.y && clipPosition.y <= 0.5;\n\t\t\tinside = inside && -0.5 <= clipPosition.z && clipPosition.z <= 0.5;\n\t\t\tinsideAny = insideAny || inside;\n\t\t}\n\n\t\tif (!insideAny) {\n\t\t\t#if defined clip_outside\n\t\t\t\tgl_Position = vec4(1000.0, 1000.0, 1000.0, 1.0);\n\t\t\t#elif defined clip_highlight_inside && !defined(color_type_depth)\n\t\t\t\tfloat c = (vColor.r + vColor.g + vColor.b) / 6.0;\n\t\t\t#endif\n\t\t} else {\n\t\t\t#if defined clip_highlight_inside\n\t\t\t\tvColor.r += 0.5;\n\t\t\t#endif\n\t\t}\n\t#endif\n}"},function(t,e,n){"use strict";n.r(e),e.default="precision highp float;\nprecision highp int;\n\n#if defined paraboloid_point_shape\n\t#extension GL_EXT_frag_depth : enable\n#endif\n\nuniform mat4 viewMatrix;\nuniform vec3 cameraPosition;\n\nuniform mat4 projectionMatrix;\nuniform float opacity;\n\nuniform float blendHardness;\nuniform float blendDepthSupplement;\nuniform float fov;\nuniform float spacing;\nuniform float pcIndex;\nuniform float screenWidth;\nuniform float screenHeight;\n\nuniform sampler2D depthMap;\n\nvarying vec3 vColor;\n\n#if !defined(color_type_point_index)\n\tvarying float vOpacity;\n#endif\n\n#if defined(weighted_splats)\n\tvarying float vLinearDepth;\n#endif\n\n#if !defined(paraboloid_point_shape) && defined(use_edl)\n\tvarying float vLogDepth;\n#endif\n\n#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape)\n\tvarying vec3 vViewPosition;\n#endif\n\n#if defined(weighted_splats) || defined(paraboloid_point_shape)\n\tvarying float vRadius;\n#endif\n\n#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0)\n\tvarying vec3 vNormal;\n#endif\n\nfloat specularStrength = 1.0;\n\nvoid main() {\n\tvec3 color = vColor;\n\tfloat depth = gl_FragCoord.z;\n\n\t#if defined(circle_point_shape) || defined(paraboloid_point_shape) || defined (weighted_splats)\n\t\tfloat u = 2.0 * gl_PointCoord.x - 1.0;\n\t\tfloat v = 2.0 * gl_PointCoord.y - 1.0;\n\t#endif\n\t\n\t#if defined(circle_point_shape) || defined (weighted_splats)\n\t\tfloat cc = u*u + v*v;\n\t\tif(cc > 1.0){\n\t\t\tdiscard;\n\t\t}\n\t#endif\n\t\n\t#if defined weighted_splats\n\t\tvec2 uv = gl_FragCoord.xy / vec2(screenWidth, screenHeight);\n\t\tfloat sDepth = texture2D(depthMap, uv).r;\n\t\tif(vLinearDepth > sDepth + vRadius + blendDepthSupplement){\n\t\t\tdiscard;\n\t\t}\n\t#endif\n\t\t\n\t#if defined color_type_point_index\n\t\tgl_FragColor = vec4(color, pcIndex / 255.0);\n\t#else\n\t\tgl_FragColor = vec4(color, vOpacity);\n\t#endif\n\n\t#if defined(color_type_phong)\n\t\t#if MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0\n\t\t\tvec3 normal = normalize( vNormal );\n\t\t\tnormal.z = abs(normal.z);\n\n\t\t\tvec3 viewPosition = normalize( vViewPosition );\n\t\t#endif\n\n\t\t// code taken from three.js phong light fragment shader\n\t\n\t\t#if MAX_POINT_LIGHTS > 0\n\n\t\t\tvec3 pointDiffuse = vec3( 0.0 );\n\t\t\tvec3 pointSpecular = vec3( 0.0 );\n\n\t\t\tfor ( int i = 0; i < MAX_POINT_LIGHTS; i ++ ) {\n\n\t\t\t\tvec4 lPosition = viewMatrix * vec4( pointLightPosition[ i ], 1.0 );\n\t\t\t\tvec3 lVector = lPosition.xyz + vViewPosition.xyz;\n\n\t\t\t\tfloat lDistance = 1.0;\n\t\t\t\tif ( pointLightDistance[ i ] > 0.0 )\n\t\t\t\t\tlDistance = 1.0 - min( ( length( lVector ) / pointLightDistance[ i ] ), 1.0 );\n\n\t\t\t\tlVector = normalize( lVector );\n\n\t\t\t\t\t\t// diffuse\n\n\t\t\t\tfloat dotProduct = dot( normal, lVector );\n\n\t\t\t\t#ifdef WRAP_AROUND\n\n\t\t\t\t\tfloat pointDiffuseWeightFull = max( dotProduct, 0.0 );\n\t\t\t\t\tfloat pointDiffuseWeightHalf = max( 0.5 * dotProduct + 0.5, 0.0 );\n\n\t\t\t\t\tvec3 pointDiffuseWeight = mix( vec3( pointDiffuseWeightFull ), vec3( pointDiffuseWeightHalf ), wrapRGB );\n\n\t\t\t\t#else\n\n\t\t\t\t\tfloat pointDiffuseWeight = max( dotProduct, 0.0 );\n\n\t\t\t\t#endif\n\n\t\t\t\tpointDiffuse += diffuse * pointLightColor[ i ] * pointDiffuseWeight * lDistance;\n\n\t\t\t\t// specular\n\n\t\t\t\tvec3 pointHalfVector = normalize( lVector + viewPosition );\n\t\t\t\tfloat pointDotNormalHalf = max( dot( normal, pointHalfVector ), 0.0 );\n\t\t\t\tfloat pointSpecularWeight = specularStrength * max( pow( pointDotNormalHalf, shininess ), 0.0 );\n\n\t\t\t\tfloat specularNormalization = ( shininess + 2.0 ) / 8.0;\n\n\t\t\t\tvec3 schlick = specular + vec3( 1.0 - specular ) * pow( max( 1.0 - dot( lVector, pointHalfVector ), 0.0 ), 5.0 );\n\t\t\t\tpointSpecular += schlick * pointLightColor[ i ] * pointSpecularWeight * pointDiffuseWeight * lDistance * specularNormalization;\n\t\t\t\tpointSpecular = vec3(0.0, 0.0, 0.0);\n\t\t\t}\n\t\t\n\t\t#endif\n\t\t\n\t\t#if MAX_DIR_LIGHTS > 0\n\n\t\t\tvec3 dirDiffuse = vec3( 0.0 );\n\t\t\tvec3 dirSpecular = vec3( 0.0 );\n\n\t\t\tfor( int i = 0; i < MAX_DIR_LIGHTS; i ++ ) {\n\n\t\t\t\tvec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );\n\t\t\t\tvec3 dirVector = normalize( lDirection.xyz );\n\n\t\t\t\t\t\t// diffuse\n\n\t\t\t\tfloat dotProduct = dot( normal, dirVector );\n\n\t\t\t\t#ifdef WRAP_AROUND\n\n\t\t\t\t\tfloat dirDiffuseWeightFull = max( dotProduct, 0.0 );\n\t\t\t\t\tfloat dirDiffuseWeightHalf = max( 0.5 * dotProduct + 0.5, 0.0 );\n\n\t\t\t\t\tvec3 dirDiffuseWeight = mix( vec3( dirDiffuseWeightFull ), vec3( dirDiffuseWeightHalf ), wrapRGB );\n\n\t\t\t\t#else\n\n\t\t\t\t\tfloat dirDiffuseWeight = max( dotProduct, 0.0 );\n\n\t\t\t\t#endif\n\n\t\t\t\tdirDiffuse += diffuse * directionalLightColor[ i ] * dirDiffuseWeight;\n\n\t\t\t\t// specular\n\n\t\t\t\tvec3 dirHalfVector = normalize( dirVector + viewPosition );\n\t\t\t\tfloat dirDotNormalHalf = max( dot( normal, dirHalfVector ), 0.0 );\n\t\t\t\tfloat dirSpecularWeight = specularStrength * max( pow( dirDotNormalHalf, shininess ), 0.0 );\n\n\t\t\t\tfloat specularNormalization = ( shininess + 2.0 ) / 8.0;\n\n\t\t\t\tvec3 schlick = specular + vec3( 1.0 - specular ) * pow( max( 1.0 - dot( dirVector, dirHalfVector ), 0.0 ), 5.0 );\n\t\t\t\tdirSpecular += schlick * directionalLightColor[ i ] * dirSpecularWeight * dirDiffuseWeight * specularNormalization;\n\t\t\t}\n\n\t\t#endif\n\t\t\n\t\tvec3 totalDiffuse = vec3( 0.0 );\n\t\tvec3 totalSpecular = vec3( 0.0 );\n\t\t\n\t\t#if MAX_POINT_LIGHTS > 0\n\n\t\t\ttotalDiffuse += pointDiffuse;\n\t\t\ttotalSpecular += pointSpecular;\n\n\t\t#endif\n\t\t\n\t\t#if MAX_DIR_LIGHTS > 0\n\n\t\t\ttotalDiffuse += dirDiffuse;\n\t\t\ttotalSpecular += dirSpecular;\n\n\t\t#endif\n\t\t\n\t\tgl_FragColor.xyz = gl_FragColor.xyz * ( emissive + totalDiffuse + ambientLightColor * ambient ) + totalSpecular;\n\n\t#endif\n\t\n\t#if defined weighted_splats\n\t    //float w = pow(1.0 - (u*u + v*v), blendHardness);\n\t\t\n\t\tfloat wx = 2.0 * length(2.0 * gl_PointCoord - 1.0);\n\t\tfloat w = exp(-wx * wx * 0.5);\n\t\t\n\t\t//float distance = length(2.0 * gl_PointCoord - 1.0);\n\t\t//float w = exp( -(distance * distance) / blendHardness);\n\t\t\n\t\tgl_FragColor.rgb = gl_FragColor.rgb * w;\n\t\tgl_FragColor.a = w;\n\t#endif\n\t\n\t#if defined paraboloid_point_shape\n\t\tfloat wi = 0.0 - ( u*u + v*v);\n\t\tvec4 pos = vec4(vViewPosition, 1.0);\n\t\tpos.z += wi * vRadius;\n\t\tfloat linearDepth = -pos.z;\n\t\tpos = projectionMatrix * pos;\n\t\tpos = pos / pos.w;\n\t\tfloat expDepth = pos.z;\n\t\tdepth = (pos.z + 1.0) / 2.0;\n\t\tgl_FragDepthEXT = depth;\n\t\t\n\t\t#if defined(color_type_depth)\n\t\t\tgl_FragColor.r = linearDepth;\n\t\t\tgl_FragColor.g = expDepth;\n\t\t#endif\n\t\t\n\t\t#if defined(use_edl)\n\t\t\tgl_FragColor.a = log2(linearDepth);\n\t\t#endif\n\t\t\n\t#else\n\t\t#if defined(use_edl)\n\t\t\tgl_FragColor.a = vLogDepth;\n\t\t#endif\n\t#endif\t\n}\n"},function(t,e,n){t.exports=function(){return n(33)('!function(t){var e={};function r(n){if(e[n])return e[n].exports;var i=e[n]={i:n,l:!1,exports:{}};return t[n].call(i.exports,i,i.exports,r),i.l=!0,i.exports}r.m=t,r.c=e,r.d=function(t,e,n){r.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:n})},r.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},r.t=function(t,e){if(1&e&&(t=r(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var i in t)r.d(n,i,function(e){return t[e]}.bind(null,i));return n},r.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return r.d(e,"a",e),e},r.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},r.p="",r(r.s=0)}([function(t,e,r){"use strict";var n=r(1);onmessage=n.handleMessage},function(t,e,r){"use strict";var n;r.r(e),r.d(e,"handleMessage",(function(){return M})),function(t){t[t.POSITION_CARTESIAN=0]="POSITION_CARTESIAN",t[t.COLOR_PACKED=1]="COLOR_PACKED",t[t.COLOR_FLOATS_1=2]="COLOR_FLOATS_1",t[t.COLOR_FLOATS_255=3]="COLOR_FLOATS_255",t[t.NORMAL_FLOATS=4]="NORMAL_FLOATS",t[t.FILLER=5]="FILLER",t[t.INTENSITY=6]="INTENSITY",t[t.CLASSIFICATION=7]="CLASSIFICATION",t[t.NORMAL_SPHEREMAPPED=8]="NORMAL_SPHEREMAPPED",t[t.NORMAL_OCT16=9]="NORMAL_OCT16",t[t.NORMAL=10]="NORMAL"}(n||(n={}));var i={ordinal:1,size:4},a={ordinal:2,size:1},o={ordinal:3,size:1},u={ordinal:5,size:2};function s(t,e,r){return{name:t,type:e,numElements:r,byteSize:r*e.size}}var f=s(n.COLOR_PACKED,a,4),A={POSITION_CARTESIAN:s(n.POSITION_CARTESIAN,i,3),RGBA_PACKED:f,COLOR_PACKED:f,RGB_PACKED:s(n.COLOR_PACKED,a,3),NORMAL_FLOATS:s(n.NORMAL_FLOATS,i,3),FILLER_1B:s(n.FILLER,o,1),INTENSITY:s(n.INTENSITY,u,1),CLASSIFICATION:s(n.CLASSIFICATION,o,1),NORMAL_SPHEREMAPPED:s(n.NORMAL_SPHEREMAPPED,o,2),NORMAL_OCT16:s(n.NORMAL_OCT16,o,2),NORMAL:s(n.NORMAL,i,3)};!function(){function t(t){void 0===t&&(t=[]),this.attributes=[],this.byteSize=0,this.size=0;for(var e=0;e<t.length;e++){var r=t[e],n=A[r];this.attributes.push(n),this.byteSize+=n.byteSize,this.size++}}t.prototype.add=function(t){this.attributes.push(t),this.byteSize+=t.byteSize,this.size++},t.prototype.hasColors=function(){return void 0!==this.attributes.find(O)},t.prototype.hasNormals=function(){return void 0!==this.attributes.find(b)}}();function O(t){return t.name===n.COLOR_PACKED}function b(t){var e=t.name;return e===n.NORMAL_SPHEREMAPPED||e===n.NORMAL_FLOATS||e===n.NORMAL||e===n.NORMAL_OCT16}var c=function(){function t(t){this.versionMinor=0,this.version=t;var e=-1===t.indexOf(".")?t.length:t.indexOf(".");this.versionMajor=parseInt(t.substr(0,e),10),this.versionMinor=parseInt(t.substr(e+1),10),isNaN(this.versionMinor)&&(this.versionMinor=0)}return t.prototype.newerThan=function(e){var r=new t(e);return this.versionMajor>r.versionMajor||this.versionMajor===r.versionMajor&&this.versionMinor>r.versionMinor},t.prototype.equalOrHigher=function(e){var r=new t(e);return this.versionMajor>r.versionMajor||this.versionMajor===r.versionMajor&&this.versionMinor>=r.versionMinor},t.prototype.upTo=function(t){return!this.newerThan(t)},t}(),h=function(){function t(t){this.tmp=new ArrayBuffer(4),this.tmpf=new Float32Array(this.tmp),this.tmpu8=new Uint8Array(this.tmp),this.u8=new Uint8Array(t)}return t.prototype.getUint32=function(t){return this.u8[t+3]<<24|this.u8[t+2]<<16|this.u8[t+1]<<8|this.u8[t]},t.prototype.getUint16=function(t){return this.u8[t+1]<<8|this.u8[t]},t.prototype.getFloat32=function(t){var e=this.tmpu8,r=this.u8,n=this.tmpf;return e[0]=r[t+0],e[1]=r[t+1],e[2]=r[t+2],e[3]=r[t+3],n[0]},t.prototype.getUint8=function(t){return this.u8[t]},t}(),I=Math.sign||function(t){return 0==(t=+t)||t!=t?t:t<0?-1:1};function M(t){for(var e=t.data.buffer,r=t.data.pointAttributes,i={attributeBuffers:{},currentOffset:0,data:new h(e),mean:[0,0,0],nodeOffset:t.data.offset,numPoints:t.data.buffer.byteLength/r.byteSize,pointAttributes:r,scale:t.data.scale,tightBoxMax:[Number.NEGATIVE_INFINITY,Number.NEGATIVE_INFINITY,Number.NEGATIVE_INFINITY],tightBoxMin:[Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY],transferables:[],version:new c(t.data.version)},a=0,o=i.pointAttributes.attributes;a<o.length;a++){var u=o[a];S(u,i),i.currentOffset+=u.byteSize}for(var s=new ArrayBuffer(4*i.numPoints),f=new Uint32Array(s),O=0;O<i.numPoints;O++)f[O]=O;i.attributeBuffers[n.CLASSIFICATION]||function(t){for(var e=new ArrayBuffer(4*t.numPoints),r=new Float32Array(e),i=0;i<t.numPoints;i++)r[i]=0;t.attributeBuffers[n.CLASSIFICATION]={buffer:e,attribute:A.CLASSIFICATION}}(i);var b={buffer:e,mean:i.mean,attributeBuffers:i.attributeBuffers,tightBoundingBox:{min:i.tightBoxMin,max:i.tightBoxMax},indices:s};postMessage(b,i.transferables)}function S(t,e){var r=function(t,e){switch(t.name){case n.POSITION_CARTESIAN:return function(t,e){for(var r=new ArrayBuffer(4*e.numPoints*3),n=new Float32Array(r),i=0;i<e.numPoints;i++){var a=void 0,o=void 0,u=void 0;e.version.newerThan("1.3")?(a=e.data.getUint32(e.currentOffset+i*e.pointAttributes.byteSize+0)*e.scale,o=e.data.getUint32(e.currentOffset+i*e.pointAttributes.byteSize+4)*e.scale,u=e.data.getUint32(e.currentOffset+i*e.pointAttributes.byteSize+8)*e.scale):(a=e.data.getFloat32(i*e.pointAttributes.byteSize+0)+e.nodeOffset[0],o=e.data.getFloat32(i*e.pointAttributes.byteSize+4)+e.nodeOffset[1],u=e.data.getFloat32(i*e.pointAttributes.byteSize+8)+e.nodeOffset[2]),n[3*i+0]=a,n[3*i+1]=o,n[3*i+2]=u,e.mean[0]+=a/e.numPoints,e.mean[1]+=o/e.numPoints,e.mean[2]+=u/e.numPoints,e.tightBoxMin[0]=Math.min(e.tightBoxMin[0],a),e.tightBoxMin[1]=Math.min(e.tightBoxMin[1],o),e.tightBoxMin[2]=Math.min(e.tightBoxMin[2],u),e.tightBoxMax[0]=Math.max(e.tightBoxMax[0],a),e.tightBoxMax[1]=Math.max(e.tightBoxMax[1],o),e.tightBoxMax[2]=Math.max(e.tightBoxMax[2],u)}return{buffer:r,attribute:t}}(t,e);case n.COLOR_PACKED:return function(t,e){for(var r=new ArrayBuffer(3*e.numPoints),n=new Uint8Array(r),i=0;i<e.numPoints;i++)n[3*i+0]=e.data.getUint8(e.currentOffset+i*e.pointAttributes.byteSize+0),n[3*i+1]=e.data.getUint8(e.currentOffset+i*e.pointAttributes.byteSize+1),n[3*i+2]=e.data.getUint8(e.currentOffset+i*e.pointAttributes.byteSize+2);return{buffer:r,attribute:t}}(t,e);case n.INTENSITY:return function(t,e){for(var r=new ArrayBuffer(4*e.numPoints),n=new Float32Array(r),i=0;i<e.numPoints;i++)n[i]=e.data.getUint16(e.currentOffset+i*e.pointAttributes.byteSize);return{buffer:r,attribute:t}}(t,e);case n.CLASSIFICATION:return function(t,e){for(var r=new ArrayBuffer(e.numPoints),n=new Uint8Array(r),i=0;i<e.numPoints;i++)n[i]=e.data.getUint8(e.currentOffset+i*e.pointAttributes.byteSize);return{buffer:r,attribute:t}}(t,e);case n.NORMAL_SPHEREMAPPED:return function(t,e){for(var r=new ArrayBuffer(4*e.numPoints*3),n=new Float32Array(r),i=0;i<e.numPoints;i++){var a=e.data.getUint8(e.currentOffset+i*e.pointAttributes.byteSize+0),o=e.data.getUint8(e.currentOffset+i*e.pointAttributes.byteSize+1),u=2*(a/255)-1,s=2*(o/255)-1,f=1,A=u*-u+s*-s+1*f;f=A,u*=Math.sqrt(A),s*=Math.sqrt(A),u*=2,s*=2,f=2*f-1,n[3*i+0]=u,n[3*i+1]=s,n[3*i+2]=f}return{buffer:r,attribute:t}}(t,e);case n.NORMAL_OCT16:return function(t,e){for(var r=new ArrayBuffer(4*e.numPoints*3),n=new Float32Array(r),i=0;i<e.numPoints;i++){var a=e.data.getUint8(e.currentOffset+i*e.pointAttributes.byteSize+0),o=e.data.getUint8(e.currentOffset+i*e.pointAttributes.byteSize+1),u=a/255*2-1,s=o/255*2-1,f=1-Math.abs(u)-Math.abs(s),A=0,O=0;f>=0?(A=u,O=s):(A=-(s/I(s)-1)/I(u),O=-(u/I(u)-1)/I(s));var b=Math.sqrt(A*A+O*O+f*f);A/=b,O/=b,f/=b,n[3*i+0]=A,n[3*i+1]=O,n[3*i+2]=f}return{buffer:r,attribute:t}}(t,e);case n.NORMAL:return function(t,e){for(var r=new ArrayBuffer(4*e.numPoints*3),n=new Float32Array(r),i=0;i<e.numPoints;i++){var a=e.data.getFloat32(e.currentOffset+i*e.pointAttributes.byteSize+0),o=e.data.getFloat32(e.currentOffset+i*e.pointAttributes.byteSize+4),u=e.data.getFloat32(e.currentOffset+i*e.pointAttributes.byteSize+8);n[3*i+0]=a,n[3*i+1]=o,n[3*i+2]=u}return{buffer:r,attribute:t}}(t,e);default:return}}(t,e);void 0!==r&&(e.attributeBuffers[r.attribute.name]=r,e.transferables.push(r.buffer))}}]);',null)}},function(t,e,n){"use strict";var i=window.URL||window.webkitURL;t.exports=function(t,e){try{try{var n;try{(n=new(window.BlobBuilder||window.WebKitBlobBuilder||window.MozBlobBuilder||window.MSBlobBuilder)).append(t),n=n.getBlob()}catch(e){n=new Blob([t])}return new Worker(i.createObjectURL(n))}catch(e){return new Worker("data:application/javascript,"+encodeURIComponent(t))}}catch(t){if(!e)throw Error("Inline worker is not supported");return new Worker(e)}}}])}));
-},{"three":6}],2:[function(require,module,exports){
+},{"three":7}],2:[function(require,module,exports){
 'use strict';
 // For more information about browser field, check out the browser field at https://github.com/substack/browserify-handbook#browser-field.
 
@@ -459,6 +459,4972 @@ module.exports = function(strings) {
 }
 
 },{}],5:[function(require,module,exports){
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = global || self, factory(global.window = global.window || {}));
+}(this, (function (exports) { 'use strict';
+
+  function _inheritsLoose(subClass, superClass) {
+    subClass.prototype = Object.create(superClass.prototype);
+    subClass.prototype.constructor = subClass;
+    subClass.__proto__ = superClass;
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  /*!
+   * GSAP 3.2.6
+   * https://greensock.com
+   *
+   * @license Copyright 2008-2020, GreenSock. All rights reserved.
+   * Subject to the terms at https://greensock.com/standard-license or for
+   * Club GreenSock members, the agreement issued with that membership.
+   * @author: Jack Doyle, jack@greensock.com
+  */
+  var _config = {
+    autoSleep: 120,
+    force3D: "auto",
+    nullTargetWarn: 1,
+    units: {
+      lineHeight: ""
+    }
+  },
+      _defaults = {
+    duration: .5,
+    overwrite: false,
+    delay: 0
+  },
+      _bigNum = 1e8,
+      _tinyNum = 1 / _bigNum,
+      _2PI = Math.PI * 2,
+      _HALF_PI = _2PI / 4,
+      _gsID = 0,
+      _sqrt = Math.sqrt,
+      _cos = Math.cos,
+      _sin = Math.sin,
+      _isString = function _isString(value) {
+    return typeof value === "string";
+  },
+      _isFunction = function _isFunction(value) {
+    return typeof value === "function";
+  },
+      _isNumber = function _isNumber(value) {
+    return typeof value === "number";
+  },
+      _isUndefined = function _isUndefined(value) {
+    return typeof value === "undefined";
+  },
+      _isObject = function _isObject(value) {
+    return typeof value === "object";
+  },
+      _isNotFalse = function _isNotFalse(value) {
+    return value !== false;
+  },
+      _windowExists = function _windowExists() {
+    return typeof window !== "undefined";
+  },
+      _isFuncOrString = function _isFuncOrString(value) {
+    return _isFunction(value) || _isString(value);
+  },
+      _isArray = Array.isArray,
+      _strictNumExp = /(?:-?\.?\d|\.)+/gi,
+      _numExp = /[-+=.]*\d+[.e\-+]*\d*[e\-\+]*\d*/g,
+      _numWithUnitExp = /[-+=.]*\d+[.e-]*\d*[a-z%]*/g,
+      _complexStringNumExp = /[-+=.]*\d+(?:\.|e-|e)*\d*/gi,
+      _parenthesesExp = /\(([^()]+)\)/i,
+      _relExp = /[+-]=-?[\.\d]+/,
+      _delimitedValueExp = /[#\-+.]*\b[a-z\d-=+%.]+/gi,
+      _globalTimeline,
+      _win,
+      _coreInitted,
+      _doc,
+      _globals = {},
+      _installScope = {},
+      _coreReady,
+      _install = function _install(scope) {
+    return (_installScope = _merge(scope, _globals)) && gsap;
+  },
+      _missingPlugin = function _missingPlugin(property, value) {
+    return console.warn("Invalid property", property, "set to", value, "Missing plugin? gsap.registerPlugin()");
+  },
+      _warn = function _warn(message, suppress) {
+    return !suppress && console.warn(message);
+  },
+      _addGlobal = function _addGlobal(name, obj) {
+    return name && (_globals[name] = obj) && _installScope && (_installScope[name] = obj) || _globals;
+  },
+      _emptyFunc = function _emptyFunc() {
+    return 0;
+  },
+      _reservedProps = {},
+      _lazyTweens = [],
+      _lazyLookup = {},
+      _lastRenderedFrame,
+      _plugins = {},
+      _effects = {},
+      _nextGCFrame = 30,
+      _harnessPlugins = [],
+      _callbackNames = "",
+      _harness = function _harness(targets) {
+    var target = targets[0],
+        harnessPlugin,
+        i;
+
+    if (!_isObject(target) && !_isFunction(target)) {
+      targets = [targets];
+    }
+
+    if (!(harnessPlugin = (target._gsap || {}).harness)) {
+      i = _harnessPlugins.length;
+
+      while (i-- && !_harnessPlugins[i].targetTest(target)) {}
+
+      harnessPlugin = _harnessPlugins[i];
+    }
+
+    i = targets.length;
+
+    while (i--) {
+      targets[i] && (targets[i]._gsap || (targets[i]._gsap = new GSCache(targets[i], harnessPlugin))) || targets.splice(i, 1);
+    }
+
+    return targets;
+  },
+      _getCache = function _getCache(target) {
+    return target._gsap || _harness(toArray(target))[0]._gsap;
+  },
+      _getProperty = function _getProperty(target, property) {
+    var currentValue = target[property];
+    return _isFunction(currentValue) ? target[property]() : _isUndefined(currentValue) && target.getAttribute(property) || currentValue;
+  },
+      _forEachName = function _forEachName(names, func) {
+    return (names = names.split(",")).forEach(func) || names;
+  },
+      _round = function _round(value) {
+    return Math.round(value * 100000) / 100000 || 0;
+  },
+      _arrayContainsAny = function _arrayContainsAny(toSearch, toFind) {
+    var l = toFind.length,
+        i = 0;
+
+    for (; toSearch.indexOf(toFind[i]) < 0 && ++i < l;) {}
+
+    return i < l;
+  },
+      _parseVars = function _parseVars(params, type, parent) {
+    var isLegacy = _isNumber(params[1]),
+        varsIndex = (isLegacy ? 2 : 1) + (type < 2 ? 0 : 1),
+        vars = params[varsIndex],
+        irVars;
+
+    if (isLegacy) {
+      vars.duration = params[1];
+    }
+
+    vars.parent = parent;
+
+    if (type) {
+      irVars = vars;
+
+      while (parent && !("immediateRender" in irVars)) {
+        irVars = parent.vars.defaults || {};
+        parent = _isNotFalse(parent.vars.inherit) && parent.parent;
+      }
+
+      vars.immediateRender = _isNotFalse(irVars.immediateRender);
+
+      if (type < 2) {
+        vars.runBackwards = 1;
+      } else {
+        vars.startAt = params[varsIndex - 1];
+      }
+    }
+
+    return vars;
+  },
+      _lazyRender = function _lazyRender() {
+    var l = _lazyTweens.length,
+        a = _lazyTweens.slice(0),
+        i,
+        tween;
+
+    _lazyLookup = {};
+    _lazyTweens.length = 0;
+
+    for (i = 0; i < l; i++) {
+      tween = a[i];
+
+      if (tween && tween._lazy) {
+        tween.render(tween._lazy[0], tween._lazy[1], true)._lazy = 0;
+      }
+    }
+  },
+      _lazySafeRender = function _lazySafeRender(animation, time, suppressEvents, force) {
+    if (_lazyTweens.length) {
+      _lazyRender();
+    }
+
+    animation.render(time, suppressEvents, force);
+
+    if (_lazyTweens.length) {
+      _lazyRender();
+    }
+  },
+      _numericIfPossible = function _numericIfPossible(value) {
+    var n = parseFloat(value);
+    return (n || n === 0) && (value + "").match(_delimitedValueExp).length < 2 ? n : value;
+  },
+      _passThrough = function _passThrough(p) {
+    return p;
+  },
+      _setDefaults = function _setDefaults(obj, defaults) {
+    for (var p in defaults) {
+      if (!(p in obj)) {
+        obj[p] = defaults[p];
+      }
+    }
+
+    return obj;
+  },
+      _setKeyframeDefaults = function _setKeyframeDefaults(obj, defaults) {
+    for (var p in defaults) {
+      if (!(p in obj) && p !== "duration" && p !== "ease") {
+        obj[p] = defaults[p];
+      }
+    }
+  },
+      _merge = function _merge(base, toMerge) {
+    for (var p in toMerge) {
+      base[p] = toMerge[p];
+    }
+
+    return base;
+  },
+      _mergeDeep = function _mergeDeep(base, toMerge) {
+    for (var p in toMerge) {
+      base[p] = _isObject(toMerge[p]) ? _mergeDeep(base[p] || (base[p] = {}), toMerge[p]) : toMerge[p];
+    }
+
+    return base;
+  },
+      _copyExcluding = function _copyExcluding(obj, excluding) {
+    var copy = {},
+        p;
+
+    for (p in obj) {
+      if (!(p in excluding)) {
+        copy[p] = obj[p];
+      }
+    }
+
+    return copy;
+  },
+      _inheritDefaults = function _inheritDefaults(vars) {
+    var parent = vars.parent || _globalTimeline,
+        func = vars.keyframes ? _setKeyframeDefaults : _setDefaults;
+
+    if (_isNotFalse(vars.inherit)) {
+      while (parent) {
+        func(vars, parent.vars.defaults);
+        parent = parent.parent;
+      }
+    }
+
+    return vars;
+  },
+      _arraysMatch = function _arraysMatch(a1, a2) {
+    var i = a1.length,
+        match = i === a2.length;
+
+    while (match && i-- && a1[i] === a2[i]) {}
+
+    return i < 0;
+  },
+      _addLinkedListItem = function _addLinkedListItem(parent, child, firstProp, lastProp, sortBy) {
+    if (firstProp === void 0) {
+      firstProp = "_first";
+    }
+
+    if (lastProp === void 0) {
+      lastProp = "_last";
+    }
+
+    var prev = parent[lastProp],
+        t;
+
+    if (sortBy) {
+      t = child[sortBy];
+
+      while (prev && prev[sortBy] > t) {
+        prev = prev._prev;
+      }
+    }
+
+    if (prev) {
+      child._next = prev._next;
+      prev._next = child;
+    } else {
+      child._next = parent[firstProp];
+      parent[firstProp] = child;
+    }
+
+    if (child._next) {
+      child._next._prev = child;
+    } else {
+      parent[lastProp] = child;
+    }
+
+    child._prev = prev;
+    child.parent = child._dp = parent;
+    return child;
+  },
+      _removeLinkedListItem = function _removeLinkedListItem(parent, child, firstProp, lastProp) {
+    if (firstProp === void 0) {
+      firstProp = "_first";
+    }
+
+    if (lastProp === void 0) {
+      lastProp = "_last";
+    }
+
+    var prev = child._prev,
+        next = child._next;
+
+    if (prev) {
+      prev._next = next;
+    } else if (parent[firstProp] === child) {
+      parent[firstProp] = next;
+    }
+
+    if (next) {
+      next._prev = prev;
+    } else if (parent[lastProp] === child) {
+      parent[lastProp] = prev;
+    }
+
+    child._next = child._prev = child.parent = null;
+  },
+      _removeFromParent = function _removeFromParent(child, onlyIfParentHasAutoRemove) {
+    if (child.parent && (!onlyIfParentHasAutoRemove || child.parent.autoRemoveChildren)) {
+      child.parent.remove(child);
+    }
+
+    child._act = 0;
+  },
+      _uncache = function _uncache(animation) {
+    var a = animation;
+
+    while (a) {
+      a._dirty = 1;
+      a = a.parent;
+    }
+
+    return animation;
+  },
+      _recacheAncestors = function _recacheAncestors(animation) {
+    var parent = animation.parent;
+
+    while (parent && parent.parent) {
+      parent._dirty = 1;
+      parent.totalDuration();
+      parent = parent.parent;
+    }
+
+    return animation;
+  },
+      _hasNoPausedAncestors = function _hasNoPausedAncestors(animation) {
+    return !animation || animation._ts && _hasNoPausedAncestors(animation.parent);
+  },
+      _elapsedCycleDuration = function _elapsedCycleDuration(animation) {
+    return animation._repeat ? _animationCycle(animation._tTime, animation = animation.duration() + animation._rDelay) * animation : 0;
+  },
+      _animationCycle = function _animationCycle(tTime, cycleDuration) {
+    return (tTime /= cycleDuration) && ~~tTime === tTime ? ~~tTime - 1 : ~~tTime;
+  },
+      _parentToChildTotalTime = function _parentToChildTotalTime(parentTime, child) {
+    return (parentTime - child._start) * child._ts + (child._ts >= 0 ? 0 : child._dirty ? child.totalDuration() : child._tDur);
+  },
+      _setEnd = function _setEnd(animation) {
+    return animation._end = _round(animation._start + (animation._tDur / Math.abs(animation._ts || animation._rts || _tinyNum) || 0));
+  },
+      _postAddChecks = function _postAddChecks(timeline, child) {
+    var t;
+
+    if (child._time || child._initted && !child._dur) {
+      t = _parentToChildTotalTime(timeline.rawTime(), child);
+
+      if (!child._dur || _clamp(0, child.totalDuration(), t) - child._tTime > _tinyNum) {
+        child.render(t, true);
+      }
+    }
+
+    if (_uncache(timeline)._dp && timeline._initted && timeline._time >= timeline._dur && timeline._ts) {
+      if (timeline._dur < timeline.duration()) {
+        t = timeline;
+
+        while (t._dp) {
+          t.rawTime() >= 0 && t.totalTime(t._tTime);
+          t = t._dp;
+        }
+      }
+
+      timeline._zTime = -_tinyNum;
+    }
+  },
+      _addToTimeline = function _addToTimeline(timeline, child, position, skipChecks) {
+    child.parent && _removeFromParent(child);
+    child._start = _round(position + child._delay);
+    child._end = _round(child._start + (child.totalDuration() / Math.abs(child.timeScale()) || 0));
+
+    _addLinkedListItem(timeline, child, "_first", "_last", timeline._sort ? "_start" : 0);
+
+    timeline._recent = child;
+    skipChecks || _postAddChecks(timeline, child);
+    return timeline;
+  },
+      _attemptInitTween = function _attemptInitTween(tween, totalTime, force, suppressEvents) {
+    _initTween(tween, totalTime);
+
+    if (!tween._initted) {
+      return 1;
+    }
+
+    if (!force && tween._pt && (tween._dur && tween.vars.lazy !== false || !tween._dur && tween.vars.lazy) && _lastRenderedFrame !== _ticker.frame) {
+      _lazyTweens.push(tween);
+
+      tween._lazy = [totalTime, suppressEvents];
+      return 1;
+    }
+  },
+      _renderZeroDurationTween = function _renderZeroDurationTween(tween, totalTime, suppressEvents, force) {
+    var prevRatio = tween._zTime < 0 ? 0 : 1,
+        ratio = totalTime < 0 ? 0 : 1,
+        repeatDelay = tween._rDelay,
+        tTime = 0,
+        pt,
+        iteration,
+        prevIteration;
+
+    if (repeatDelay && tween._repeat) {
+      tTime = _clamp(0, tween._tDur, totalTime);
+      iteration = _animationCycle(tTime, repeatDelay);
+      prevIteration = _animationCycle(tween._tTime, repeatDelay);
+
+      if (iteration !== prevIteration) {
+        prevRatio = 1 - ratio;
+
+        if (tween.vars.repeatRefresh && tween._initted) {
+          tween.invalidate();
+        }
+      }
+    }
+
+    if (!tween._initted && _attemptInitTween(tween, totalTime, force, suppressEvents)) {
+      return;
+    }
+
+    if (ratio !== prevRatio || force || tween._zTime === _tinyNum || !totalTime && tween._zTime) {
+      tween._zTime = totalTime || (suppressEvents ? _tinyNum : 0);
+      tween.ratio = ratio;
+
+      if (tween._from) {
+        ratio = 1 - ratio;
+      }
+
+      tween._time = 0;
+      tween._tTime = tTime;
+      suppressEvents || _callback(tween, "onStart");
+      pt = tween._pt;
+
+      while (pt) {
+        pt.r(ratio, pt.d);
+        pt = pt._next;
+      }
+
+      if (!ratio && tween._startAt && !tween._onUpdate && tween._start) {
+        tween._startAt.render(totalTime, true, force);
+      }
+
+      tween._onUpdate && (suppressEvents || _callback(tween, "onUpdate"));
+
+      if (tTime && tween._repeat && !suppressEvents && tween.parent) {
+        _callback(tween, "onRepeat");
+      }
+
+      if ((totalTime >= tween._tDur || totalTime < 0) && tween.ratio === ratio) {
+        tween.ratio && _removeFromParent(tween, 1);
+
+        if (!suppressEvents) {
+          _callback(tween, tween.ratio ? "onComplete" : "onReverseComplete", true);
+
+          tween._prom && tween._prom();
+        }
+      }
+    }
+  },
+      _findNextPauseTween = function _findNextPauseTween(animation, prevTime, time) {
+    var child;
+
+    if (time > prevTime) {
+      child = animation._first;
+
+      while (child && child._start <= time) {
+        if (!child._dur && child.data === "isPause" && child._start > prevTime) {
+          return child;
+        }
+
+        child = child._next;
+      }
+    } else {
+      child = animation._last;
+
+      while (child && child._start >= time) {
+        if (!child._dur && child.data === "isPause" && child._start < prevTime) {
+          return child;
+        }
+
+        child = child._prev;
+      }
+    }
+  },
+      _setDuration = function _setDuration(animation, duration, skipUncache) {
+    var repeat = animation._repeat,
+        dur = _round(duration) || 0;
+    animation._dur = dur;
+    animation._tDur = !repeat ? dur : repeat < 0 ? 1e12 : _round(dur * (repeat + 1) + animation._rDelay * repeat);
+
+    if (animation._time > dur) {
+      animation._time = dur;
+      animation._tTime = Math.min(animation._tTime, animation._tDur);
+    }
+
+    !skipUncache && _uncache(animation.parent);
+    animation.parent && _setEnd(animation);
+    return animation;
+  },
+      _onUpdateTotalDuration = function _onUpdateTotalDuration(animation) {
+    return animation instanceof Timeline ? _uncache(animation) : _setDuration(animation, animation._dur);
+  },
+      _zeroPosition = {
+    _start: 0,
+    endTime: _emptyFunc
+  },
+      _parsePosition = function _parsePosition(animation, position) {
+    var labels = animation.labels,
+        recent = animation._recent || _zeroPosition,
+        clippedDuration = animation.duration() >= _bigNum ? recent.endTime(false) : animation._dur,
+        i,
+        offset;
+
+    if (_isString(position) && (isNaN(position) || position in labels)) {
+      i = position.charAt(0);
+
+      if (i === "<" || i === ">") {
+        return (i === "<" ? recent._start : recent.endTime(recent._repeat >= 0)) + (parseFloat(position.substr(1)) || 0);
+      }
+
+      i = position.indexOf("=");
+
+      if (i < 0) {
+        if (!(position in labels)) {
+          labels[position] = clippedDuration;
+        }
+
+        return labels[position];
+      }
+
+      offset = +(position.charAt(i - 1) + position.substr(i + 1));
+      return i > 1 ? _parsePosition(animation, position.substr(0, i - 1)) + offset : clippedDuration + offset;
+    }
+
+    return position == null ? clippedDuration : +position;
+  },
+      _conditionalReturn = function _conditionalReturn(value, func) {
+    return value || value === 0 ? func(value) : func;
+  },
+      _clamp = function _clamp(min, max, value) {
+    return value < min ? min : value > max ? max : value;
+  },
+      getUnit = function getUnit(value) {
+    return (value + "").substr((parseFloat(value) + "").length);
+  },
+      clamp = function clamp(min, max, value) {
+    return _conditionalReturn(value, function (v) {
+      return _clamp(min, max, v);
+    });
+  },
+      _slice = [].slice,
+      _isArrayLike = function _isArrayLike(value, nonEmpty) {
+    return value && _isObject(value) && "length" in value && (!nonEmpty && !value.length || value.length - 1 in value && _isObject(value[0])) && !value.nodeType && value !== _win;
+  },
+      _flatten = function _flatten(ar, leaveStrings, accumulator) {
+    if (accumulator === void 0) {
+      accumulator = [];
+    }
+
+    return ar.forEach(function (value) {
+      var _accumulator;
+
+      return _isString(value) && !leaveStrings || _isArrayLike(value, 1) ? (_accumulator = accumulator).push.apply(_accumulator, toArray(value)) : accumulator.push(value);
+    }) || accumulator;
+  },
+      toArray = function toArray(value, leaveStrings) {
+    return _isString(value) && !leaveStrings && (_coreInitted || !_wake()) ? _slice.call(_doc.querySelectorAll(value), 0) : _isArray(value) ? _flatten(value, leaveStrings) : _isArrayLike(value) ? _slice.call(value, 0) : value ? [value] : [];
+  },
+      shuffle = function shuffle(a) {
+    return a.sort(function () {
+      return .5 - Math.random();
+    });
+  },
+      distribute = function distribute(v) {
+    if (_isFunction(v)) {
+      return v;
+    }
+
+    var vars = _isObject(v) ? v : {
+      each: v
+    },
+        ease = _parseEase(vars.ease),
+        from = vars.from || 0,
+        base = parseFloat(vars.base) || 0,
+        cache = {},
+        isDecimal = from > 0 && from < 1,
+        ratios = isNaN(from) || isDecimal,
+        axis = vars.axis,
+        ratioX = from,
+        ratioY = from;
+
+    if (_isString(from)) {
+      ratioX = ratioY = {
+        center: .5,
+        edges: .5,
+        end: 1
+      }[from] || 0;
+    } else if (!isDecimal && ratios) {
+      ratioX = from[0];
+      ratioY = from[1];
+    }
+
+    return function (i, target, a) {
+      var l = (a || vars).length,
+          distances = cache[l],
+          originX,
+          originY,
+          x,
+          y,
+          d,
+          j,
+          max,
+          min,
+          wrapAt;
+
+      if (!distances) {
+        wrapAt = vars.grid === "auto" ? 0 : (vars.grid || [1, _bigNum])[1];
+
+        if (!wrapAt) {
+          max = -_bigNum;
+
+          while (max < (max = a[wrapAt++].getBoundingClientRect().left) && wrapAt < l) {}
+
+          wrapAt--;
+        }
+
+        distances = cache[l] = [];
+        originX = ratios ? Math.min(wrapAt, l) * ratioX - .5 : from % wrapAt;
+        originY = ratios ? l * ratioY / wrapAt - .5 : from / wrapAt | 0;
+        max = 0;
+        min = _bigNum;
+
+        for (j = 0; j < l; j++) {
+          x = j % wrapAt - originX;
+          y = originY - (j / wrapAt | 0);
+          distances[j] = d = !axis ? _sqrt(x * x + y * y) : Math.abs(axis === "y" ? y : x);
+
+          if (d > max) {
+            max = d;
+          }
+
+          if (d < min) {
+            min = d;
+          }
+        }
+
+        from === "random" && shuffle(distances);
+        distances.max = max - min;
+        distances.min = min;
+        distances.v = l = (parseFloat(vars.amount) || parseFloat(vars.each) * (wrapAt > l ? l - 1 : !axis ? Math.max(wrapAt, l / wrapAt) : axis === "y" ? l / wrapAt : wrapAt) || 0) * (from === "edges" ? -1 : 1);
+        distances.b = l < 0 ? base - l : base;
+        distances.u = getUnit(vars.amount || vars.each) || 0;
+        ease = ease && l < 0 ? _invertEase(ease) : ease;
+      }
+
+      l = (distances[i] - distances.min) / distances.max || 0;
+      return _round(distances.b + (ease ? ease(l) : l) * distances.v) + distances.u;
+    };
+  },
+      _roundModifier = function _roundModifier(v) {
+    var p = v < 1 ? Math.pow(10, (v + "").length - 2) : 1;
+    return function (raw) {
+      return ~~(Math.round(parseFloat(raw) / v) * v * p) / p + (_isNumber(raw) ? 0 : getUnit(raw));
+    };
+  },
+      snap = function snap(snapTo, value) {
+    var isArray = _isArray(snapTo),
+        radius,
+        is2D;
+
+    if (!isArray && _isObject(snapTo)) {
+      radius = isArray = snapTo.radius || _bigNum;
+
+      if (snapTo.values) {
+        snapTo = toArray(snapTo.values);
+
+        if (is2D = !_isNumber(snapTo[0])) {
+          radius *= radius;
+        }
+      } else {
+        snapTo = _roundModifier(snapTo.increment);
+      }
+    }
+
+    return _conditionalReturn(value, !isArray ? _roundModifier(snapTo) : _isFunction(snapTo) ? function (raw) {
+      is2D = snapTo(raw);
+      return Math.abs(is2D - raw) <= radius ? is2D : raw;
+    } : function (raw) {
+      var x = parseFloat(is2D ? raw.x : raw),
+          y = parseFloat(is2D ? raw.y : 0),
+          min = _bigNum,
+          closest = 0,
+          i = snapTo.length,
+          dx,
+          dy;
+
+      while (i--) {
+        if (is2D) {
+          dx = snapTo[i].x - x;
+          dy = snapTo[i].y - y;
+          dx = dx * dx + dy * dy;
+        } else {
+          dx = Math.abs(snapTo[i] - x);
+        }
+
+        if (dx < min) {
+          min = dx;
+          closest = i;
+        }
+      }
+
+      closest = !radius || min <= radius ? snapTo[closest] : raw;
+      return is2D || closest === raw || _isNumber(raw) ? closest : closest + getUnit(raw);
+    });
+  },
+      random = function random(min, max, roundingIncrement, returnFunction) {
+    return _conditionalReturn(_isArray(min) ? !max : roundingIncrement === true ? !!(roundingIncrement = 0) : !returnFunction, function () {
+      return _isArray(min) ? min[~~(Math.random() * min.length)] : (roundingIncrement = roundingIncrement || 1e-5) && (returnFunction = roundingIncrement < 1 ? Math.pow(10, (roundingIncrement + "").length - 2) : 1) && ~~(Math.round((min + Math.random() * (max - min)) / roundingIncrement) * roundingIncrement * returnFunction) / returnFunction;
+    });
+  },
+      pipe = function pipe() {
+    for (var _len = arguments.length, functions = new Array(_len), _key = 0; _key < _len; _key++) {
+      functions[_key] = arguments[_key];
+    }
+
+    return function (value) {
+      return functions.reduce(function (v, f) {
+        return f(v);
+      }, value);
+    };
+  },
+      unitize = function unitize(func, unit) {
+    return function (value) {
+      return func(parseFloat(value)) + (unit || getUnit(value));
+    };
+  },
+      normalize = function normalize(min, max, value) {
+    return mapRange(min, max, 0, 1, value);
+  },
+      _wrapArray = function _wrapArray(a, wrapper, value) {
+    return _conditionalReturn(value, function (index) {
+      return a[~~wrapper(index)];
+    });
+  },
+      wrap = function wrap(min, max, value) {
+    var range = max - min;
+    return _isArray(min) ? _wrapArray(min, wrap(0, min.length), max) : _conditionalReturn(value, function (value) {
+      return (range + (value - min) % range) % range + min;
+    });
+  },
+      wrapYoyo = function wrapYoyo(min, max, value) {
+    var range = max - min,
+        total = range * 2;
+    return _isArray(min) ? _wrapArray(min, wrapYoyo(0, min.length - 1), max) : _conditionalReturn(value, function (value) {
+      value = (total + (value - min) % total) % total;
+      return min + (value > range ? total - value : value);
+    });
+  },
+      _replaceRandom = function _replaceRandom(value) {
+    var prev = 0,
+        s = "",
+        i,
+        nums,
+        end,
+        isArray;
+
+    while (~(i = value.indexOf("random(", prev))) {
+      end = value.indexOf(")", i);
+      isArray = value.charAt(i + 7) === "[";
+      nums = value.substr(i + 7, end - i - 7).match(isArray ? _delimitedValueExp : _strictNumExp);
+      s += value.substr(prev, i - prev) + random(isArray ? nums : +nums[0], +nums[1], +nums[2] || 1e-5);
+      prev = end + 1;
+    }
+
+    return s + value.substr(prev, value.length - prev);
+  },
+      mapRange = function mapRange(inMin, inMax, outMin, outMax, value) {
+    var inRange = inMax - inMin,
+        outRange = outMax - outMin;
+    return _conditionalReturn(value, function (value) {
+      return outMin + (value - inMin) / inRange * outRange;
+    });
+  },
+      interpolate = function interpolate(start, end, progress, mutate) {
+    var func = isNaN(start + end) ? 0 : function (p) {
+      return (1 - p) * start + p * end;
+    };
+
+    if (!func) {
+      var isString = _isString(start),
+          master = {},
+          p,
+          i,
+          interpolators,
+          l,
+          il;
+
+      progress === true && (mutate = 1) && (progress = null);
+
+      if (isString) {
+        start = {
+          p: start
+        };
+        end = {
+          p: end
+        };
+      } else if (_isArray(start) && !_isArray(end)) {
+        interpolators = [];
+        l = start.length;
+        il = l - 2;
+
+        for (i = 1; i < l; i++) {
+          interpolators.push(interpolate(start[i - 1], start[i]));
+        }
+
+        l--;
+
+        func = function func(p) {
+          p *= l;
+          var i = Math.min(il, ~~p);
+          return interpolators[i](p - i);
+        };
+
+        progress = end;
+      } else if (!mutate) {
+        start = _merge(_isArray(start) ? [] : {}, start);
+      }
+
+      if (!interpolators) {
+        for (p in end) {
+          _addPropTween.call(master, start, p, "get", end[p]);
+        }
+
+        func = function func(p) {
+          return _renderPropTweens(p, master) || (isString ? start.p : start);
+        };
+      }
+    }
+
+    return _conditionalReturn(progress, func);
+  },
+      _getLabelInDirection = function _getLabelInDirection(timeline, fromTime, backward) {
+    var labels = timeline.labels,
+        min = _bigNum,
+        p,
+        distance,
+        label;
+
+    for (p in labels) {
+      distance = labels[p] - fromTime;
+
+      if (distance < 0 === !!backward && distance && min > (distance = Math.abs(distance))) {
+        label = p;
+        min = distance;
+      }
+    }
+
+    return label;
+  },
+      _callback = function _callback(animation, type, executeLazyFirst) {
+    var v = animation.vars,
+        callback = v[type],
+        params,
+        scope;
+
+    if (!callback) {
+      return;
+    }
+
+    params = v[type + "Params"];
+    scope = v.callbackScope || animation;
+    executeLazyFirst && _lazyTweens.length && _lazyRender();
+    return params ? callback.apply(scope, params) : callback.call(scope);
+  },
+      _interrupt = function _interrupt(animation) {
+    _removeFromParent(animation);
+
+    if (animation.progress() < 1) {
+      _callback(animation, "onInterrupt");
+    }
+
+    return animation;
+  },
+      _quickTween,
+      _createPlugin = function _createPlugin(config) {
+    config = !config.name && config["default"] || config;
+
+    var name = config.name,
+        isFunc = _isFunction(config),
+        Plugin = name && !isFunc && config.init ? function () {
+      this._props = [];
+    } : config,
+        instanceDefaults = {
+      init: _emptyFunc,
+      render: _renderPropTweens,
+      add: _addPropTween,
+      kill: _killPropTweensOf,
+      modifier: _addPluginModifier,
+      rawVars: 0
+    },
+        statics = {
+      targetTest: 0,
+      get: 0,
+      getSetter: _getSetter,
+      aliases: {},
+      register: 0
+    };
+
+    _wake();
+
+    if (config !== Plugin) {
+      if (_plugins[name]) {
+        return;
+      }
+
+      _setDefaults(Plugin, _setDefaults(_copyExcluding(config, instanceDefaults), statics));
+
+      _merge(Plugin.prototype, _merge(instanceDefaults, _copyExcluding(config, statics)));
+
+      _plugins[Plugin.prop = name] = Plugin;
+
+      if (config.targetTest) {
+        _harnessPlugins.push(Plugin);
+
+        _reservedProps[name] = 1;
+      }
+
+      name = (name === "css" ? "CSS" : name.charAt(0).toUpperCase() + name.substr(1)) + "Plugin";
+    }
+
+    _addGlobal(name, Plugin);
+
+    if (config.register) {
+      config.register(gsap, Plugin, PropTween);
+    }
+  },
+      _255 = 255,
+      _colorLookup = {
+    aqua: [0, _255, _255],
+    lime: [0, _255, 0],
+    silver: [192, 192, 192],
+    black: [0, 0, 0],
+    maroon: [128, 0, 0],
+    teal: [0, 128, 128],
+    blue: [0, 0, _255],
+    navy: [0, 0, 128],
+    white: [_255, _255, _255],
+    olive: [128, 128, 0],
+    yellow: [_255, _255, 0],
+    orange: [_255, 165, 0],
+    gray: [128, 128, 128],
+    purple: [128, 0, 128],
+    green: [0, 128, 0],
+    red: [_255, 0, 0],
+    pink: [_255, 192, 203],
+    cyan: [0, _255, _255],
+    transparent: [_255, _255, _255, 0]
+  },
+      _hue = function _hue(h, m1, m2) {
+    h = h < 0 ? h + 1 : h > 1 ? h - 1 : h;
+    return (h * 6 < 1 ? m1 + (m2 - m1) * h * 6 : h < .5 ? m2 : h * 3 < 2 ? m1 + (m2 - m1) * (2 / 3 - h) * 6 : m1) * _255 + .5 | 0;
+  },
+      splitColor = function splitColor(v, toHSL, forceAlpha) {
+    var a = !v ? _colorLookup.black : _isNumber(v) ? [v >> 16, v >> 8 & _255, v & _255] : 0,
+        r,
+        g,
+        b,
+        h,
+        s,
+        l,
+        max,
+        min,
+        d,
+        wasHSL;
+
+    if (!a) {
+      if (v.substr(-1) === ",") {
+        v = v.substr(0, v.length - 1);
+      }
+
+      if (_colorLookup[v]) {
+        a = _colorLookup[v];
+      } else if (v.charAt(0) === "#") {
+        if (v.length === 4) {
+          r = v.charAt(1);
+          g = v.charAt(2);
+          b = v.charAt(3);
+          v = "#" + r + r + g + g + b + b;
+        }
+
+        v = parseInt(v.substr(1), 16);
+        a = [v >> 16, v >> 8 & _255, v & _255];
+      } else if (v.substr(0, 3) === "hsl") {
+        a = wasHSL = v.match(_strictNumExp);
+
+        if (!toHSL) {
+          h = +a[0] % 360 / 360;
+          s = +a[1] / 100;
+          l = +a[2] / 100;
+          g = l <= .5 ? l * (s + 1) : l + s - l * s;
+          r = l * 2 - g;
+
+          if (a.length > 3) {
+            a[3] *= 1;
+          }
+
+          a[0] = _hue(h + 1 / 3, r, g);
+          a[1] = _hue(h, r, g);
+          a[2] = _hue(h - 1 / 3, r, g);
+        } else if (~v.indexOf("=")) {
+          a = v.match(_numExp);
+          forceAlpha && a.length < 4 && (a[3] = 1);
+          return a;
+        }
+      } else {
+        a = v.match(_strictNumExp) || _colorLookup.transparent;
+      }
+
+      a = a.map(Number);
+    }
+
+    if (toHSL && !wasHSL) {
+      r = a[0] / _255;
+      g = a[1] / _255;
+      b = a[2] / _255;
+      max = Math.max(r, g, b);
+      min = Math.min(r, g, b);
+      l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0;
+      } else {
+        d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+        h *= 60;
+      }
+
+      a[0] = ~~(h + .5);
+      a[1] = ~~(s * 100 + .5);
+      a[2] = ~~(l * 100 + .5);
+    }
+
+    forceAlpha && a.length < 4 && (a[3] = 1);
+    return a;
+  },
+      _colorOrderData = function _colorOrderData(v) {
+    var values = [],
+        c = [],
+        i = -1;
+    v.split(_colorExp).forEach(function (v) {
+      var a = v.match(_numWithUnitExp) || [];
+      values.push.apply(values, a);
+      c.push(i += a.length + 1);
+    });
+    values.c = c;
+    return values;
+  },
+      _formatColors = function _formatColors(s, toHSL, orderMatchData) {
+    var result = "",
+        colors = (s + result).match(_colorExp),
+        type = toHSL ? "hsla(" : "rgba(",
+        i = 0,
+        c,
+        shell,
+        d,
+        l;
+
+    if (!colors) {
+      return s;
+    }
+
+    colors = colors.map(function (color) {
+      return (color = splitColor(color, toHSL, 1)) && type + (toHSL ? color[0] + "," + color[1] + "%," + color[2] + "%," + color[3] : color.join(",")) + ")";
+    });
+
+    if (orderMatchData) {
+      d = _colorOrderData(s);
+      c = orderMatchData.c;
+
+      if (c.join(result) !== d.c.join(result)) {
+        shell = s.replace(_colorExp, "1").split(_numWithUnitExp);
+        l = shell.length - 1;
+
+        for (; i < l; i++) {
+          result += shell[i] + (~c.indexOf(i) ? colors.shift() || type + "0,0,0,0)" : (d.length ? d : colors.length ? colors : orderMatchData).shift());
+        }
+      }
+    }
+
+    if (!shell) {
+      shell = s.split(_colorExp);
+      l = shell.length - 1;
+
+      for (; i < l; i++) {
+        result += shell[i] + colors[i];
+      }
+    }
+
+    return result + shell[l];
+  },
+      _colorExp = function () {
+    var s = "(?:\\b(?:(?:rgb|rgba|hsl|hsla)\\(.+?\\))|\\B#(?:[0-9a-f]{3}){1,2}\\b",
+        p;
+
+    for (p in _colorLookup) {
+      s += "|" + p + "\\b";
+    }
+
+    return new RegExp(s + ")", "gi");
+  }(),
+      _hslExp = /hsl[a]?\(/,
+      _colorStringFilter = function _colorStringFilter(a) {
+    var combined = a.join(" "),
+        toHSL;
+    _colorExp.lastIndex = 0;
+
+    if (_colorExp.test(combined)) {
+      toHSL = _hslExp.test(combined);
+      a[1] = _formatColors(a[1], toHSL);
+      a[0] = _formatColors(a[0], toHSL, _colorOrderData(a[1]));
+      return true;
+    }
+  },
+      _tickerActive,
+      _ticker = function () {
+    var _getTime = Date.now,
+        _lagThreshold = 500,
+        _adjustedLag = 33,
+        _startTime = _getTime(),
+        _lastUpdate = _startTime,
+        _gap = 1 / 240,
+        _nextTime = _gap,
+        _listeners = [],
+        _id,
+        _req,
+        _raf,
+        _self,
+        _tick = function _tick(v) {
+      var elapsed = _getTime() - _lastUpdate,
+          manual = v === true,
+          overlap,
+          dispatch;
+
+      if (elapsed > _lagThreshold) {
+        _startTime += elapsed - _adjustedLag;
+      }
+
+      _lastUpdate += elapsed;
+      _self.time = (_lastUpdate - _startTime) / 1000;
+      overlap = _self.time - _nextTime;
+
+      if (overlap > 0 || manual) {
+        _self.frame++;
+        _nextTime += overlap + (overlap >= _gap ? 0.004 : _gap - overlap);
+        dispatch = 1;
+      }
+
+      if (!manual) {
+        _id = _req(_tick);
+      }
+
+      if (dispatch) {
+        _listeners.forEach(function (l) {
+          return l(_self.time, elapsed, _self.frame, v);
+        });
+      }
+    };
+
+    _self = {
+      time: 0,
+      frame: 0,
+      tick: function tick() {
+        _tick(true);
+      },
+      wake: function wake() {
+        if (_coreReady) {
+          if (!_coreInitted && _windowExists()) {
+            _win = _coreInitted = window;
+            _doc = _win.document || {};
+            _globals.gsap = gsap;
+            (_win.gsapVersions || (_win.gsapVersions = [])).push(gsap.version);
+
+            _install(_installScope || _win.GreenSockGlobals || !_win.gsap && _win || {});
+
+            _raf = _win.requestAnimationFrame;
+          }
+
+          _id && _self.sleep();
+
+          _req = _raf || function (f) {
+            return setTimeout(f, (_nextTime - _self.time) * 1000 + 1 | 0);
+          };
+
+          _tickerActive = 1;
+
+          _tick(2);
+        }
+      },
+      sleep: function sleep() {
+        (_raf ? _win.cancelAnimationFrame : clearTimeout)(_id);
+        _tickerActive = 0;
+        _req = _emptyFunc;
+      },
+      lagSmoothing: function lagSmoothing(threshold, adjustedLag) {
+        _lagThreshold = threshold || 1 / _tinyNum;
+        _adjustedLag = Math.min(adjustedLag, _lagThreshold, 0);
+      },
+      fps: function fps(_fps) {
+        _gap = 1 / (_fps || 240);
+        _nextTime = _self.time + _gap;
+      },
+      add: function add(callback) {
+        _listeners.indexOf(callback) < 0 && _listeners.push(callback);
+
+        _wake();
+      },
+      remove: function remove(callback) {
+        var i;
+        ~(i = _listeners.indexOf(callback)) && _listeners.splice(i, 1);
+      },
+      _listeners: _listeners
+    };
+    return _self;
+  }(),
+      _wake = function _wake() {
+    return !_tickerActive && _ticker.wake();
+  },
+      _easeMap = {},
+      _customEaseExp = /^[\d.\-M][\d.\-,\s]/,
+      _quotesExp = /["']/g,
+      _parseObjectInString = function _parseObjectInString(value) {
+    var obj = {},
+        split = value.substr(1, value.length - 3).split(":"),
+        key = split[0],
+        i = 1,
+        l = split.length,
+        index,
+        val,
+        parsedVal;
+
+    for (; i < l; i++) {
+      val = split[i];
+      index = i !== l - 1 ? val.lastIndexOf(",") : val.length;
+      parsedVal = val.substr(0, index);
+      obj[key] = isNaN(parsedVal) ? parsedVal.replace(_quotesExp, "").trim() : +parsedVal;
+      key = val.substr(index + 1).trim();
+    }
+
+    return obj;
+  },
+      _configEaseFromString = function _configEaseFromString(name) {
+    var split = (name + "").split("("),
+        ease = _easeMap[split[0]];
+    return ease && split.length > 1 && ease.config ? ease.config.apply(null, ~name.indexOf("{") ? [_parseObjectInString(split[1])] : _parenthesesExp.exec(name)[1].split(",").map(_numericIfPossible)) : _easeMap._CE && _customEaseExp.test(name) ? _easeMap._CE("", name) : ease;
+  },
+      _invertEase = function _invertEase(ease) {
+    return function (p) {
+      return 1 - ease(1 - p);
+    };
+  },
+      _parseEase = function _parseEase(ease, defaultEase) {
+    return !ease ? defaultEase : (_isFunction(ease) ? ease : _easeMap[ease] || _configEaseFromString(ease)) || defaultEase;
+  },
+      _insertEase = function _insertEase(names, easeIn, easeOut, easeInOut) {
+    if (easeOut === void 0) {
+      easeOut = function easeOut(p) {
+        return 1 - easeIn(1 - p);
+      };
+    }
+
+    if (easeInOut === void 0) {
+      easeInOut = function easeInOut(p) {
+        return p < .5 ? easeIn(p * 2) / 2 : 1 - easeIn((1 - p) * 2) / 2;
+      };
+    }
+
+    var ease = {
+      easeIn: easeIn,
+      easeOut: easeOut,
+      easeInOut: easeInOut
+    },
+        lowercaseName;
+
+    _forEachName(names, function (name) {
+      _easeMap[name] = _globals[name] = ease;
+      _easeMap[lowercaseName = name.toLowerCase()] = easeOut;
+
+      for (var p in ease) {
+        _easeMap[lowercaseName + (p === "easeIn" ? ".in" : p === "easeOut" ? ".out" : ".inOut")] = _easeMap[name + "." + p] = ease[p];
+      }
+    });
+
+    return ease;
+  },
+      _easeInOutFromOut = function _easeInOutFromOut(easeOut) {
+    return function (p) {
+      return p < .5 ? (1 - easeOut(1 - p * 2)) / 2 : .5 + easeOut((p - .5) * 2) / 2;
+    };
+  },
+      _configElastic = function _configElastic(type, amplitude, period) {
+    var p1 = amplitude >= 1 ? amplitude : 1,
+        p2 = (period || (type ? .3 : .45)) / (amplitude < 1 ? amplitude : 1),
+        p3 = p2 / _2PI * (Math.asin(1 / p1) || 0),
+        easeOut = function easeOut(p) {
+      return p === 1 ? 1 : p1 * Math.pow(2, -10 * p) * _sin((p - p3) * p2) + 1;
+    },
+        ease = type === "out" ? easeOut : type === "in" ? function (p) {
+      return 1 - easeOut(1 - p);
+    } : _easeInOutFromOut(easeOut);
+
+    p2 = _2PI / p2;
+
+    ease.config = function (amplitude, period) {
+      return _configElastic(type, amplitude, period);
+    };
+
+    return ease;
+  },
+      _configBack = function _configBack(type, overshoot) {
+    if (overshoot === void 0) {
+      overshoot = 1.70158;
+    }
+
+    var easeOut = function easeOut(p) {
+      return p ? --p * p * ((overshoot + 1) * p + overshoot) + 1 : 0;
+    },
+        ease = type === "out" ? easeOut : type === "in" ? function (p) {
+      return 1 - easeOut(1 - p);
+    } : _easeInOutFromOut(easeOut);
+
+    ease.config = function (overshoot) {
+      return _configBack(type, overshoot);
+    };
+
+    return ease;
+  };
+
+  _forEachName("Linear,Quad,Cubic,Quart,Quint,Strong", function (name, i) {
+    var power = i < 5 ? i + 1 : i;
+
+    _insertEase(name + ",Power" + (power - 1), i ? function (p) {
+      return Math.pow(p, power);
+    } : function (p) {
+      return p;
+    }, function (p) {
+      return 1 - Math.pow(1 - p, power);
+    }, function (p) {
+      return p < .5 ? Math.pow(p * 2, power) / 2 : 1 - Math.pow((1 - p) * 2, power) / 2;
+    });
+  });
+
+  _easeMap.Linear.easeNone = _easeMap.none = _easeMap.Linear.easeIn;
+
+  _insertEase("Elastic", _configElastic("in"), _configElastic("out"), _configElastic());
+
+  (function (n, c) {
+    var n1 = 1 / c,
+        n2 = 2 * n1,
+        n3 = 2.5 * n1,
+        easeOut = function easeOut(p) {
+      return p < n1 ? n * p * p : p < n2 ? n * Math.pow(p - 1.5 / c, 2) + .75 : p < n3 ? n * (p -= 2.25 / c) * p + .9375 : n * Math.pow(p - 2.625 / c, 2) + .984375;
+    };
+
+    _insertEase("Bounce", function (p) {
+      return 1 - easeOut(1 - p);
+    }, easeOut);
+  })(7.5625, 2.75);
+
+  _insertEase("Expo", function (p) {
+    return p ? Math.pow(2, 10 * (p - 1)) : 0;
+  });
+
+  _insertEase("Circ", function (p) {
+    return -(_sqrt(1 - p * p) - 1);
+  });
+
+  _insertEase("Sine", function (p) {
+    return -_cos(p * _HALF_PI) + 1;
+  });
+
+  _insertEase("Back", _configBack("in"), _configBack("out"), _configBack());
+
+  _easeMap.SteppedEase = _easeMap.steps = _globals.SteppedEase = {
+    config: function config(steps, immediateStart) {
+      if (steps === void 0) {
+        steps = 1;
+      }
+
+      var p1 = 1 / steps,
+          p2 = steps + (immediateStart ? 0 : 1),
+          p3 = immediateStart ? 1 : 0,
+          max = 1 - _tinyNum;
+      return function (p) {
+        return ((p2 * _clamp(0, max, p) | 0) + p3) * p1;
+      };
+    }
+  };
+  _defaults.ease = _easeMap["quad.out"];
+
+  _forEachName("onComplete,onUpdate,onStart,onRepeat,onReverseComplete,onInterrupt", function (name) {
+    return _callbackNames += name + "," + name + "Params,";
+  });
+
+  var GSCache = function GSCache(target, harness) {
+    this.id = _gsID++;
+    target._gsap = this;
+    this.target = target;
+    this.harness = harness;
+    this.get = harness ? harness.get : _getProperty;
+    this.set = harness ? harness.getSetter : _getSetter;
+  };
+  var Animation = function () {
+    function Animation(vars, time) {
+      var parent = vars.parent || _globalTimeline;
+      this.vars = vars;
+      this._delay = +vars.delay || 0;
+
+      if (this._repeat = vars.repeat || 0) {
+        this._rDelay = vars.repeatDelay || 0;
+        this._yoyo = !!vars.yoyo || !!vars.yoyoEase;
+      }
+
+      this._ts = 1;
+
+      _setDuration(this, +vars.duration, 1);
+
+      this.data = vars.data;
+      _tickerActive || _ticker.wake();
+      parent && _addToTimeline(parent, this, time || time === 0 ? time : parent._time, 1);
+      vars.reversed && this.reverse();
+      vars.paused && this.paused(true);
+    }
+
+    var _proto = Animation.prototype;
+
+    _proto.delay = function delay(value) {
+      if (value || value === 0) {
+        this.parent && this.parent.smoothChildTiming && this.startTime(this._start + value - this._delay);
+        this._delay = value;
+        return this;
+      }
+
+      return this._delay;
+    };
+
+    _proto.duration = function duration(value) {
+      return arguments.length ? this.totalDuration(this._repeat > 0 ? value + (value + this._rDelay) * this._repeat : value) : this.totalDuration() && this._dur;
+    };
+
+    _proto.totalDuration = function totalDuration(value) {
+      if (!arguments.length) {
+        return this._tDur;
+      }
+
+      this._dirty = 0;
+      return _setDuration(this, this._repeat < 0 ? value : (value - this._repeat * this._rDelay) / (this._repeat + 1));
+    };
+
+    _proto.totalTime = function totalTime(_totalTime, suppressEvents) {
+      _wake();
+
+      if (!arguments.length) {
+        return this._tTime;
+      }
+
+      var parent = this.parent || this._dp;
+
+      if (parent && parent.smoothChildTiming && this._ts) {
+        this._start = _round(parent._time - (this._ts > 0 ? _totalTime / this._ts : ((this._dirty ? this.totalDuration() : this._tDur) - _totalTime) / -this._ts));
+
+        _setEnd(this);
+
+        if (!parent._dirty) {
+          _uncache(parent);
+        }
+
+        while (parent.parent) {
+          if (parent.parent._time !== parent._start + (parent._ts >= 0 ? parent._tTime / parent._ts : (parent.totalDuration() - parent._tTime) / -parent._ts)) {
+            parent.totalTime(parent._tTime, true);
+          }
+
+          parent = parent.parent;
+        }
+
+        if (!this.parent && this._dp.autoRemoveChildren) {
+          _addToTimeline(this._dp, this, this._start - this._delay);
+        }
+      }
+
+      if (this._tTime !== _totalTime || !this._dur && !suppressEvents || this._initted && Math.abs(this._zTime) === _tinyNum) {
+        this._ts || (this._pTime = _totalTime);
+
+        _lazySafeRender(this, _totalTime, suppressEvents);
+      }
+
+      return this;
+    };
+
+    _proto.time = function time(value, suppressEvents) {
+      return arguments.length ? this.totalTime(Math.min(this.totalDuration(), value + _elapsedCycleDuration(this)) % this._dur || (value ? this._dur : 0), suppressEvents) : this._time;
+    };
+
+    _proto.totalProgress = function totalProgress(value, suppressEvents) {
+      return arguments.length ? this.totalTime(this.totalDuration() * value, suppressEvents) : this.totalDuration() ? Math.min(1, this._tTime / this._tDur) : this.ratio;
+    };
+
+    _proto.progress = function progress(value, suppressEvents) {
+      return arguments.length ? this.totalTime(this.duration() * (this._yoyo && !(this.iteration() & 1) ? 1 - value : value) + _elapsedCycleDuration(this), suppressEvents) : this.duration() ? Math.min(1, this._time / this._dur) : this.ratio;
+    };
+
+    _proto.iteration = function iteration(value, suppressEvents) {
+      var cycleDuration = this.duration() + this._rDelay;
+
+      return arguments.length ? this.totalTime(this._time + (value - 1) * cycleDuration, suppressEvents) : this._repeat ? _animationCycle(this._tTime, cycleDuration) + 1 : 1;
+    };
+
+    _proto.timeScale = function timeScale(value) {
+      if (!arguments.length) {
+        return this._rts === -_tinyNum ? 0 : this._rts;
+      }
+
+      if (this._rts === value) {
+        return this;
+      }
+
+      var tTime = this.parent && this._ts ? _parentToChildTotalTime(this.parent._time, this) : this._tTime;
+      this._rts = +value || 0;
+      this._ts = this._ps || value === -_tinyNum ? 0 : this._rts;
+      return _recacheAncestors(this.totalTime(_clamp(0, this._tDur, tTime), true));
+    };
+
+    _proto.paused = function paused(value) {
+      if (!arguments.length) {
+        return this._ps;
+      }
+
+      if (this._ps !== value) {
+        this._ps = value;
+
+        if (value) {
+          this._pTime = this._tTime || Math.max(-this._delay, this.rawTime());
+          this._ts = this._act = 0;
+        } else {
+          _wake();
+
+          this._ts = this._rts;
+          this.totalTime(this.parent && !this.parent.smoothChildTiming ? this.rawTime() : this._tTime || this._pTime, this.progress() === 1 && (this._tTime -= _tinyNum) && Math.abs(this._zTime) !== _tinyNum);
+        }
+      }
+
+      return this;
+    };
+
+    _proto.startTime = function startTime(value) {
+      if (arguments.length) {
+        this._start = value;
+        var parent = this.parent || this._dp;
+        parent && (parent._sort || !this.parent) && _addToTimeline(parent, this, value - this._delay);
+        return this;
+      }
+
+      return this._start;
+    };
+
+    _proto.endTime = function endTime(includeRepeats) {
+      return this._start + (_isNotFalse(includeRepeats) ? this.totalDuration() : this.duration()) / Math.abs(this._ts);
+    };
+
+    _proto.rawTime = function rawTime(wrapRepeats) {
+      var parent = this.parent || this._dp;
+      return !parent ? this._tTime : wrapRepeats && (!this._ts || this._repeat && this._time && this.totalProgress() < 1) ? this._tTime % (this._dur + this._rDelay) : !this._ts ? this._tTime : _parentToChildTotalTime(parent.rawTime(wrapRepeats), this);
+    };
+
+    _proto.repeat = function repeat(value) {
+      if (arguments.length) {
+        this._repeat = value;
+        return _onUpdateTotalDuration(this);
+      }
+
+      return this._repeat;
+    };
+
+    _proto.repeatDelay = function repeatDelay(value) {
+      if (arguments.length) {
+        this._rDelay = value;
+        return _onUpdateTotalDuration(this);
+      }
+
+      return this._rDelay;
+    };
+
+    _proto.yoyo = function yoyo(value) {
+      if (arguments.length) {
+        this._yoyo = value;
+        return this;
+      }
+
+      return this._yoyo;
+    };
+
+    _proto.seek = function seek(position, suppressEvents) {
+      return this.totalTime(_parsePosition(this, position), _isNotFalse(suppressEvents));
+    };
+
+    _proto.restart = function restart(includeDelay, suppressEvents) {
+      return this.play().totalTime(includeDelay ? -this._delay : 0, _isNotFalse(suppressEvents));
+    };
+
+    _proto.play = function play(from, suppressEvents) {
+      if (from != null) {
+        this.seek(from, suppressEvents);
+      }
+
+      return this.reversed(false).paused(false);
+    };
+
+    _proto.reverse = function reverse(from, suppressEvents) {
+      if (from != null) {
+        this.seek(from || this.totalDuration(), suppressEvents);
+      }
+
+      return this.reversed(true).paused(false);
+    };
+
+    _proto.pause = function pause(atTime, suppressEvents) {
+      if (atTime != null) {
+        this.seek(atTime, suppressEvents);
+      }
+
+      return this.paused(true);
+    };
+
+    _proto.resume = function resume() {
+      return this.paused(false);
+    };
+
+    _proto.reversed = function reversed(value) {
+      if (arguments.length) {
+        if (!!value !== this.reversed()) {
+          this.timeScale(-this._rts || (value ? -_tinyNum : 0));
+        }
+
+        return this;
+      }
+
+      return this._rts < 0;
+    };
+
+    _proto.invalidate = function invalidate() {
+      this._initted = 0;
+      this._zTime = -_tinyNum;
+      return this;
+    };
+
+    _proto.isActive = function isActive(hasStarted) {
+      var parent = this.parent || this._dp,
+          start = this._start,
+          rawTime;
+      return !!(!parent || this._ts && (this._initted || !hasStarted) && parent.isActive(hasStarted) && (rawTime = parent.rawTime(true)) >= start && rawTime < this.endTime(true) - _tinyNum);
+    };
+
+    _proto.eventCallback = function eventCallback(type, callback, params) {
+      var vars = this.vars;
+
+      if (arguments.length > 1) {
+        if (!callback) {
+          delete vars[type];
+        } else {
+          vars[type] = callback;
+
+          if (params) {
+            vars[type + "Params"] = params;
+          }
+
+          if (type === "onUpdate") {
+            this._onUpdate = callback;
+          }
+        }
+
+        return this;
+      }
+
+      return vars[type];
+    };
+
+    _proto.then = function then(onFulfilled) {
+      var self = this;
+      return new Promise(function (resolve) {
+        var f = _isFunction(onFulfilled) ? onFulfilled : _passThrough,
+            _resolve = function _resolve() {
+          var _then = self.then;
+          self.then = null;
+          _isFunction(f) && (f = f(self)) && (f.then || f === self) && (self.then = _then);
+          resolve(f);
+          self.then = _then;
+        };
+
+        if (self._initted && self.totalProgress() === 1 && self._ts >= 0 || !self._tTime && self._ts < 0) {
+          _resolve();
+        } else {
+          self._prom = _resolve;
+        }
+      });
+    };
+
+    _proto.kill = function kill() {
+      _interrupt(this);
+    };
+
+    return Animation;
+  }();
+
+  _setDefaults(Animation.prototype, {
+    _time: 0,
+    _start: 0,
+    _end: 0,
+    _tTime: 0,
+    _tDur: 0,
+    _dirty: 0,
+    _repeat: 0,
+    _yoyo: false,
+    parent: null,
+    _initted: false,
+    _rDelay: 0,
+    _ts: 1,
+    _dp: 0,
+    ratio: 0,
+    _zTime: -_tinyNum,
+    _prom: 0,
+    _ps: false,
+    _rts: 1
+  });
+
+  var Timeline = function (_Animation) {
+    _inheritsLoose(Timeline, _Animation);
+
+    function Timeline(vars, time) {
+      var _this;
+
+      if (vars === void 0) {
+        vars = {};
+      }
+
+      _this = _Animation.call(this, vars, time) || this;
+      _this.labels = {};
+      _this.smoothChildTiming = !!vars.smoothChildTiming;
+      _this.autoRemoveChildren = !!vars.autoRemoveChildren;
+      _this._sort = _isNotFalse(vars.sortChildren);
+      _this.parent && _postAddChecks(_this.parent, _assertThisInitialized(_this));
+      return _this;
+    }
+
+    var _proto2 = Timeline.prototype;
+
+    _proto2.to = function to(targets, vars, position) {
+      new Tween(targets, _parseVars(arguments, 0, this), _parsePosition(this, _isNumber(vars) ? arguments[3] : position));
+      return this;
+    };
+
+    _proto2.from = function from(targets, vars, position) {
+      new Tween(targets, _parseVars(arguments, 1, this), _parsePosition(this, _isNumber(vars) ? arguments[3] : position));
+      return this;
+    };
+
+    _proto2.fromTo = function fromTo(targets, fromVars, toVars, position) {
+      new Tween(targets, _parseVars(arguments, 2, this), _parsePosition(this, _isNumber(fromVars) ? arguments[4] : position));
+      return this;
+    };
+
+    _proto2.set = function set(targets, vars, position) {
+      vars.duration = 0;
+      vars.parent = this;
+      _inheritDefaults(vars).repeatDelay || (vars.repeat = 0);
+      vars.immediateRender = !!vars.immediateRender;
+      new Tween(targets, vars, _parsePosition(this, position), 1);
+      return this;
+    };
+
+    _proto2.call = function call(callback, params, position) {
+      return _addToTimeline(this, Tween.delayedCall(0, callback, params), _parsePosition(this, position));
+    };
+
+    _proto2.staggerTo = function staggerTo(targets, duration, vars, stagger, position, onCompleteAll, onCompleteAllParams) {
+      vars.duration = duration;
+      vars.stagger = vars.stagger || stagger;
+      vars.onComplete = onCompleteAll;
+      vars.onCompleteParams = onCompleteAllParams;
+      vars.parent = this;
+      new Tween(targets, vars, _parsePosition(this, position));
+      return this;
+    };
+
+    _proto2.staggerFrom = function staggerFrom(targets, duration, vars, stagger, position, onCompleteAll, onCompleteAllParams) {
+      vars.runBackwards = 1;
+      _inheritDefaults(vars).immediateRender = _isNotFalse(vars.immediateRender);
+      return this.staggerTo(targets, duration, vars, stagger, position, onCompleteAll, onCompleteAllParams);
+    };
+
+    _proto2.staggerFromTo = function staggerFromTo(targets, duration, fromVars, toVars, stagger, position, onCompleteAll, onCompleteAllParams) {
+      toVars.startAt = fromVars;
+      _inheritDefaults(toVars).immediateRender = _isNotFalse(toVars.immediateRender);
+      return this.staggerTo(targets, duration, toVars, stagger, position, onCompleteAll, onCompleteAllParams);
+    };
+
+    _proto2.render = function render(totalTime, suppressEvents, force) {
+      var prevTime = this._time,
+          tDur = this._dirty ? this.totalDuration() : this._tDur,
+          dur = this._dur,
+          tTime = this !== _globalTimeline && totalTime > tDur - _tinyNum && totalTime >= 0 ? tDur : totalTime < _tinyNum ? 0 : totalTime,
+          crossingStart = this._zTime < 0 !== totalTime < 0 && (this._initted || !dur),
+          time,
+          child,
+          next,
+          iteration,
+          cycleDuration,
+          prevPaused,
+          pauseTween,
+          timeScale,
+          prevStart,
+          prevIteration,
+          yoyo,
+          isYoyo;
+
+      if (tTime !== this._tTime || force || crossingStart) {
+        if (prevTime !== this._time && dur) {
+          tTime += this._time - prevTime;
+          totalTime += this._time - prevTime;
+        }
+
+        time = tTime;
+        prevStart = this._start;
+        timeScale = this._ts;
+        prevPaused = !timeScale;
+
+        if (crossingStart) {
+          if (!dur) {
+            prevTime = this._zTime;
+          }
+
+          if (totalTime || !suppressEvents) {
+            this._zTime = totalTime;
+          }
+        }
+
+        if (this._repeat) {
+          yoyo = this._yoyo;
+          cycleDuration = dur + this._rDelay;
+          time = _round(tTime % cycleDuration);
+
+          if (time > dur || tDur === tTime) {
+            time = dur;
+          }
+
+          iteration = ~~(tTime / cycleDuration);
+
+          if (iteration && iteration === tTime / cycleDuration) {
+            time = dur;
+            iteration--;
+          }
+
+          prevIteration = _animationCycle(this._tTime, cycleDuration);
+
+          if (yoyo && iteration & 1) {
+            time = dur - time;
+            isYoyo = 1;
+          }
+
+          if (iteration !== prevIteration && !this._lock) {
+            var rewinding = yoyo && prevIteration & 1,
+                doesWrap = rewinding === (yoyo && iteration & 1);
+
+            if (iteration < prevIteration) {
+              rewinding = !rewinding;
+            }
+
+            prevTime = rewinding ? 0 : dur;
+            this._lock = 1;
+            this.render(prevTime, suppressEvents, !dur)._lock = 0;
+
+            if (!suppressEvents && this.parent) {
+              _callback(this, "onRepeat");
+            }
+
+            this.vars.repeatRefresh && !isYoyo && (this.invalidate()._lock = 1);
+
+            if (prevTime !== this._time || prevPaused !== !this._ts) {
+              return this;
+            }
+
+            if (doesWrap) {
+              this._lock = 2;
+              prevTime = rewinding ? dur + 0.0001 : -0.0001;
+              this.render(prevTime, true);
+              this.vars.repeatRefresh && !isYoyo && this.invalidate();
+            }
+
+            this._lock = 0;
+
+            if (!this._ts && !prevPaused) {
+              return this;
+            }
+          }
+        }
+
+        if (this._hasPause && !this._forcing && this._lock < 2) {
+          pauseTween = _findNextPauseTween(this, _round(prevTime), _round(time));
+
+          if (pauseTween) {
+            tTime -= time - (time = pauseTween._start);
+          }
+        }
+
+        this._tTime = tTime;
+        this._time = time;
+        this._act = !timeScale;
+
+        if (!this._initted) {
+          this._onUpdate = this.vars.onUpdate;
+          this._initted = 1;
+          this._zTime = totalTime;
+        }
+
+        if (!prevTime && time && !suppressEvents) {
+          _callback(this, "onStart");
+        }
+
+        if (time >= prevTime && totalTime >= 0) {
+          child = this._first;
+
+          while (child) {
+            next = child._next;
+
+            if ((child._act || time >= child._start) && child._ts && pauseTween !== child) {
+              if (child.parent !== this) {
+                return this.render(totalTime, suppressEvents, force);
+              }
+
+              child.render(child._ts > 0 ? (time - child._start) * child._ts : (child._dirty ? child.totalDuration() : child._tDur) + (time - child._start) * child._ts, suppressEvents, force);
+
+              if (time !== this._time || !this._ts && !prevPaused) {
+                pauseTween = 0;
+                next && (tTime += this._zTime = -_tinyNum);
+                break;
+              }
+            }
+
+            child = next;
+          }
+        } else {
+          child = this._last;
+          var adjustedTime = totalTime < 0 ? totalTime : time;
+
+          while (child) {
+            next = child._prev;
+
+            if ((child._act || adjustedTime <= child._end) && child._ts && pauseTween !== child) {
+              if (child.parent !== this) {
+                return this.render(totalTime, suppressEvents, force);
+              }
+
+              child.render(child._ts > 0 ? (adjustedTime - child._start) * child._ts : (child._dirty ? child.totalDuration() : child._tDur) + (adjustedTime - child._start) * child._ts, suppressEvents, force);
+
+              if (time !== this._time || !this._ts && !prevPaused) {
+                pauseTween = 0;
+                next && (tTime += this._zTime = adjustedTime ? -_tinyNum : _tinyNum);
+                break;
+              }
+            }
+
+            child = next;
+          }
+        }
+
+        if (pauseTween && !suppressEvents) {
+          this.pause();
+          pauseTween.render(time >= prevTime ? 0 : -_tinyNum)._zTime = time >= prevTime ? 1 : -1;
+
+          if (this._ts) {
+            this._start = prevStart;
+
+            _setEnd(this);
+
+            return this.render(totalTime, suppressEvents, force);
+          }
+        }
+
+        if (this._onUpdate && !suppressEvents) {
+          _callback(this, "onUpdate", true);
+        }
+
+        if (tTime === tDur && tDur >= this.totalDuration() || !tTime && this._ts < 0) if (prevStart === this._start || Math.abs(timeScale) !== Math.abs(this._ts)) if (!this._lock) {
+          (totalTime || !dur) && (totalTime && this._ts > 0 || !tTime && this._ts < 0) && _removeFromParent(this, 1);
+
+          if (!suppressEvents && !(totalTime < 0 && !prevTime)) {
+            _callback(this, tTime === tDur ? "onComplete" : "onReverseComplete", true);
+
+            this._prom && this._prom();
+          }
+        }
+      }
+
+      return this;
+    };
+
+    _proto2.add = function add(child, position) {
+      var _this2 = this;
+
+      if (!_isNumber(position)) {
+        position = _parsePosition(this, position);
+      }
+
+      if (!(child instanceof Animation)) {
+        if (_isArray(child)) {
+          child.forEach(function (obj) {
+            return _this2.add(obj, position);
+          });
+          return _uncache(this);
+        }
+
+        if (_isString(child)) {
+          return this.addLabel(child, position);
+        }
+
+        if (_isFunction(child)) {
+          child = Tween.delayedCall(0, child);
+        } else {
+          return this;
+        }
+      }
+
+      return this !== child ? _addToTimeline(this, child, position) : this;
+    };
+
+    _proto2.getChildren = function getChildren(nested, tweens, timelines, ignoreBeforeTime) {
+      if (nested === void 0) {
+        nested = true;
+      }
+
+      if (tweens === void 0) {
+        tweens = true;
+      }
+
+      if (timelines === void 0) {
+        timelines = true;
+      }
+
+      if (ignoreBeforeTime === void 0) {
+        ignoreBeforeTime = -_bigNum;
+      }
+
+      var a = [],
+          child = this._first;
+
+      while (child) {
+        if (child._start >= ignoreBeforeTime) {
+          if (child instanceof Tween) {
+            if (tweens) {
+              a.push(child);
+            }
+          } else {
+            if (timelines) {
+              a.push(child);
+            }
+
+            if (nested) {
+              a.push.apply(a, child.getChildren(true, tweens, timelines));
+            }
+          }
+        }
+
+        child = child._next;
+      }
+
+      return a;
+    };
+
+    _proto2.getById = function getById(id) {
+      var animations = this.getChildren(1, 1, 1),
+          i = animations.length;
+
+      while (i--) {
+        if (animations[i].vars.id === id) {
+          return animations[i];
+        }
+      }
+    };
+
+    _proto2.remove = function remove(child) {
+      if (_isString(child)) {
+        return this.removeLabel(child);
+      }
+
+      if (_isFunction(child)) {
+        return this.killTweensOf(child);
+      }
+
+      _removeLinkedListItem(this, child);
+
+      if (child === this._recent) {
+        this._recent = this._last;
+      }
+
+      return _uncache(this);
+    };
+
+    _proto2.totalTime = function totalTime(_totalTime2, suppressEvents) {
+      if (!arguments.length) {
+        return this._tTime;
+      }
+
+      this._forcing = 1;
+
+      if (!this.parent && !this._dp && this._ts) {
+        this._start = _round(_ticker.time - (this._ts > 0 ? _totalTime2 / this._ts : (this.totalDuration() - _totalTime2) / -this._ts));
+      }
+
+      _Animation.prototype.totalTime.call(this, _totalTime2, suppressEvents);
+
+      this._forcing = 0;
+      return this;
+    };
+
+    _proto2.addLabel = function addLabel(label, position) {
+      this.labels[label] = _parsePosition(this, position);
+      return this;
+    };
+
+    _proto2.removeLabel = function removeLabel(label) {
+      delete this.labels[label];
+      return this;
+    };
+
+    _proto2.addPause = function addPause(position, callback, params) {
+      var t = Tween.delayedCall(0, callback || _emptyFunc, params);
+      t.data = "isPause";
+      this._hasPause = 1;
+      return _addToTimeline(this, t, _parsePosition(this, position));
+    };
+
+    _proto2.removePause = function removePause(position) {
+      var child = this._first;
+      position = _parsePosition(this, position);
+
+      while (child) {
+        if (child._start === position && child.data === "isPause") {
+          _removeFromParent(child);
+        }
+
+        child = child._next;
+      }
+    };
+
+    _proto2.killTweensOf = function killTweensOf(targets, props, onlyActive) {
+      var tweens = this.getTweensOf(targets, onlyActive),
+          i = tweens.length;
+
+      while (i--) {
+        _overwritingTween !== tweens[i] && tweens[i].kill(targets, props);
+      }
+
+      return this;
+    };
+
+    _proto2.getTweensOf = function getTweensOf(targets, onlyActive) {
+      var a = [],
+          parsedTargets = toArray(targets),
+          child = this._first,
+          children;
+
+      while (child) {
+        if (child instanceof Tween) {
+          if (_arrayContainsAny(child._targets, parsedTargets) && (!onlyActive || child.isActive(onlyActive === "started"))) {
+            a.push(child);
+          }
+        } else if ((children = child.getTweensOf(parsedTargets, onlyActive)).length) {
+          a.push.apply(a, children);
+        }
+
+        child = child._next;
+      }
+
+      return a;
+    };
+
+    _proto2.tweenTo = function tweenTo(position, vars) {
+      vars = vars || {};
+
+      var tl = this,
+          endTime = _parsePosition(tl, position),
+          _vars = vars,
+          startAt = _vars.startAt,
+          _onStart = _vars.onStart,
+          onStartParams = _vars.onStartParams,
+          tween = Tween.to(tl, _setDefaults(vars, {
+        ease: "none",
+        lazy: false,
+        time: endTime,
+        duration: vars.duration || Math.abs((endTime - (startAt && "time" in startAt ? startAt.time : tl._time)) / tl.timeScale()) || _tinyNum,
+        onStart: function onStart() {
+          tl.pause();
+          var duration = vars.duration || Math.abs((endTime - tl._time) / tl.timeScale());
+
+          if (tween._dur !== duration) {
+            _setDuration(tween, duration).render(tween._time, true, true);
+          }
+
+          if (_onStart) {
+            _onStart.apply(tween, onStartParams || []);
+          }
+        }
+      }));
+
+      return tween;
+    };
+
+    _proto2.tweenFromTo = function tweenFromTo(fromPosition, toPosition, vars) {
+      return this.tweenTo(toPosition, _setDefaults({
+        startAt: {
+          time: _parsePosition(this, fromPosition)
+        }
+      }, vars));
+    };
+
+    _proto2.recent = function recent() {
+      return this._recent;
+    };
+
+    _proto2.nextLabel = function nextLabel(afterTime) {
+      if (afterTime === void 0) {
+        afterTime = this._time;
+      }
+
+      return _getLabelInDirection(this, _parsePosition(this, afterTime));
+    };
+
+    _proto2.previousLabel = function previousLabel(beforeTime) {
+      if (beforeTime === void 0) {
+        beforeTime = this._time;
+      }
+
+      return _getLabelInDirection(this, _parsePosition(this, beforeTime), 1);
+    };
+
+    _proto2.currentLabel = function currentLabel(value) {
+      return arguments.length ? this.seek(value, true) : this.previousLabel(this._time + _tinyNum);
+    };
+
+    _proto2.shiftChildren = function shiftChildren(amount, adjustLabels, ignoreBeforeTime) {
+      if (ignoreBeforeTime === void 0) {
+        ignoreBeforeTime = 0;
+      }
+
+      var child = this._first,
+          labels = this.labels,
+          p;
+
+      while (child) {
+        if (child._start >= ignoreBeforeTime) {
+          child._start += amount;
+        }
+
+        child = child._next;
+      }
+
+      if (adjustLabels) {
+        for (p in labels) {
+          if (labels[p] >= ignoreBeforeTime) {
+            labels[p] += amount;
+          }
+        }
+      }
+
+      return _uncache(this);
+    };
+
+    _proto2.invalidate = function invalidate() {
+      var child = this._first;
+      this._lock = 0;
+
+      while (child) {
+        child.invalidate();
+        child = child._next;
+      }
+
+      return _Animation.prototype.invalidate.call(this);
+    };
+
+    _proto2.clear = function clear(includeLabels) {
+      if (includeLabels === void 0) {
+        includeLabels = true;
+      }
+
+      var child = this._first,
+          next;
+
+      while (child) {
+        next = child._next;
+        this.remove(child);
+        child = next;
+      }
+
+      this._time = this._tTime = 0;
+
+      if (includeLabels) {
+        this.labels = {};
+      }
+
+      return _uncache(this);
+    };
+
+    _proto2.totalDuration = function totalDuration(value) {
+      var max = 0,
+          self = this,
+          child = self._last,
+          prevStart = _bigNum,
+          prev,
+          end,
+          start,
+          parent;
+
+      if (arguments.length) {
+        return self.timeScale((self._repeat < 0 ? self.duration() : self.totalDuration()) / (self.reversed() ? -value : value));
+      }
+
+      if (self._dirty) {
+        parent = self.parent;
+
+        while (child) {
+          prev = child._prev;
+
+          if (child._dirty) {
+            child.totalDuration();
+          }
+
+          start = child._start;
+
+          if (start > prevStart && self._sort && child._ts && !self._lock) {
+            self._lock = 1;
+            _addToTimeline(self, child, start - child._delay, 1)._lock = 0;
+          } else {
+            prevStart = start;
+          }
+
+          if (start < 0 && child._ts) {
+            max -= start;
+
+            if (!parent && !self._dp || parent && parent.smoothChildTiming) {
+              self._start += start / self._ts;
+              self._time -= start;
+              self._tTime -= start;
+            }
+
+            self.shiftChildren(-start, false, -1e20);
+            prevStart = 0;
+          }
+
+          end = _setEnd(child);
+
+          if (end > max && child._ts) {
+            max = end;
+          }
+
+          child = prev;
+        }
+
+        _setDuration(self, self === _globalTimeline && self._time > max ? self._time : Math.min(_bigNum, max), 1);
+
+        self._dirty = 0;
+      }
+
+      return self._tDur;
+    };
+
+    Timeline.updateRoot = function updateRoot(time) {
+      if (_globalTimeline._ts) {
+        _lazySafeRender(_globalTimeline, _parentToChildTotalTime(time, _globalTimeline));
+
+        _lastRenderedFrame = _ticker.frame;
+      }
+
+      if (_ticker.frame >= _nextGCFrame) {
+        _nextGCFrame += _config.autoSleep || 120;
+        var child = _globalTimeline._first;
+        if (!child || !child._ts) if (_config.autoSleep && _ticker._listeners.length < 2) {
+          while (child && !child._ts) {
+            child = child._next;
+          }
+
+          if (!child) {
+            _ticker.sleep();
+          }
+        }
+      }
+    };
+
+    return Timeline;
+  }(Animation);
+
+  _setDefaults(Timeline.prototype, {
+    _lock: 0,
+    _hasPause: 0,
+    _forcing: 0
+  });
+
+  var _addComplexStringPropTween = function _addComplexStringPropTween(target, prop, start, end, setter, stringFilter, funcParam) {
+    var pt = new PropTween(this._pt, target, prop, 0, 1, _renderComplexString, null, setter),
+        index = 0,
+        matchIndex = 0,
+        result,
+        startNums,
+        color,
+        endNum,
+        chunk,
+        startNum,
+        hasRandom,
+        a;
+    pt.b = start;
+    pt.e = end;
+    start += "";
+    end += "";
+
+    if (hasRandom = ~end.indexOf("random(")) {
+      end = _replaceRandom(end);
+    }
+
+    if (stringFilter) {
+      a = [start, end];
+      stringFilter(a, target, prop);
+      start = a[0];
+      end = a[1];
+    }
+
+    startNums = start.match(_complexStringNumExp) || [];
+
+    while (result = _complexStringNumExp.exec(end)) {
+      endNum = result[0];
+      chunk = end.substring(index, result.index);
+
+      if (color) {
+        color = (color + 1) % 5;
+      } else if (chunk.substr(-5) === "rgba(") {
+        color = 1;
+      }
+
+      if (endNum !== startNums[matchIndex++]) {
+        startNum = parseFloat(startNums[matchIndex - 1]) || 0;
+        pt._pt = {
+          _next: pt._pt,
+          p: chunk || matchIndex === 1 ? chunk : ",",
+          s: startNum,
+          c: endNum.charAt(1) === "=" ? parseFloat(endNum.substr(2)) * (endNum.charAt(0) === "-" ? -1 : 1) : parseFloat(endNum) - startNum,
+          m: color && color < 4 ? Math.round : 0
+        };
+        index = _complexStringNumExp.lastIndex;
+      }
+    }
+
+    pt.c = index < end.length ? end.substring(index, end.length) : "";
+    pt.fp = funcParam;
+
+    if (_relExp.test(end) || hasRandom) {
+      pt.e = 0;
+    }
+
+    this._pt = pt;
+    return pt;
+  },
+      _addPropTween = function _addPropTween(target, prop, start, end, index, targets, modifier, stringFilter, funcParam) {
+    if (_isFunction(end)) {
+      end = end(index || 0, target, targets);
+    }
+
+    var currentValue = target[prop],
+        parsedStart = start !== "get" ? start : !_isFunction(currentValue) ? currentValue : funcParam ? target[prop.indexOf("set") || !_isFunction(target["get" + prop.substr(3)]) ? prop : "get" + prop.substr(3)](funcParam) : target[prop](),
+        setter = !_isFunction(currentValue) ? _setterPlain : funcParam ? _setterFuncWithParam : _setterFunc,
+        pt;
+
+    if (_isString(end)) {
+      if (~end.indexOf("random(")) {
+        end = _replaceRandom(end);
+      }
+
+      if (end.charAt(1) === "=") {
+        end = parseFloat(parsedStart) + parseFloat(end.substr(2)) * (end.charAt(0) === "-" ? -1 : 1) + (getUnit(parsedStart) || 0);
+      }
+    }
+
+    if (parsedStart !== end) {
+      if (!isNaN(parsedStart + end)) {
+        pt = new PropTween(this._pt, target, prop, +parsedStart || 0, end - (parsedStart || 0), typeof currentValue === "boolean" ? _renderBoolean : _renderPlain, 0, setter);
+
+        if (funcParam) {
+          pt.fp = funcParam;
+        }
+
+        if (modifier) {
+          pt.modifier(modifier, this, target);
+        }
+
+        return this._pt = pt;
+      }
+
+      !currentValue && !(prop in target) && _missingPlugin(prop, end);
+      return _addComplexStringPropTween.call(this, target, prop, parsedStart, end, setter, stringFilter || _config.stringFilter, funcParam);
+    }
+  },
+      _processVars = function _processVars(vars, index, target, targets, tween) {
+    if (_isFunction(vars)) {
+      vars = _parseFuncOrString(vars, tween, index, target, targets);
+    }
+
+    if (!_isObject(vars) || vars.style && vars.nodeType || _isArray(vars)) {
+      return _isString(vars) ? _parseFuncOrString(vars, tween, index, target, targets) : vars;
+    }
+
+    var copy = {},
+        p;
+
+    for (p in vars) {
+      copy[p] = _parseFuncOrString(vars[p], tween, index, target, targets);
+    }
+
+    return copy;
+  },
+      _checkPlugin = function _checkPlugin(property, vars, tween, index, target, targets) {
+    var plugin, pt, ptLookup, i;
+
+    if (_plugins[property] && (plugin = new _plugins[property]()).init(target, plugin.rawVars ? vars[property] : _processVars(vars[property], index, target, targets, tween), tween, index, targets) !== false) {
+      tween._pt = pt = new PropTween(tween._pt, target, property, 0, 1, plugin.render, plugin, 0, plugin.priority);
+
+      if (tween !== _quickTween) {
+        ptLookup = tween._ptLookup[tween._targets.indexOf(target)];
+        i = plugin._props.length;
+
+        while (i--) {
+          ptLookup[plugin._props[i]] = pt;
+        }
+      }
+    }
+
+    return plugin;
+  },
+      _overwritingTween,
+      _initTween = function _initTween(tween, time) {
+    var vars = tween.vars,
+        ease = vars.ease,
+        startAt = vars.startAt,
+        immediateRender = vars.immediateRender,
+        lazy = vars.lazy,
+        onUpdate = vars.onUpdate,
+        onUpdateParams = vars.onUpdateParams,
+        callbackScope = vars.callbackScope,
+        runBackwards = vars.runBackwards,
+        yoyoEase = vars.yoyoEase,
+        keyframes = vars.keyframes,
+        autoRevert = vars.autoRevert,
+        dur = tween._dur,
+        prevStartAt = tween._startAt,
+        targets = tween._targets,
+        parent = tween.parent,
+        fullTargets = parent && parent.data === "nested" ? parent.parent._targets : targets,
+        autoOverwrite = tween._overwrite === "auto",
+        tl = tween.timeline,
+        cleanVars,
+        i,
+        p,
+        pt,
+        target,
+        hasPriority,
+        gsData,
+        harness,
+        plugin,
+        ptLookup,
+        index,
+        harnessVars;
+
+    if (tl && (!keyframes || !ease)) {
+      ease = "none";
+    }
+
+    tween._ease = _parseEase(ease, _defaults.ease);
+    tween._yEase = yoyoEase ? _invertEase(_parseEase(yoyoEase === true ? ease : yoyoEase, _defaults.ease)) : 0;
+
+    if (yoyoEase && tween._yoyo && !tween._repeat) {
+      yoyoEase = tween._yEase;
+      tween._yEase = tween._ease;
+      tween._ease = yoyoEase;
+    }
+
+    if (!tl) {
+      if (prevStartAt) {
+        prevStartAt.render(-1, true).kill();
+      }
+
+      if (startAt) {
+        _removeFromParent(tween._startAt = Tween.set(targets, _setDefaults({
+          data: "isStart",
+          overwrite: false,
+          parent: parent,
+          immediateRender: true,
+          lazy: _isNotFalse(lazy),
+          startAt: null,
+          delay: 0,
+          onUpdate: onUpdate,
+          onUpdateParams: onUpdateParams,
+          callbackScope: callbackScope,
+          stagger: 0
+        }, startAt)));
+
+        if (immediateRender) {
+          if (time > 0) {
+            !autoRevert && (tween._startAt = 0);
+          } else if (dur) {
+            return;
+          }
+        }
+      } else if (runBackwards && dur) {
+        if (prevStartAt) {
+          !autoRevert && (tween._startAt = 0);
+        } else {
+          if (time) {
+            immediateRender = false;
+          }
+
+          _removeFromParent(tween._startAt = Tween.set(targets, _merge(_copyExcluding(vars, _reservedProps), {
+            overwrite: false,
+            data: "isFromStart",
+            lazy: immediateRender && _isNotFalse(lazy),
+            immediateRender: immediateRender,
+            stagger: 0,
+            parent: parent
+          })));
+
+          if (!immediateRender) {
+            _initTween(tween._startAt, _tinyNum);
+          } else if (!time) {
+            return;
+          }
+        }
+      }
+
+      cleanVars = _copyExcluding(vars, _reservedProps);
+      tween._pt = 0;
+      harness = targets[0] ? _getCache(targets[0]).harness : 0;
+      harnessVars = harness && vars[harness.prop];
+      lazy = dur && _isNotFalse(lazy) || lazy && !dur;
+
+      for (i = 0; i < targets.length; i++) {
+        target = targets[i];
+        gsData = target._gsap || _harness(targets)[i]._gsap;
+        tween._ptLookup[i] = ptLookup = {};
+
+        if (_lazyLookup[gsData.id]) {
+          _lazyRender();
+        }
+
+        index = fullTargets === targets ? i : fullTargets.indexOf(target);
+
+        if (harness && (plugin = new harness()).init(target, harnessVars || cleanVars, tween, index, fullTargets) !== false) {
+          tween._pt = pt = new PropTween(tween._pt, target, plugin.name, 0, 1, plugin.render, plugin, 0, plugin.priority);
+
+          plugin._props.forEach(function (name) {
+            ptLookup[name] = pt;
+          });
+
+          if (plugin.priority) {
+            hasPriority = 1;
+          }
+        }
+
+        if (!harness || harnessVars) {
+          for (p in cleanVars) {
+            if (_plugins[p] && (plugin = _checkPlugin(p, cleanVars, tween, index, target, fullTargets))) {
+              if (plugin.priority) {
+                hasPriority = 1;
+              }
+            } else {
+              ptLookup[p] = pt = _addPropTween.call(tween, target, p, "get", cleanVars[p], index, fullTargets, 0, vars.stringFilter);
+            }
+          }
+        }
+
+        if (tween._op && tween._op[i]) {
+          tween.kill(target, tween._op[i]);
+        }
+
+        if (autoOverwrite && tween._pt) {
+          _overwritingTween = tween;
+
+          _globalTimeline.killTweensOf(target, ptLookup, "started");
+
+          _overwritingTween = 0;
+        }
+
+        if (tween._pt && lazy) {
+          _lazyLookup[gsData.id] = 1;
+        }
+      }
+
+      if (hasPriority) {
+        _sortPropTweensByPriority(tween);
+      }
+
+      if (tween._onInit) {
+        tween._onInit(tween);
+      }
+    }
+
+    tween._from = !tl && !!vars.runBackwards;
+    tween._onUpdate = onUpdate;
+    tween._initted = 1;
+  },
+      _addAliasesToVars = function _addAliasesToVars(targets, vars) {
+    var harness = targets[0] ? _getCache(targets[0]).harness : 0,
+        propertyAliases = harness && harness.aliases,
+        copy,
+        p,
+        i,
+        aliases;
+
+    if (!propertyAliases) {
+      return vars;
+    }
+
+    copy = _merge({}, vars);
+
+    for (p in propertyAliases) {
+      if (p in copy) {
+        aliases = propertyAliases[p].split(",");
+        i = aliases.length;
+
+        while (i--) {
+          copy[aliases[i]] = copy[p];
+        }
+      }
+    }
+
+    return copy;
+  },
+      _parseFuncOrString = function _parseFuncOrString(value, tween, i, target, targets) {
+    return _isFunction(value) ? value.call(tween, i, target, targets) : _isString(value) && ~value.indexOf("random(") ? _replaceRandom(value) : value;
+  },
+      _staggerTweenProps = _callbackNames + "repeat,repeatDelay,yoyo,repeatRefresh,yoyoEase",
+      _staggerPropsToSkip = (_staggerTweenProps + ",id,stagger,delay,duration,paused").split(",");
+
+  var Tween = function (_Animation2) {
+    _inheritsLoose(Tween, _Animation2);
+
+    function Tween(targets, vars, time, skipInherit) {
+      var _this3;
+
+      if (typeof vars === "number") {
+        time.duration = vars;
+        vars = time;
+        time = null;
+      }
+
+      _this3 = _Animation2.call(this, skipInherit ? vars : _inheritDefaults(vars), time) || this;
+      var _this3$vars = _this3.vars,
+          duration = _this3$vars.duration,
+          delay = _this3$vars.delay,
+          immediateRender = _this3$vars.immediateRender,
+          stagger = _this3$vars.stagger,
+          overwrite = _this3$vars.overwrite,
+          keyframes = _this3$vars.keyframes,
+          defaults = _this3$vars.defaults,
+          parent = _this3.parent,
+          parsedTargets = (_isArray(targets) ? _isNumber(targets[0]) : "length" in vars) ? [targets] : toArray(targets),
+          tl,
+          i,
+          copy,
+          l,
+          p,
+          curTarget,
+          staggerFunc,
+          staggerVarsToMerge;
+      _this3._targets = parsedTargets.length ? _harness(parsedTargets) : _warn("GSAP target " + targets + " not found. https://greensock.com", !_config.nullTargetWarn) || [];
+      _this3._ptLookup = [];
+      _this3._overwrite = overwrite;
+
+      if (keyframes || stagger || _isFuncOrString(duration) || _isFuncOrString(delay)) {
+        vars = _this3.vars;
+        tl = _this3.timeline = new Timeline({
+          data: "nested",
+          defaults: defaults || {}
+        });
+        tl.kill();
+        tl.parent = _assertThisInitialized(_this3);
+
+        if (keyframes) {
+          _setDefaults(tl.vars.defaults, {
+            ease: "none"
+          });
+
+          keyframes.forEach(function (frame) {
+            return tl.to(parsedTargets, frame, ">");
+          });
+        } else {
+          l = parsedTargets.length;
+          staggerFunc = stagger ? distribute(stagger) : _emptyFunc;
+
+          if (_isObject(stagger)) {
+            for (p in stagger) {
+              if (~_staggerTweenProps.indexOf(p)) {
+                if (!staggerVarsToMerge) {
+                  staggerVarsToMerge = {};
+                }
+
+                staggerVarsToMerge[p] = stagger[p];
+              }
+            }
+          }
+
+          for (i = 0; i < l; i++) {
+            copy = {};
+
+            for (p in vars) {
+              if (_staggerPropsToSkip.indexOf(p) < 0) {
+                copy[p] = vars[p];
+              }
+            }
+
+            copy.stagger = 0;
+
+            if (staggerVarsToMerge) {
+              _merge(copy, staggerVarsToMerge);
+            }
+
+            if (vars.yoyoEase && !vars.repeat) {
+              copy.yoyoEase = vars.yoyoEase;
+            }
+
+            curTarget = parsedTargets[i];
+            copy.duration = +_parseFuncOrString(duration, _assertThisInitialized(_this3), i, curTarget, parsedTargets);
+            copy.delay = (+_parseFuncOrString(delay, _assertThisInitialized(_this3), i, curTarget, parsedTargets) || 0) - _this3._delay;
+
+            if (!stagger && l === 1 && copy.delay) {
+              _this3._delay = delay = copy.delay;
+              _this3._start += delay;
+              copy.delay = 0;
+            }
+
+            tl.to(curTarget, copy, staggerFunc(i, curTarget, parsedTargets));
+          }
+
+          duration = delay = 0;
+        }
+
+        duration || _this3.duration(duration = tl.duration());
+      } else {
+        _this3.timeline = 0;
+      }
+
+      if (overwrite === true) {
+        _overwritingTween = _assertThisInitialized(_this3);
+
+        _globalTimeline.killTweensOf(parsedTargets);
+
+        _overwritingTween = 0;
+      }
+
+      parent && _postAddChecks(parent, _assertThisInitialized(_this3));
+
+      if (immediateRender || !duration && !keyframes && _this3._start === parent._time && _isNotFalse(immediateRender) && _hasNoPausedAncestors(_assertThisInitialized(_this3)) && parent.data !== "nested") {
+        _this3._tTime = -_tinyNum;
+
+        _this3.render(Math.max(0, -delay));
+      }
+
+      return _this3;
+    }
+
+    var _proto3 = Tween.prototype;
+
+    _proto3.render = function render(totalTime, suppressEvents, force) {
+      var prevTime = this._time,
+          tDur = this._tDur,
+          dur = this._dur,
+          tTime = totalTime > tDur - _tinyNum && totalTime >= 0 ? tDur : totalTime < _tinyNum ? 0 : totalTime,
+          time,
+          pt,
+          iteration,
+          cycleDuration,
+          prevIteration,
+          isYoyo,
+          ratio,
+          timeline,
+          yoyoEase;
+
+      if (!dur) {
+        _renderZeroDurationTween(this, totalTime, suppressEvents, force);
+      } else if (tTime !== this._tTime || !totalTime || force || this._startAt && this._zTime < 0 !== totalTime < 0) {
+        time = tTime;
+        timeline = this.timeline;
+
+        if (this._repeat) {
+          cycleDuration = dur + this._rDelay;
+          time = _round(tTime % cycleDuration);
+
+          if (time > dur || tDur === tTime) {
+            time = dur;
+          }
+
+          iteration = ~~(tTime / cycleDuration);
+
+          if (iteration && iteration === tTime / cycleDuration) {
+            time = dur;
+            iteration--;
+          }
+
+          isYoyo = this._yoyo && iteration & 1;
+
+          if (isYoyo) {
+            yoyoEase = this._yEase;
+            time = dur - time;
+          }
+
+          prevIteration = _animationCycle(this._tTime, cycleDuration);
+
+          if (time === prevTime && !force && this._initted) {
+            return this;
+          }
+
+          if (iteration !== prevIteration) {
+            if (this.vars.repeatRefresh && !isYoyo && !this._lock) {
+              this._lock = force = 1;
+              this.render(cycleDuration * iteration, true).invalidate()._lock = 0;
+            }
+          }
+        }
+
+        if (!this._initted) {
+          if (_attemptInitTween(this, time, force, suppressEvents)) {
+            this._tTime = 0;
+            return this;
+          }
+
+          if (dur !== this._dur) {
+            return this.render(totalTime, suppressEvents, force);
+          }
+        }
+
+        this._tTime = tTime;
+        this._time = time;
+
+        if (!this._act && this._ts) {
+          this._act = 1;
+          this._lazy = 0;
+        }
+
+        this.ratio = ratio = (yoyoEase || this._ease)(time / dur);
+
+        if (this._from) {
+          this.ratio = ratio = 1 - ratio;
+        }
+
+        if (!prevTime && time && !suppressEvents) {
+          _callback(this, "onStart");
+        }
+
+        pt = this._pt;
+
+        while (pt) {
+          pt.r(ratio, pt.d);
+          pt = pt._next;
+        }
+
+        timeline && timeline.render(totalTime < 0 ? totalTime : !time && isYoyo ? -_tinyNum : timeline._dur * ratio, suppressEvents, force) || this._startAt && (this._zTime = totalTime);
+
+        if (this._onUpdate && !suppressEvents) {
+          if (totalTime < 0 && this._startAt) {
+            this._startAt.render(totalTime, true, force);
+          }
+
+          _callback(this, "onUpdate");
+        }
+
+        if (this._repeat) if (iteration !== prevIteration && this.vars.onRepeat && !suppressEvents && this.parent) {
+          _callback(this, "onRepeat");
+        }
+
+        if ((tTime === this._tDur || !tTime) && this._tTime === tTime) {
+          if (totalTime < 0 && this._startAt && !this._onUpdate) {
+            this._startAt.render(totalTime, true, force);
+          }
+
+          (totalTime || !dur) && (totalTime && this._ts > 0 || !tTime && this._ts < 0) && _removeFromParent(this, 1);
+
+          if (!suppressEvents && !(totalTime < 0 && !prevTime) && !(tTime < tDur && this.timeScale() > 0)) {
+            _callback(this, tTime === tDur ? "onComplete" : "onReverseComplete", true);
+
+            this._prom && this._prom();
+          }
+        }
+      }
+
+      return this;
+    };
+
+    _proto3.targets = function targets() {
+      return this._targets;
+    };
+
+    _proto3.invalidate = function invalidate() {
+      this._pt = this._op = this._startAt = this._onUpdate = this._act = this._lazy = 0;
+      this._ptLookup = [];
+      this.timeline && this.timeline.invalidate();
+      return _Animation2.prototype.invalidate.call(this);
+    };
+
+    _proto3.kill = function kill(targets, vars) {
+      if (vars === void 0) {
+        vars = "all";
+      }
+
+      if (!targets && (!vars || vars === "all")) {
+        this._lazy = 0;
+
+        if (this.parent) {
+          return _interrupt(this);
+        }
+      }
+
+      if (this.timeline) {
+        this.timeline.killTweensOf(targets, vars, _overwritingTween && _overwritingTween.vars.overwrite !== true);
+        return this;
+      }
+
+      var parsedTargets = this._targets,
+          killingTargets = targets ? toArray(targets) : parsedTargets,
+          propTweenLookup = this._ptLookup,
+          firstPT = this._pt,
+          overwrittenProps,
+          curLookup,
+          curOverwriteProps,
+          props,
+          p,
+          pt,
+          i;
+
+      if ((!vars || vars === "all") && _arraysMatch(parsedTargets, killingTargets)) {
+        return _interrupt(this);
+      }
+
+      overwrittenProps = this._op = this._op || [];
+
+      if (vars !== "all") {
+        if (_isString(vars)) {
+          p = {};
+
+          _forEachName(vars, function (name) {
+            return p[name] = 1;
+          });
+
+          vars = p;
+        }
+
+        vars = _addAliasesToVars(parsedTargets, vars);
+      }
+
+      i = parsedTargets.length;
+
+      while (i--) {
+        if (~killingTargets.indexOf(parsedTargets[i])) {
+          curLookup = propTweenLookup[i];
+
+          if (vars === "all") {
+            overwrittenProps[i] = vars;
+            props = curLookup;
+            curOverwriteProps = {};
+          } else {
+            curOverwriteProps = overwrittenProps[i] = overwrittenProps[i] || {};
+            props = vars;
+          }
+
+          for (p in props) {
+            pt = curLookup && curLookup[p];
+
+            if (pt) {
+              if (!("kill" in pt.d) || pt.d.kill(p) === true) {
+                _removeLinkedListItem(this, pt, "_pt");
+              }
+
+              delete curLookup[p];
+            }
+
+            if (curOverwriteProps !== "all") {
+              curOverwriteProps[p] = 1;
+            }
+          }
+        }
+      }
+
+      if (this._initted && !this._pt && firstPT) {
+        _interrupt(this);
+      }
+
+      return this;
+    };
+
+    Tween.to = function to(targets, vars) {
+      return new Tween(targets, vars, arguments[2]);
+    };
+
+    Tween.from = function from(targets, vars) {
+      return new Tween(targets, _parseVars(arguments, 1));
+    };
+
+    Tween.delayedCall = function delayedCall(delay, callback, params, scope) {
+      return new Tween(callback, 0, {
+        immediateRender: false,
+        lazy: false,
+        overwrite: false,
+        delay: delay,
+        onComplete: callback,
+        onReverseComplete: callback,
+        onCompleteParams: params,
+        onReverseCompleteParams: params,
+        callbackScope: scope
+      });
+    };
+
+    Tween.fromTo = function fromTo(targets, fromVars, toVars) {
+      return new Tween(targets, _parseVars(arguments, 2));
+    };
+
+    Tween.set = function set(targets, vars) {
+      vars.duration = 0;
+      vars.repeatDelay || (vars.repeat = 0);
+      return new Tween(targets, vars);
+    };
+
+    Tween.killTweensOf = function killTweensOf(targets, props, onlyActive) {
+      return _globalTimeline.killTweensOf(targets, props, onlyActive);
+    };
+
+    return Tween;
+  }(Animation);
+
+  _setDefaults(Tween.prototype, {
+    _targets: [],
+    _lazy: 0,
+    _startAt: 0,
+    _op: 0,
+    _onInit: 0
+  });
+
+  _forEachName("staggerTo,staggerFrom,staggerFromTo", function (name) {
+    Tween[name] = function () {
+      var tl = new Timeline(),
+          params = _slice.call(arguments, 0);
+
+      params.splice(name === "staggerFromTo" ? 5 : 4, 0, 0);
+      return tl[name].apply(tl, params);
+    };
+  });
+
+  var _setterPlain = function _setterPlain(target, property, value) {
+    return target[property] = value;
+  },
+      _setterFunc = function _setterFunc(target, property, value) {
+    return target[property](value);
+  },
+      _setterFuncWithParam = function _setterFuncWithParam(target, property, value, data) {
+    return target[property](data.fp, value);
+  },
+      _setterAttribute = function _setterAttribute(target, property, value) {
+    return target.setAttribute(property, value);
+  },
+      _getSetter = function _getSetter(target, property) {
+    return _isFunction(target[property]) ? _setterFunc : _isUndefined(target[property]) && target.setAttribute ? _setterAttribute : _setterPlain;
+  },
+      _renderPlain = function _renderPlain(ratio, data) {
+    return data.set(data.t, data.p, Math.round((data.s + data.c * ratio) * 10000) / 10000, data);
+  },
+      _renderBoolean = function _renderBoolean(ratio, data) {
+    return data.set(data.t, data.p, !!(data.s + data.c * ratio), data);
+  },
+      _renderComplexString = function _renderComplexString(ratio, data) {
+    var pt = data._pt,
+        s = "";
+
+    if (!ratio && data.b) {
+      s = data.b;
+    } else if (ratio === 1 && data.e) {
+      s = data.e;
+    } else {
+      while (pt) {
+        s = pt.p + (pt.m ? pt.m(pt.s + pt.c * ratio) : Math.round((pt.s + pt.c * ratio) * 10000) / 10000) + s;
+        pt = pt._next;
+      }
+
+      s += data.c;
+    }
+
+    data.set(data.t, data.p, s, data);
+  },
+      _renderPropTweens = function _renderPropTweens(ratio, data) {
+    var pt = data._pt;
+
+    while (pt) {
+      pt.r(ratio, pt.d);
+      pt = pt._next;
+    }
+  },
+      _addPluginModifier = function _addPluginModifier(modifier, tween, target, property) {
+    var pt = this._pt,
+        next;
+
+    while (pt) {
+      next = pt._next;
+
+      if (pt.p === property) {
+        pt.modifier(modifier, tween, target);
+      }
+
+      pt = next;
+    }
+  },
+      _killPropTweensOf = function _killPropTweensOf(property) {
+    var pt = this._pt,
+        hasNonDependentRemaining,
+        next;
+
+    while (pt) {
+      next = pt._next;
+
+      if (pt.p === property && !pt.op || pt.op === property) {
+        _removeLinkedListItem(this, pt, "_pt");
+      } else if (!pt.dep) {
+        hasNonDependentRemaining = 1;
+      }
+
+      pt = next;
+    }
+
+    return !hasNonDependentRemaining;
+  },
+      _setterWithModifier = function _setterWithModifier(target, property, value, data) {
+    data.mSet(target, property, data.m.call(data.tween, value, data.mt), data);
+  },
+      _sortPropTweensByPriority = function _sortPropTweensByPriority(parent) {
+    var pt = parent._pt,
+        next,
+        pt2,
+        first,
+        last;
+
+    while (pt) {
+      next = pt._next;
+      pt2 = first;
+
+      while (pt2 && pt2.pr > pt.pr) {
+        pt2 = pt2._next;
+      }
+
+      if (pt._prev = pt2 ? pt2._prev : last) {
+        pt._prev._next = pt;
+      } else {
+        first = pt;
+      }
+
+      if (pt._next = pt2) {
+        pt2._prev = pt;
+      } else {
+        last = pt;
+      }
+
+      pt = next;
+    }
+
+    parent._pt = first;
+  };
+
+  var PropTween = function () {
+    function PropTween(next, target, prop, start, change, renderer, data, setter, priority) {
+      this.t = target;
+      this.s = start;
+      this.c = change;
+      this.p = prop;
+      this.r = renderer || _renderPlain;
+      this.d = data || this;
+      this.set = setter || _setterPlain;
+      this.pr = priority || 0;
+      this._next = next;
+
+      if (next) {
+        next._prev = this;
+      }
+    }
+
+    var _proto4 = PropTween.prototype;
+
+    _proto4.modifier = function modifier(func, tween, target) {
+      this.mSet = this.mSet || this.set;
+      this.set = _setterWithModifier;
+      this.m = func;
+      this.mt = target;
+      this.tween = tween;
+    };
+
+    return PropTween;
+  }();
+
+  _forEachName(_callbackNames + "parent,duration,ease,delay,overwrite,runBackwards,startAt,yoyo,immediateRender,repeat,repeatDelay,data,paused,reversed,lazy,callbackScope,stringFilter,id,yoyoEase,stagger,inherit,repeatRefresh,keyframes,autoRevert", function (name) {
+    return _reservedProps[name] = 1;
+  });
+
+  _globals.TweenMax = _globals.TweenLite = Tween;
+  _globals.TimelineLite = _globals.TimelineMax = Timeline;
+  _globalTimeline = new Timeline({
+    sortChildren: false,
+    defaults: _defaults,
+    autoRemoveChildren: true,
+    id: "root",
+    smoothChildTiming: true
+  });
+  _config.stringFilter = _colorStringFilter;
+  var _gsap = {
+    registerPlugin: function registerPlugin() {
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      args.forEach(function (config) {
+        return _createPlugin(config);
+      });
+    },
+    timeline: function timeline(vars) {
+      return new Timeline(vars);
+    },
+    getTweensOf: function getTweensOf(targets, onlyActive) {
+      return _globalTimeline.getTweensOf(targets, onlyActive);
+    },
+    getProperty: function getProperty(target, property, unit, uncache) {
+      if (_isString(target)) {
+        target = toArray(target)[0];
+      }
+
+      var getter = _getCache(target || {}).get,
+          format = unit ? _passThrough : _numericIfPossible;
+
+      if (unit === "native") {
+        unit = "";
+      }
+
+      return !target ? target : !property ? function (property, unit, uncache) {
+        return format((_plugins[property] && _plugins[property].get || getter)(target, property, unit, uncache));
+      } : format((_plugins[property] && _plugins[property].get || getter)(target, property, unit, uncache));
+    },
+    quickSetter: function quickSetter(target, property, unit) {
+      target = toArray(target);
+
+      if (target.length > 1) {
+        var setters = target.map(function (t) {
+          return gsap.quickSetter(t, property, unit);
+        }),
+            l = setters.length;
+        return function (value) {
+          var i = l;
+
+          while (i--) {
+            setters[i](value);
+          }
+        };
+      }
+
+      target = target[0] || {};
+
+      var Plugin = _plugins[property],
+          cache = _getCache(target),
+          setter = Plugin ? function (value) {
+        var p = new Plugin();
+        _quickTween._pt = 0;
+        p.init(target, unit ? value + unit : value, _quickTween, 0, [target]);
+        p.render(1, p);
+        _quickTween._pt && _renderPropTweens(1, _quickTween);
+      } : cache.set(target, property);
+
+      return Plugin ? setter : function (value) {
+        return setter(target, property, unit ? value + unit : value, cache, 1);
+      };
+    },
+    isTweening: function isTweening(targets) {
+      return _globalTimeline.getTweensOf(targets, true).length > 0;
+    },
+    defaults: function defaults(value) {
+      if (value && value.ease) {
+        value.ease = _parseEase(value.ease, _defaults.ease);
+      }
+
+      return _mergeDeep(_defaults, value || {});
+    },
+    config: function config(value) {
+      return _mergeDeep(_config, value || {});
+    },
+    registerEffect: function registerEffect(_ref) {
+      var name = _ref.name,
+          effect = _ref.effect,
+          plugins = _ref.plugins,
+          defaults = _ref.defaults,
+          extendTimeline = _ref.extendTimeline;
+      (plugins || "").split(",").forEach(function (pluginName) {
+        return pluginName && !_plugins[pluginName] && !_globals[pluginName] && _warn(name + " effect requires " + pluginName + " plugin.");
+      });
+
+      _effects[name] = function (targets, vars, tl) {
+        return effect(toArray(targets), _setDefaults(vars || {}, defaults), tl);
+      };
+
+      if (extendTimeline) {
+        Timeline.prototype[name] = function (targets, vars, position) {
+          return this.add(_effects[name](targets, _isObject(vars) ? vars : (position = vars) && {}, this), position);
+        };
+      }
+    },
+    registerEase: function registerEase(name, ease) {
+      _easeMap[name] = _parseEase(ease);
+    },
+    parseEase: function parseEase(ease, defaultEase) {
+      return arguments.length ? _parseEase(ease, defaultEase) : _easeMap;
+    },
+    getById: function getById(id) {
+      return _globalTimeline.getById(id);
+    },
+    exportRoot: function exportRoot(vars, includeDelayedCalls) {
+      if (vars === void 0) {
+        vars = {};
+      }
+
+      var tl = new Timeline(vars),
+          child,
+          next;
+      tl.smoothChildTiming = _isNotFalse(vars.smoothChildTiming);
+
+      _globalTimeline.remove(tl);
+
+      tl._dp = 0;
+      tl._time = tl._tTime = _globalTimeline._time;
+      child = _globalTimeline._first;
+
+      while (child) {
+        next = child._next;
+
+        if (includeDelayedCalls || !(!child._dur && child instanceof Tween && child.vars.onComplete === child._targets[0])) {
+          _addToTimeline(tl, child, child._start - child._delay);
+        }
+
+        child = next;
+      }
+
+      _addToTimeline(_globalTimeline, tl, 0);
+
+      return tl;
+    },
+    utils: {
+      wrap: wrap,
+      wrapYoyo: wrapYoyo,
+      distribute: distribute,
+      random: random,
+      snap: snap,
+      normalize: normalize,
+      getUnit: getUnit,
+      clamp: clamp,
+      splitColor: splitColor,
+      toArray: toArray,
+      mapRange: mapRange,
+      pipe: pipe,
+      unitize: unitize,
+      interpolate: interpolate,
+      shuffle: shuffle
+    },
+    install: _install,
+    effects: _effects,
+    ticker: _ticker,
+    updateRoot: Timeline.updateRoot,
+    plugins: _plugins,
+    globalTimeline: _globalTimeline,
+    core: {
+      PropTween: PropTween,
+      globals: _addGlobal,
+      Tween: Tween,
+      Timeline: Timeline,
+      Animation: Animation,
+      getCache: _getCache,
+      _removeLinkedListItem: _removeLinkedListItem
+    }
+  };
+
+  _forEachName("to,from,fromTo,delayedCall,set,killTweensOf", function (name) {
+    return _gsap[name] = Tween[name];
+  });
+
+  _ticker.add(Timeline.updateRoot);
+
+  _quickTween = _gsap.to({}, {
+    duration: 0
+  });
+
+  var _getPluginPropTween = function _getPluginPropTween(plugin, prop) {
+    var pt = plugin._pt;
+
+    while (pt && pt.p !== prop && pt.op !== prop && pt.fp !== prop) {
+      pt = pt._next;
+    }
+
+    return pt;
+  },
+      _addModifiers = function _addModifiers(tween, modifiers) {
+    var targets = tween._targets,
+        p,
+        i,
+        pt;
+
+    for (p in modifiers) {
+      i = targets.length;
+
+      while (i--) {
+        pt = tween._ptLookup[i][p];
+
+        if (pt && (pt = pt.d)) {
+          if (pt._pt) {
+            pt = _getPluginPropTween(pt, p);
+          }
+
+          pt && pt.modifier && pt.modifier(modifiers[p], tween, targets[i], p);
+        }
+      }
+    }
+  },
+      _buildModifierPlugin = function _buildModifierPlugin(name, modifier) {
+    return {
+      name: name,
+      rawVars: 1,
+      init: function init(target, vars, tween) {
+        tween._onInit = function (tween) {
+          var temp, p;
+
+          if (_isString(vars)) {
+            temp = {};
+
+            _forEachName(vars, function (name) {
+              return temp[name] = 1;
+            });
+
+            vars = temp;
+          }
+
+          if (modifier) {
+            temp = {};
+
+            for (p in vars) {
+              temp[p] = modifier(vars[p]);
+            }
+
+            vars = temp;
+          }
+
+          _addModifiers(tween, vars);
+        };
+      }
+    };
+  };
+
+  var gsap = _gsap.registerPlugin({
+    name: "attr",
+    init: function init(target, vars, tween, index, targets) {
+      for (var p in vars) {
+        this.add(target, "setAttribute", (target.getAttribute(p) || 0) + "", vars[p], index, targets, 0, 0, p);
+
+        this._props.push(p);
+      }
+    }
+  }, {
+    name: "endArray",
+    init: function init(target, value) {
+      var i = value.length;
+
+      while (i--) {
+        this.add(target, i, target[i] || 0, value[i]);
+      }
+    }
+  }, _buildModifierPlugin("roundProps", _roundModifier), _buildModifierPlugin("modifiers"), _buildModifierPlugin("snap", snap)) || _gsap;
+  Tween.version = Timeline.version = gsap.version = "3.2.6";
+  _coreReady = 1;
+
+  if (_windowExists()) {
+    _wake();
+  }
+
+  var Power0 = _easeMap.Power0,
+      Power1 = _easeMap.Power1,
+      Power2 = _easeMap.Power2,
+      Power3 = _easeMap.Power3,
+      Power4 = _easeMap.Power4,
+      Linear = _easeMap.Linear,
+      Quad = _easeMap.Quad,
+      Cubic = _easeMap.Cubic,
+      Quart = _easeMap.Quart,
+      Quint = _easeMap.Quint,
+      Strong = _easeMap.Strong,
+      Elastic = _easeMap.Elastic,
+      Back = _easeMap.Back,
+      SteppedEase = _easeMap.SteppedEase,
+      Bounce = _easeMap.Bounce,
+      Sine = _easeMap.Sine,
+      Expo = _easeMap.Expo,
+      Circ = _easeMap.Circ;
+
+  var _win$1,
+      _doc$1,
+      _docElement,
+      _pluginInitted,
+      _tempDiv,
+      _tempDivStyler,
+      _recentSetterPlugin,
+      _windowExists$1 = function _windowExists() {
+    return typeof window !== "undefined";
+  },
+      _transformProps = {},
+      _RAD2DEG = 180 / Math.PI,
+      _DEG2RAD = Math.PI / 180,
+      _atan2 = Math.atan2,
+      _bigNum$1 = 1e8,
+      _capsExp = /([A-Z])/g,
+      _horizontalExp = /(?:left|right|width|margin|padding|x)/i,
+      _complexExp = /[\s,\(]\S/,
+      _propertyAliases = {
+    autoAlpha: "opacity,visibility",
+    scale: "scaleX,scaleY",
+    alpha: "opacity"
+  },
+      _renderCSSProp = function _renderCSSProp(ratio, data) {
+    return data.set(data.t, data.p, Math.round((data.s + data.c * ratio) * 10000) / 10000 + data.u, data);
+  },
+      _renderPropWithEnd = function _renderPropWithEnd(ratio, data) {
+    return data.set(data.t, data.p, ratio === 1 ? data.e : Math.round((data.s + data.c * ratio) * 10000) / 10000 + data.u, data);
+  },
+      _renderCSSPropWithBeginning = function _renderCSSPropWithBeginning(ratio, data) {
+    return data.set(data.t, data.p, ratio ? Math.round((data.s + data.c * ratio) * 10000) / 10000 + data.u : data.b, data);
+  },
+      _renderRoundedCSSProp = function _renderRoundedCSSProp(ratio, data) {
+    var value = data.s + data.c * ratio;
+    data.set(data.t, data.p, ~~(value + (value < 0 ? -.5 : .5)) + data.u, data);
+  },
+      _renderNonTweeningValue = function _renderNonTweeningValue(ratio, data) {
+    return data.set(data.t, data.p, ratio ? data.e : data.b, data);
+  },
+      _renderNonTweeningValueOnlyAtEnd = function _renderNonTweeningValueOnlyAtEnd(ratio, data) {
+    return data.set(data.t, data.p, ratio !== 1 ? data.b : data.e, data);
+  },
+      _setterCSSStyle = function _setterCSSStyle(target, property, value) {
+    return target.style[property] = value;
+  },
+      _setterCSSProp = function _setterCSSProp(target, property, value) {
+    return target.style.setProperty(property, value);
+  },
+      _setterTransform = function _setterTransform(target, property, value) {
+    return target._gsap[property] = value;
+  },
+      _setterScale = function _setterScale(target, property, value) {
+    return target._gsap.scaleX = target._gsap.scaleY = value;
+  },
+      _setterScaleWithRender = function _setterScaleWithRender(target, property, value, data, ratio) {
+    var cache = target._gsap;
+    cache.scaleX = cache.scaleY = value;
+    cache.renderTransform(ratio, cache);
+  },
+      _setterTransformWithRender = function _setterTransformWithRender(target, property, value, data, ratio) {
+    var cache = target._gsap;
+    cache[property] = value;
+    cache.renderTransform(ratio, cache);
+  },
+      _transformProp = "transform",
+      _transformOriginProp = _transformProp + "Origin",
+      _supports3D,
+      _createElement = function _createElement(type, ns) {
+    var e = _doc$1.createElementNS ? _doc$1.createElementNS((ns || "http://www.w3.org/1999/xhtml").replace(/^https/, "http"), type) : _doc$1.createElement(type);
+    return e.style ? e : _doc$1.createElement(type);
+  },
+      _getComputedProperty = function _getComputedProperty(target, property, skipPrefixFallback) {
+    var cs = getComputedStyle(target);
+    return cs[property] || cs.getPropertyValue(property.replace(_capsExp, "-$1").toLowerCase()) || cs.getPropertyValue(property) || !skipPrefixFallback && _getComputedProperty(target, _checkPropPrefix(property) || property, 1) || "";
+  },
+      _prefixes = "O,Moz,ms,Ms,Webkit".split(","),
+      _checkPropPrefix = function _checkPropPrefix(property, element, preferPrefix) {
+    var e = element || _tempDiv,
+        s = e.style,
+        i = 5;
+
+    if (property in s && !preferPrefix) {
+      return property;
+    }
+
+    property = property.charAt(0).toUpperCase() + property.substr(1);
+
+    while (i-- && !(_prefixes[i] + property in s)) {}
+
+    return i < 0 ? null : (i === 3 ? "ms" : i >= 0 ? _prefixes[i] : "") + property;
+  },
+      _initCore = function _initCore() {
+    if (_windowExists$1()) {
+      _win$1 = window;
+      _doc$1 = _win$1.document;
+      _docElement = _doc$1.documentElement;
+      _tempDiv = _createElement("div") || {
+        style: {}
+      };
+      _tempDivStyler = _createElement("div");
+      _transformProp = _checkPropPrefix(_transformProp);
+      _transformOriginProp = _checkPropPrefix(_transformOriginProp);
+      _tempDiv.style.cssText = "border-width:0;line-height:0;position:absolute;padding:0";
+      _supports3D = !!_checkPropPrefix("perspective");
+      _pluginInitted = 1;
+    }
+  },
+      _getBBoxHack = function _getBBoxHack(swapIfPossible) {
+    var svg = _createElement("svg", this.ownerSVGElement && this.ownerSVGElement.getAttribute("xmlns") || "http://www.w3.org/2000/svg"),
+        oldParent = this.parentNode,
+        oldSibling = this.nextSibling,
+        oldCSS = this.style.cssText,
+        bbox;
+
+    _docElement.appendChild(svg);
+
+    svg.appendChild(this);
+    this.style.display = "block";
+
+    if (swapIfPossible) {
+      try {
+        bbox = this.getBBox();
+        this._gsapBBox = this.getBBox;
+        this.getBBox = _getBBoxHack;
+      } catch (e) {}
+    } else if (this._gsapBBox) {
+      bbox = this._gsapBBox();
+    }
+
+    if (oldParent) {
+      if (oldSibling) {
+        oldParent.insertBefore(this, oldSibling);
+      } else {
+        oldParent.appendChild(this);
+      }
+    }
+
+    _docElement.removeChild(svg);
+
+    this.style.cssText = oldCSS;
+    return bbox;
+  },
+      _getAttributeFallbacks = function _getAttributeFallbacks(target, attributesArray) {
+    var i = attributesArray.length;
+
+    while (i--) {
+      if (target.hasAttribute(attributesArray[i])) {
+        return target.getAttribute(attributesArray[i]);
+      }
+    }
+  },
+      _getBBox = function _getBBox(target) {
+    var bounds;
+
+    try {
+      bounds = target.getBBox();
+    } catch (error) {
+      bounds = _getBBoxHack.call(target, true);
+    }
+
+    bounds && (bounds.width || bounds.height) || target.getBBox === _getBBoxHack || (bounds = _getBBoxHack.call(target, true));
+    return bounds && !bounds.width && !bounds.x && !bounds.y ? {
+      x: +_getAttributeFallbacks(target, ["x", "cx", "x1"]) || 0,
+      y: +_getAttributeFallbacks(target, ["y", "cy", "y1"]) || 0,
+      width: 0,
+      height: 0
+    } : bounds;
+  },
+      _isSVG = function _isSVG(e) {
+    return !!(e.getCTM && (!e.parentNode || e.ownerSVGElement) && _getBBox(e));
+  },
+      _removeProperty = function _removeProperty(target, property) {
+    if (property) {
+      var style = target.style;
+
+      if (property in _transformProps) {
+        property = _transformProp;
+      }
+
+      if (style.removeProperty) {
+        if (property.substr(0, 2) === "ms" || property.substr(0, 6) === "webkit") {
+          property = "-" + property;
+        }
+
+        style.removeProperty(property.replace(_capsExp, "-$1").toLowerCase());
+      } else {
+        style.removeAttribute(property);
+      }
+    }
+  },
+      _addNonTweeningPT = function _addNonTweeningPT(plugin, target, property, beginning, end, onlySetAtEnd) {
+    var pt = new PropTween(plugin._pt, target, property, 0, 1, onlySetAtEnd ? _renderNonTweeningValueOnlyAtEnd : _renderNonTweeningValue);
+    plugin._pt = pt;
+    pt.b = beginning;
+    pt.e = end;
+
+    plugin._props.push(property);
+
+    return pt;
+  },
+      _nonConvertibleUnits = {
+    deg: 1,
+    rad: 1,
+    turn: 1
+  },
+      _convertToUnit = function _convertToUnit(target, property, value, unit) {
+    var curValue = parseFloat(value) || 0,
+        curUnit = (value + "").trim().substr((curValue + "").length) || "px",
+        style = _tempDiv.style,
+        horizontal = _horizontalExp.test(property),
+        isRootSVG = target.tagName.toLowerCase() === "svg",
+        measureProperty = (isRootSVG ? "client" : "offset") + (horizontal ? "Width" : "Height"),
+        amount = 100,
+        toPixels = unit === "px",
+        toPercent = unit === "%",
+        px,
+        parent,
+        cache,
+        isSVG;
+
+    if (unit === curUnit || !curValue || _nonConvertibleUnits[unit] || _nonConvertibleUnits[curUnit]) {
+      return curValue;
+    }
+
+    curUnit !== "px" && !toPixels && (curValue = _convertToUnit(target, property, value, "px"));
+    isSVG = target.getCTM && _isSVG(target);
+
+    if (toPercent && (_transformProps[property] || ~property.indexOf("adius"))) {
+      return _round(curValue / (isSVG ? target.getBBox()[horizontal ? "width" : "height"] : target[measureProperty]) * amount);
+    }
+
+    style[horizontal ? "width" : "height"] = amount + (toPixels ? curUnit : unit);
+    parent = ~property.indexOf("adius") || unit === "em" && target.appendChild && !isRootSVG ? target : target.parentNode;
+
+    if (isSVG) {
+      parent = (target.ownerSVGElement || {}).parentNode;
+    }
+
+    if (!parent || parent === _doc$1 || !parent.appendChild) {
+      parent = _doc$1.body;
+    }
+
+    cache = parent._gsap;
+
+    if (cache && toPercent && cache.width && horizontal && cache.time === _ticker.time) {
+      return _round(curValue / cache.width * amount);
+    } else {
+      (toPercent || curUnit === "%") && (style.position = _getComputedProperty(target, "position"));
+      parent === target && (style.position = "static");
+      parent.appendChild(_tempDiv);
+      px = _tempDiv[measureProperty];
+      parent.removeChild(_tempDiv);
+      style.position = "absolute";
+
+      if (horizontal && toPercent) {
+        cache = _getCache(parent);
+        cache.time = _ticker.time;
+        cache.width = parent[measureProperty];
+      }
+    }
+
+    return _round(toPixels ? px * curValue / amount : px && curValue ? amount / px * curValue : 0);
+  },
+      _get = function _get(target, property, unit, uncache) {
+    var value;
+
+    if (!_pluginInitted) {
+      _initCore();
+    }
+
+    if (property in _propertyAliases && property !== "transform") {
+      property = _propertyAliases[property];
+
+      if (~property.indexOf(",")) {
+        property = property.split(",")[0];
+      }
+    }
+
+    if (_transformProps[property] && property !== "transform") {
+      value = _parseTransform(target, uncache);
+      value = property !== "transformOrigin" ? value[property] : _firstTwoOnly(_getComputedProperty(target, _transformOriginProp)) + " " + value.zOrigin + "px";
+    } else {
+      value = target.style[property];
+
+      if (!value || value === "auto" || uncache || ~(value + "").indexOf("calc(")) {
+        value = _specialProps[property] && _specialProps[property](target, property, unit) || _getComputedProperty(target, property) || _getProperty(target, property) || (property === "opacity" ? 1 : 0);
+      }
+    }
+
+    return unit && !~(value + "").indexOf(" ") ? _convertToUnit(target, property, value, unit) + unit : value;
+  },
+      _tweenComplexCSSString = function _tweenComplexCSSString(target, prop, start, end) {
+    if (!start || start === "none") {
+      var p = _checkPropPrefix(prop, target, 1),
+          s = p && _getComputedProperty(target, p, 1);
+
+      if (s && s !== start) {
+        prop = p;
+        start = s;
+      }
+    }
+
+    var pt = new PropTween(this._pt, target.style, prop, 0, 1, _renderComplexString),
+        index = 0,
+        matchIndex = 0,
+        a,
+        result,
+        startValues,
+        startNum,
+        color,
+        startValue,
+        endValue,
+        endNum,
+        chunk,
+        endUnit,
+        startUnit,
+        relative,
+        endValues;
+    pt.b = start;
+    pt.e = end;
+    start += "";
+    end += "";
+
+    if (end === "auto") {
+      target.style[prop] = end;
+      end = _getComputedProperty(target, prop) || end;
+      target.style[prop] = start;
+    }
+
+    a = [start, end];
+
+    _colorStringFilter(a);
+
+    start = a[0];
+    end = a[1];
+    startValues = start.match(_numWithUnitExp) || [];
+    endValues = end.match(_numWithUnitExp) || [];
+
+    if (endValues.length) {
+      while (result = _numWithUnitExp.exec(end)) {
+        endValue = result[0];
+        chunk = end.substring(index, result.index);
+
+        if (color) {
+          color = (color + 1) % 5;
+        } else if (chunk.substr(-5) === "rgba(" || chunk.substr(-5) === "hsla(") {
+          color = 1;
+        }
+
+        if (endValue !== (startValue = startValues[matchIndex++] || "")) {
+          startNum = parseFloat(startValue) || 0;
+          startUnit = startValue.substr((startNum + "").length);
+          relative = endValue.charAt(1) === "=" ? +(endValue.charAt(0) + "1") : 0;
+
+          if (relative) {
+            endValue = endValue.substr(2);
+          }
+
+          endNum = parseFloat(endValue);
+          endUnit = endValue.substr((endNum + "").length);
+          index = _numWithUnitExp.lastIndex - endUnit.length;
+
+          if (!endUnit) {
+            endUnit = endUnit || _config.units[prop] || startUnit;
+
+            if (index === end.length) {
+              end += endUnit;
+              pt.e += endUnit;
+            }
+          }
+
+          if (startUnit !== endUnit) {
+            startNum = _convertToUnit(target, prop, startValue, endUnit) || 0;
+          }
+
+          pt._pt = {
+            _next: pt._pt,
+            p: chunk || matchIndex === 1 ? chunk : ",",
+            s: startNum,
+            c: relative ? relative * endNum : endNum - startNum,
+            m: color && color < 4 ? Math.round : 0
+          };
+        }
+      }
+
+      pt.c = index < end.length ? end.substring(index, end.length) : "";
+    } else {
+      pt.r = prop === "display" && end === "none" ? _renderNonTweeningValueOnlyAtEnd : _renderNonTweeningValue;
+    }
+
+    if (_relExp.test(end)) {
+      pt.e = 0;
+    }
+
+    this._pt = pt;
+    return pt;
+  },
+      _keywordToPercent = {
+    top: "0%",
+    bottom: "100%",
+    left: "0%",
+    right: "100%",
+    center: "50%"
+  },
+      _convertKeywordsToPercentages = function _convertKeywordsToPercentages(value) {
+    var split = value.split(" "),
+        x = split[0],
+        y = split[1] || "50%";
+
+    if (x === "top" || x === "bottom" || y === "left" || y === "right") {
+      value = x;
+      x = y;
+      y = value;
+    }
+
+    split[0] = _keywordToPercent[x] || x;
+    split[1] = _keywordToPercent[y] || y;
+    return split.join(" ");
+  },
+      _renderClearProps = function _renderClearProps(ratio, data) {
+    if (data.tween && data.tween._time === data.tween._dur) {
+      var target = data.t,
+          style = target.style,
+          props = data.u,
+          cache = target._gsap,
+          prop,
+          clearTransforms,
+          i;
+
+      if (props === "all" || props === true) {
+        style.cssText = "";
+        clearTransforms = 1;
+      } else {
+        props = props.split(",");
+        i = props.length;
+
+        while (--i > -1) {
+          prop = props[i];
+
+          if (_transformProps[prop]) {
+            clearTransforms = 1;
+            prop = prop === "transformOrigin" ? _transformOriginProp : _transformProp;
+          }
+
+          _removeProperty(target, prop);
+        }
+      }
+
+      if (clearTransforms) {
+        _removeProperty(target, _transformProp);
+
+        if (cache) {
+          cache.svg && target.removeAttribute("transform");
+
+          _parseTransform(target, 1);
+
+          cache.uncache = 1;
+        }
+      }
+    }
+  },
+      _specialProps = {
+    clearProps: function clearProps(plugin, target, property, endValue, tween) {
+      if (tween.data !== "isFromStart") {
+        var pt = plugin._pt = new PropTween(plugin._pt, target, property, 0, 0, _renderClearProps);
+        pt.u = endValue;
+        pt.pr = -10;
+        pt.tween = tween;
+
+        plugin._props.push(property);
+
+        return 1;
+      }
+    }
+  },
+      _identity2DMatrix = [1, 0, 0, 1, 0, 0],
+      _rotationalProperties = {},
+      _isNullTransform = function _isNullTransform(value) {
+    return value === "matrix(1, 0, 0, 1, 0, 0)" || value === "none" || !value;
+  },
+      _getComputedTransformMatrixAsArray = function _getComputedTransformMatrixAsArray(target) {
+    var matrixString = _getComputedProperty(target, _transformProp);
+
+    return _isNullTransform(matrixString) ? _identity2DMatrix : matrixString.substr(7).match(_numExp).map(_round);
+  },
+      _getMatrix = function _getMatrix(target, force2D) {
+    var cache = target._gsap || _getCache(target),
+        style = target.style,
+        matrix = _getComputedTransformMatrixAsArray(target),
+        parent,
+        nextSibling,
+        temp,
+        addedToDOM;
+
+    if (cache.svg && target.getAttribute("transform")) {
+      temp = target.transform.baseVal.consolidate().matrix;
+      matrix = [temp.a, temp.b, temp.c, temp.d, temp.e, temp.f];
+      return matrix.join(",") === "1,0,0,1,0,0" ? _identity2DMatrix : matrix;
+    } else if (matrix === _identity2DMatrix && !target.offsetParent && target !== _docElement && !cache.svg) {
+      temp = style.display;
+      style.display = "block";
+      parent = target.parentNode;
+
+      if (!parent || !target.offsetParent) {
+        addedToDOM = 1;
+        nextSibling = target.nextSibling;
+
+        _docElement.appendChild(target);
+      }
+
+      matrix = _getComputedTransformMatrixAsArray(target);
+
+      if (temp) {
+        style.display = temp;
+      } else {
+        _removeProperty(target, "display");
+      }
+
+      if (addedToDOM) {
+        if (nextSibling) {
+          parent.insertBefore(target, nextSibling);
+        } else if (parent) {
+          parent.appendChild(target);
+        } else {
+          _docElement.removeChild(target);
+        }
+      }
+    }
+
+    return force2D && matrix.length > 6 ? [matrix[0], matrix[1], matrix[4], matrix[5], matrix[12], matrix[13]] : matrix;
+  },
+      _applySVGOrigin = function _applySVGOrigin(target, origin, originIsAbsolute, smooth, matrixArray, pluginToAddPropTweensTo) {
+    var cache = target._gsap,
+        matrix = matrixArray || _getMatrix(target, true),
+        xOriginOld = cache.xOrigin || 0,
+        yOriginOld = cache.yOrigin || 0,
+        xOffsetOld = cache.xOffset || 0,
+        yOffsetOld = cache.yOffset || 0,
+        a = matrix[0],
+        b = matrix[1],
+        c = matrix[2],
+        d = matrix[3],
+        tx = matrix[4],
+        ty = matrix[5],
+        originSplit = origin.split(" "),
+        xOrigin = parseFloat(originSplit[0]) || 0,
+        yOrigin = parseFloat(originSplit[1]) || 0,
+        bounds,
+        determinant,
+        x,
+        y;
+
+    if (!originIsAbsolute) {
+      bounds = _getBBox(target);
+      xOrigin = bounds.x + (~originSplit[0].indexOf("%") ? xOrigin / 100 * bounds.width : xOrigin);
+      yOrigin = bounds.y + (~(originSplit[1] || originSplit[0]).indexOf("%") ? yOrigin / 100 * bounds.height : yOrigin);
+    } else if (matrix !== _identity2DMatrix && (determinant = a * d - b * c)) {
+      x = xOrigin * (d / determinant) + yOrigin * (-c / determinant) + (c * ty - d * tx) / determinant;
+      y = xOrigin * (-b / determinant) + yOrigin * (a / determinant) - (a * ty - b * tx) / determinant;
+      xOrigin = x;
+      yOrigin = y;
+    }
+
+    if (smooth || smooth !== false && cache.smooth) {
+      tx = xOrigin - xOriginOld;
+      ty = yOrigin - yOriginOld;
+      cache.xOffset = xOffsetOld + (tx * a + ty * c) - tx;
+      cache.yOffset = yOffsetOld + (tx * b + ty * d) - ty;
+    } else {
+      cache.xOffset = cache.yOffset = 0;
+    }
+
+    cache.xOrigin = xOrigin;
+    cache.yOrigin = yOrigin;
+    cache.smooth = !!smooth;
+    cache.origin = origin;
+    cache.originIsAbsolute = !!originIsAbsolute;
+    target.style[_transformOriginProp] = "0px 0px";
+
+    if (pluginToAddPropTweensTo) {
+      _addNonTweeningPT(pluginToAddPropTweensTo, cache, "xOrigin", xOriginOld, xOrigin);
+
+      _addNonTweeningPT(pluginToAddPropTweensTo, cache, "yOrigin", yOriginOld, yOrigin);
+
+      _addNonTweeningPT(pluginToAddPropTweensTo, cache, "xOffset", xOffsetOld, cache.xOffset);
+
+      _addNonTweeningPT(pluginToAddPropTweensTo, cache, "yOffset", yOffsetOld, cache.yOffset);
+    }
+
+    target.setAttribute("data-svg-origin", xOrigin + " " + yOrigin);
+  },
+      _parseTransform = function _parseTransform(target, uncache) {
+    var cache = target._gsap || new GSCache(target);
+
+    if ("x" in cache && !uncache && !cache.uncache) {
+      return cache;
+    }
+
+    var style = target.style,
+        invertedScaleX = cache.scaleX < 0,
+        px = "px",
+        deg = "deg",
+        origin = _getComputedProperty(target, _transformOriginProp) || "0",
+        x,
+        y,
+        z,
+        scaleX,
+        scaleY,
+        rotation,
+        rotationX,
+        rotationY,
+        skewX,
+        skewY,
+        perspective,
+        xOrigin,
+        yOrigin,
+        matrix,
+        angle,
+        cos,
+        sin,
+        a,
+        b,
+        c,
+        d,
+        a12,
+        a22,
+        t1,
+        t2,
+        t3,
+        a13,
+        a23,
+        a33,
+        a42,
+        a43,
+        a32;
+    x = y = z = rotation = rotationX = rotationY = skewX = skewY = perspective = 0;
+    scaleX = scaleY = 1;
+    cache.svg = !!(target.getCTM && _isSVG(target));
+    matrix = _getMatrix(target, cache.svg);
+
+    if (cache.svg) {
+      t1 = !cache.uncache && target.getAttribute("data-svg-origin");
+
+      _applySVGOrigin(target, t1 || origin, !!t1 || cache.originIsAbsolute, cache.smooth !== false, matrix);
+    }
+
+    xOrigin = cache.xOrigin || 0;
+    yOrigin = cache.yOrigin || 0;
+
+    if (matrix !== _identity2DMatrix) {
+      a = matrix[0];
+      b = matrix[1];
+      c = matrix[2];
+      d = matrix[3];
+      x = a12 = matrix[4];
+      y = a22 = matrix[5];
+
+      if (matrix.length === 6) {
+        scaleX = Math.sqrt(a * a + b * b);
+        scaleY = Math.sqrt(d * d + c * c);
+        rotation = a || b ? _atan2(b, a) * _RAD2DEG : 0;
+        skewX = c || d ? _atan2(c, d) * _RAD2DEG + rotation : 0;
+        skewX && (scaleY *= Math.cos(skewX * _DEG2RAD));
+
+        if (cache.svg) {
+          x -= xOrigin - (xOrigin * a + yOrigin * c);
+          y -= yOrigin - (xOrigin * b + yOrigin * d);
+        }
+      } else {
+        a32 = matrix[6];
+        a42 = matrix[7];
+        a13 = matrix[8];
+        a23 = matrix[9];
+        a33 = matrix[10];
+        a43 = matrix[11];
+        x = matrix[12];
+        y = matrix[13];
+        z = matrix[14];
+        angle = _atan2(a32, a33);
+        rotationX = angle * _RAD2DEG;
+
+        if (angle) {
+          cos = Math.cos(-angle);
+          sin = Math.sin(-angle);
+          t1 = a12 * cos + a13 * sin;
+          t2 = a22 * cos + a23 * sin;
+          t3 = a32 * cos + a33 * sin;
+          a13 = a12 * -sin + a13 * cos;
+          a23 = a22 * -sin + a23 * cos;
+          a33 = a32 * -sin + a33 * cos;
+          a43 = a42 * -sin + a43 * cos;
+          a12 = t1;
+          a22 = t2;
+          a32 = t3;
+        }
+
+        angle = _atan2(-c, a33);
+        rotationY = angle * _RAD2DEG;
+
+        if (angle) {
+          cos = Math.cos(-angle);
+          sin = Math.sin(-angle);
+          t1 = a * cos - a13 * sin;
+          t2 = b * cos - a23 * sin;
+          t3 = c * cos - a33 * sin;
+          a43 = d * sin + a43 * cos;
+          a = t1;
+          b = t2;
+          c = t3;
+        }
+
+        angle = _atan2(b, a);
+        rotation = angle * _RAD2DEG;
+
+        if (angle) {
+          cos = Math.cos(angle);
+          sin = Math.sin(angle);
+          t1 = a * cos + b * sin;
+          t2 = a12 * cos + a22 * sin;
+          b = b * cos - a * sin;
+          a22 = a22 * cos - a12 * sin;
+          a = t1;
+          a12 = t2;
+        }
+
+        if (rotationX && Math.abs(rotationX) + Math.abs(rotation) > 359.9) {
+          rotationX = rotation = 0;
+          rotationY = 180 - rotationY;
+        }
+
+        scaleX = _round(Math.sqrt(a * a + b * b + c * c));
+        scaleY = _round(Math.sqrt(a22 * a22 + a32 * a32));
+        angle = _atan2(a12, a22);
+        skewX = Math.abs(angle) > 0.0002 ? angle * _RAD2DEG : 0;
+        perspective = a43 ? 1 / (a43 < 0 ? -a43 : a43) : 0;
+      }
+
+      if (cache.svg) {
+        matrix = target.getAttribute("transform");
+        cache.forceCSS = target.setAttribute("transform", "") || !_isNullTransform(_getComputedProperty(target, _transformProp));
+        matrix && target.setAttribute("transform", matrix);
+      }
+    }
+
+    if (Math.abs(skewX) > 90 && Math.abs(skewX) < 270) {
+      if (invertedScaleX) {
+        scaleX *= -1;
+        skewX += rotation <= 0 ? 180 : -180;
+        rotation += rotation <= 0 ? 180 : -180;
+      } else {
+        scaleY *= -1;
+        skewX += skewX <= 0 ? 180 : -180;
+      }
+    }
+
+    cache.x = ((cache.xPercent = x && Math.round(target.offsetWidth / 2) === Math.round(-x) ? -50 : 0) ? 0 : x) + px;
+    cache.y = ((cache.yPercent = y && Math.round(target.offsetHeight / 2) === Math.round(-y) ? -50 : 0) ? 0 : y) + px;
+    cache.z = z + px;
+    cache.scaleX = _round(scaleX);
+    cache.scaleY = _round(scaleY);
+    cache.rotation = _round(rotation) + deg;
+    cache.rotationX = _round(rotationX) + deg;
+    cache.rotationY = _round(rotationY) + deg;
+    cache.skewX = skewX + deg;
+    cache.skewY = skewY + deg;
+    cache.transformPerspective = perspective + px;
+
+    if (cache.zOrigin = parseFloat(origin.split(" ")[2]) || 0) {
+      style[_transformOriginProp] = _firstTwoOnly(origin);
+    }
+
+    cache.xOffset = cache.yOffset = 0;
+    cache.force3D = _config.force3D;
+    cache.renderTransform = cache.svg ? _renderSVGTransforms : _supports3D ? _renderCSSTransforms : _renderNon3DTransforms;
+    cache.uncache = 0;
+    return cache;
+  },
+      _firstTwoOnly = function _firstTwoOnly(value) {
+    return (value = value.split(" "))[0] + " " + value[1];
+  },
+      _addPxTranslate = function _addPxTranslate(target, start, value) {
+    var unit = getUnit(start);
+    return _round(parseFloat(start) + parseFloat(_convertToUnit(target, "x", value + "px", unit))) + unit;
+  },
+      _renderNon3DTransforms = function _renderNon3DTransforms(ratio, cache) {
+    cache.z = "0px";
+    cache.rotationY = cache.rotationX = "0deg";
+    cache.force3D = 0;
+
+    _renderCSSTransforms(ratio, cache);
+  },
+      _zeroDeg = "0deg",
+      _zeroPx = "0px",
+      _endParenthesis = ") ",
+      _renderCSSTransforms = function _renderCSSTransforms(ratio, cache) {
+    var _ref = cache || this,
+        xPercent = _ref.xPercent,
+        yPercent = _ref.yPercent,
+        x = _ref.x,
+        y = _ref.y,
+        z = _ref.z,
+        rotation = _ref.rotation,
+        rotationY = _ref.rotationY,
+        rotationX = _ref.rotationX,
+        skewX = _ref.skewX,
+        skewY = _ref.skewY,
+        scaleX = _ref.scaleX,
+        scaleY = _ref.scaleY,
+        transformPerspective = _ref.transformPerspective,
+        force3D = _ref.force3D,
+        target = _ref.target,
+        zOrigin = _ref.zOrigin,
+        transforms = "",
+        use3D = force3D === "auto" && ratio && ratio !== 1 || force3D === true;
+
+    if (zOrigin && (rotationX !== _zeroDeg || rotationY !== _zeroDeg)) {
+      var angle = parseFloat(rotationY) * _DEG2RAD,
+          a13 = Math.sin(angle),
+          a33 = Math.cos(angle),
+          cos;
+
+      angle = parseFloat(rotationX) * _DEG2RAD;
+      cos = Math.cos(angle);
+      x = _addPxTranslate(target, x, a13 * cos * -zOrigin);
+      y = _addPxTranslate(target, y, -Math.sin(angle) * -zOrigin);
+      z = _addPxTranslate(target, z, a33 * cos * -zOrigin + zOrigin);
+    }
+
+    if (transformPerspective !== _zeroPx) {
+      transforms += "perspective(" + transformPerspective + _endParenthesis;
+    }
+
+    if (xPercent || yPercent) {
+      transforms += "translate(" + xPercent + "%, " + yPercent + "%) ";
+    }
+
+    if (use3D || x !== _zeroPx || y !== _zeroPx || z !== _zeroPx) {
+      transforms += z !== _zeroPx || use3D ? "translate3d(" + x + ", " + y + ", " + z + ") " : "translate(" + x + ", " + y + _endParenthesis;
+    }
+
+    if (rotation !== _zeroDeg) {
+      transforms += "rotate(" + rotation + _endParenthesis;
+    }
+
+    if (rotationY !== _zeroDeg) {
+      transforms += "rotateY(" + rotationY + _endParenthesis;
+    }
+
+    if (rotationX !== _zeroDeg) {
+      transforms += "rotateX(" + rotationX + _endParenthesis;
+    }
+
+    if (skewX !== _zeroDeg || skewY !== _zeroDeg) {
+      transforms += "skew(" + skewX + ", " + skewY + _endParenthesis;
+    }
+
+    if (scaleX !== 1 || scaleY !== 1) {
+      transforms += "scale(" + scaleX + ", " + scaleY + _endParenthesis;
+    }
+
+    target.style[_transformProp] = transforms || "translate(0, 0)";
+  },
+      _renderSVGTransforms = function _renderSVGTransforms(ratio, cache) {
+    var _ref2 = cache || this,
+        xPercent = _ref2.xPercent,
+        yPercent = _ref2.yPercent,
+        x = _ref2.x,
+        y = _ref2.y,
+        rotation = _ref2.rotation,
+        skewX = _ref2.skewX,
+        skewY = _ref2.skewY,
+        scaleX = _ref2.scaleX,
+        scaleY = _ref2.scaleY,
+        target = _ref2.target,
+        xOrigin = _ref2.xOrigin,
+        yOrigin = _ref2.yOrigin,
+        xOffset = _ref2.xOffset,
+        yOffset = _ref2.yOffset,
+        forceCSS = _ref2.forceCSS,
+        tx = parseFloat(x),
+        ty = parseFloat(y),
+        a11,
+        a21,
+        a12,
+        a22,
+        temp;
+
+    rotation = parseFloat(rotation);
+    skewX = parseFloat(skewX);
+    skewY = parseFloat(skewY);
+
+    if (skewY) {
+      skewY = parseFloat(skewY);
+      skewX += skewY;
+      rotation += skewY;
+    }
+
+    if (rotation || skewX) {
+      rotation *= _DEG2RAD;
+      skewX *= _DEG2RAD;
+      a11 = Math.cos(rotation) * scaleX;
+      a21 = Math.sin(rotation) * scaleX;
+      a12 = Math.sin(rotation - skewX) * -scaleY;
+      a22 = Math.cos(rotation - skewX) * scaleY;
+
+      if (skewX) {
+        skewY *= _DEG2RAD;
+        temp = Math.tan(skewX - skewY);
+        temp = Math.sqrt(1 + temp * temp);
+        a12 *= temp;
+        a22 *= temp;
+
+        if (skewY) {
+          temp = Math.tan(skewY);
+          temp = Math.sqrt(1 + temp * temp);
+          a11 *= temp;
+          a21 *= temp;
+        }
+      }
+
+      a11 = _round(a11);
+      a21 = _round(a21);
+      a12 = _round(a12);
+      a22 = _round(a22);
+    } else {
+      a11 = scaleX;
+      a22 = scaleY;
+      a21 = a12 = 0;
+    }
+
+    if (tx && !~(x + "").indexOf("px") || ty && !~(y + "").indexOf("px")) {
+      tx = _convertToUnit(target, "x", x, "px");
+      ty = _convertToUnit(target, "y", y, "px");
+    }
+
+    if (xOrigin || yOrigin || xOffset || yOffset) {
+      tx = _round(tx + xOrigin - (xOrigin * a11 + yOrigin * a12) + xOffset);
+      ty = _round(ty + yOrigin - (xOrigin * a21 + yOrigin * a22) + yOffset);
+    }
+
+    if (xPercent || yPercent) {
+      temp = target.getBBox();
+      tx = _round(tx + xPercent / 100 * temp.width);
+      ty = _round(ty + yPercent / 100 * temp.height);
+    }
+
+    temp = "matrix(" + a11 + "," + a21 + "," + a12 + "," + a22 + "," + tx + "," + ty + ")";
+    target.setAttribute("transform", temp);
+
+    if (forceCSS) {
+      target.style[_transformProp] = temp;
+    }
+  },
+      _addRotationalPropTween = function _addRotationalPropTween(plugin, target, property, startNum, endValue, relative) {
+    var cap = 360,
+        isString = _isString(endValue),
+        endNum = parseFloat(endValue) * (isString && ~endValue.indexOf("rad") ? _RAD2DEG : 1),
+        change = relative ? endNum * relative : endNum - startNum,
+        finalValue = startNum + change + "deg",
+        direction,
+        pt;
+
+    if (isString) {
+      direction = endValue.split("_")[1];
+
+      if (direction === "short") {
+        change %= cap;
+
+        if (change !== change % (cap / 2)) {
+          change += change < 0 ? cap : -cap;
+        }
+      }
+
+      if (direction === "cw" && change < 0) {
+        change = (change + cap * _bigNum$1) % cap - ~~(change / cap) * cap;
+      } else if (direction === "ccw" && change > 0) {
+        change = (change - cap * _bigNum$1) % cap - ~~(change / cap) * cap;
+      }
+    }
+
+    plugin._pt = pt = new PropTween(plugin._pt, target, property, startNum, change, _renderPropWithEnd);
+    pt.e = finalValue;
+    pt.u = "deg";
+
+    plugin._props.push(property);
+
+    return pt;
+  },
+      _addRawTransformPTs = function _addRawTransformPTs(plugin, transforms, target) {
+    var style = _tempDivStyler.style,
+        startCache = target._gsap,
+        exclude = "perspective,force3D,transformOrigin,svgOrigin",
+        endCache,
+        p,
+        startValue,
+        endValue,
+        startNum,
+        endNum,
+        startUnit,
+        endUnit;
+    style.cssText = getComputedStyle(target).cssText + ";position:absolute;display:block;";
+    style[_transformProp] = transforms;
+
+    _doc$1.body.appendChild(_tempDivStyler);
+
+    endCache = _parseTransform(_tempDivStyler, 1);
+
+    for (p in _transformProps) {
+      startValue = startCache[p];
+      endValue = endCache[p];
+
+      if (startValue !== endValue && exclude.indexOf(p) < 0) {
+        startUnit = getUnit(startValue);
+        endUnit = getUnit(endValue);
+        startNum = startUnit !== endUnit ? _convertToUnit(target, p, startValue, endUnit) : parseFloat(startValue);
+        endNum = parseFloat(endValue);
+        plugin._pt = new PropTween(plugin._pt, startCache, p, startNum, endNum - startNum, _renderCSSProp);
+        plugin._pt.u = endUnit || 0;
+
+        plugin._props.push(p);
+      }
+    }
+
+    _doc$1.body.removeChild(_tempDivStyler);
+  };
+
+  _forEachName("padding,margin,Width,Radius", function (name, index) {
+    var t = "Top",
+        r = "Right",
+        b = "Bottom",
+        l = "Left",
+        props = (index < 3 ? [t, r, b, l] : [t + l, t + r, b + r, b + l]).map(function (side) {
+      return index < 2 ? name + side : "border" + side + name;
+    });
+
+    _specialProps[index > 1 ? "border" + name : name] = function (plugin, target, property, endValue, tween) {
+      var a, vars;
+
+      if (arguments.length < 4) {
+        a = props.map(function (prop) {
+          return _get(plugin, prop, property);
+        });
+        vars = a.join(" ");
+        return vars.split(a[0]).length === 5 ? a[0] : vars;
+      }
+
+      a = (endValue + "").split(" ");
+      vars = {};
+      props.forEach(function (prop, i) {
+        return vars[prop] = a[i] = a[i] || a[(i - 1) / 2 | 0];
+      });
+      plugin.init(target, vars, tween);
+    };
+  });
+
+  var CSSPlugin = {
+    name: "css",
+    register: _initCore,
+    targetTest: function targetTest(target) {
+      return target.style && target.nodeType;
+    },
+    init: function init(target, vars, tween, index, targets) {
+      var props = this._props,
+          style = target.style,
+          startValue,
+          endValue,
+          endNum,
+          startNum,
+          type,
+          specialProp,
+          p,
+          startUnit,
+          endUnit,
+          relative,
+          isTransformRelated,
+          transformPropTween,
+          cache,
+          smooth,
+          hasPriority;
+
+      if (!_pluginInitted) {
+        _initCore();
+      }
+
+      for (p in vars) {
+        if (p === "autoRound") {
+          continue;
+        }
+
+        endValue = vars[p];
+
+        if (_plugins[p] && _checkPlugin(p, vars, tween, index, target, targets)) {
+          continue;
+        }
+
+        type = typeof endValue;
+        specialProp = _specialProps[p];
+
+        if (type === "function") {
+          endValue = endValue.call(tween, index, target, targets);
+          type = typeof endValue;
+        }
+
+        if (type === "string" && ~endValue.indexOf("random(")) {
+          endValue = _replaceRandom(endValue);
+        }
+
+        if (specialProp) {
+          if (specialProp(this, target, p, endValue, tween)) {
+            hasPriority = 1;
+          }
+        } else if (p.substr(0, 2) === "--") {
+          this.add(style, "setProperty", getComputedStyle(target).getPropertyValue(p) + "", endValue + "", index, targets, 0, 0, p);
+        } else {
+          startValue = _get(target, p);
+          startNum = parseFloat(startValue);
+          relative = type === "string" && endValue.charAt(1) === "=" ? +(endValue.charAt(0) + "1") : 0;
+
+          if (relative) {
+            endValue = endValue.substr(2);
+          }
+
+          endNum = parseFloat(endValue);
+
+          if (p in _propertyAliases) {
+            if (p === "autoAlpha") {
+              if (startNum === 1 && _get(target, "visibility") === "hidden" && endNum) {
+                startNum = 0;
+              }
+
+              _addNonTweeningPT(this, style, "visibility", startNum ? "inherit" : "hidden", endNum ? "inherit" : "hidden", !endNum);
+            }
+
+            if (p !== "scale" && p !== "transform") {
+              p = _propertyAliases[p];
+
+              if (~p.indexOf(",")) {
+                p = p.split(",")[0];
+              }
+            }
+          }
+
+          isTransformRelated = p in _transformProps;
+
+          if (isTransformRelated) {
+            if (!transformPropTween) {
+              cache = target._gsap;
+              cache.renderTransform || _parseTransform(target);
+              smooth = vars.smoothOrigin !== false && cache.smooth;
+              transformPropTween = this._pt = new PropTween(this._pt, style, _transformProp, 0, 1, cache.renderTransform, cache, 0, -1);
+              transformPropTween.dep = 1;
+            }
+
+            if (p === "scale") {
+              this._pt = new PropTween(this._pt, cache, "scaleY", cache.scaleY, relative ? relative * endNum : endNum - cache.scaleY);
+              props.push("scaleY", p);
+              p += "X";
+            } else if (p === "transformOrigin") {
+              endValue = _convertKeywordsToPercentages(endValue);
+
+              if (cache.svg) {
+                _applySVGOrigin(target, endValue, 0, smooth, 0, this);
+              } else {
+                endUnit = parseFloat(endValue.split(" ")[2]) || 0;
+
+                if (endUnit !== cache.zOrigin) {
+                  _addNonTweeningPT(this, cache, "zOrigin", cache.zOrigin, endUnit);
+                }
+
+                _addNonTweeningPT(this, style, p, _firstTwoOnly(startValue), _firstTwoOnly(endValue));
+              }
+
+              continue;
+            } else if (p === "svgOrigin") {
+              _applySVGOrigin(target, endValue, 1, smooth, 0, this);
+
+              continue;
+            } else if (p in _rotationalProperties) {
+              _addRotationalPropTween(this, cache, p, startNum, endValue, relative);
+
+              continue;
+            } else if (p === "smoothOrigin") {
+              _addNonTweeningPT(this, cache, "smooth", cache.smooth, endValue);
+
+              continue;
+            } else if (p === "force3D") {
+              cache[p] = endValue;
+              continue;
+            } else if (p === "transform") {
+              _addRawTransformPTs(this, endValue, target);
+
+              continue;
+            }
+          } else if (!(p in style)) {
+            p = _checkPropPrefix(p) || p;
+          }
+
+          if (isTransformRelated || (endNum || endNum === 0) && (startNum || startNum === 0) && !_complexExp.test(endValue) && p in style) {
+            startUnit = (startValue + "").substr((startNum + "").length);
+            endNum || (endNum = 0);
+            endUnit = (endValue + "").substr((endNum + "").length) || (p in _config.units ? _config.units[p] : startUnit);
+
+            if (startUnit !== endUnit) {
+              startNum = _convertToUnit(target, p, startValue, endUnit);
+            }
+
+            this._pt = new PropTween(this._pt, isTransformRelated ? cache : style, p, startNum, relative ? relative * endNum : endNum - startNum, endUnit === "px" && vars.autoRound !== false && !isTransformRelated ? _renderRoundedCSSProp : _renderCSSProp);
+            this._pt.u = endUnit || 0;
+
+            if (startUnit !== endUnit) {
+              this._pt.b = startValue;
+              this._pt.r = _renderCSSPropWithBeginning;
+            }
+          } else if (!(p in style)) {
+            if (p in target) {
+              this.add(target, p, target[p], endValue, index, targets);
+            } else {
+              _missingPlugin(p, endValue);
+
+              continue;
+            }
+          } else {
+            _tweenComplexCSSString.call(this, target, p, startValue, endValue);
+          }
+
+          props.push(p);
+        }
+      }
+
+      if (hasPriority) {
+        _sortPropTweensByPriority(this);
+      }
+    },
+    get: _get,
+    aliases: _propertyAliases,
+    getSetter: function getSetter(target, property, plugin) {
+      var p = _propertyAliases[property];
+      p && p.indexOf(",") < 0 && (property = p);
+      return property in _transformProps && property !== _transformOriginProp && (target._gsap.x || _get(target, "x")) ? plugin && _recentSetterPlugin === plugin ? property === "scale" ? _setterScale : _setterTransform : (_recentSetterPlugin = plugin || {}) && (property === "scale" ? _setterScaleWithRender : _setterTransformWithRender) : target.style && !_isUndefined(target.style[property]) ? _setterCSSStyle : ~property.indexOf("-") ? _setterCSSProp : _getSetter(target, property);
+    },
+    core: {
+      _removeProperty: _removeProperty,
+      _getMatrix: _getMatrix
+    }
+  };
+  gsap.utils.checkPrefix = _checkPropPrefix;
+
+  (function (positionAndScale, rotation, others, aliases) {
+    var all = _forEachName(positionAndScale + "," + rotation + "," + others, function (name) {
+      _transformProps[name] = 1;
+    });
+
+    _forEachName(rotation, function (name) {
+      _config.units[name] = "deg";
+      _rotationalProperties[name] = 1;
+    });
+
+    _propertyAliases[all[13]] = positionAndScale + "," + rotation;
+
+    _forEachName(aliases, function (name) {
+      var split = name.split(":");
+      _propertyAliases[split[1]] = all[split[0]];
+    });
+  })("x,y,z,scale,scaleX,scaleY,xPercent,yPercent", "rotation,rotationX,rotationY,skewX,skewY", "transform,transformOrigin,svgOrigin,force3D,smoothOrigin,transformPerspective", "0:translateX,1:translateY,2:translateZ,8:rotate,8:rotationZ,8:rotateZ,9:rotateX,10:rotateY");
+
+  _forEachName("x,y,z,top,right,bottom,left,width,height,fontSize,padding,margin,perspective", function (name) {
+    _config.units[name] = "px";
+  });
+
+  gsap.registerPlugin(CSSPlugin);
+
+  var gsapWithCSS = gsap.registerPlugin(CSSPlugin) || gsap,
+      TweenMaxWithCSS = gsapWithCSS.core.Tween;
+
+  exports.Back = Back;
+  exports.Bounce = Bounce;
+  exports.CSSPlugin = CSSPlugin;
+  exports.Circ = Circ;
+  exports.Cubic = Cubic;
+  exports.Elastic = Elastic;
+  exports.Expo = Expo;
+  exports.Linear = Linear;
+  exports.Power0 = Power0;
+  exports.Power1 = Power1;
+  exports.Power2 = Power2;
+  exports.Power3 = Power3;
+  exports.Power4 = Power4;
+  exports.Quad = Quad;
+  exports.Quart = Quart;
+  exports.Quint = Quint;
+  exports.Sine = Sine;
+  exports.SteppedEase = SteppedEase;
+  exports.Strong = Strong;
+  exports.TimelineLite = Timeline;
+  exports.TimelineMax = Timeline;
+  exports.TweenLite = Tween;
+  exports.TweenMax = TweenMaxWithCSS;
+  exports.default = gsapWithCSS;
+  exports.gsap = gsapWithCSS;
+
+  if (typeof(window) === 'undefined' || window !== exports) {Object.defineProperty(exports, '__esModule', { value: true });} else {delete window.default;}
+
+})));
+
+},{}],6:[function(require,module,exports){
 module.exports = asyncFor;
 
 /**
@@ -506,7 +5472,7 @@ function asyncFor(array, visitCallback, doneCallback, options) {
   }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 // threejs.org/license
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -37795,7 +42761,7 @@ function asyncFor(array, visitCallback, doneCallback, options) {
 
 })));
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (global){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -39626,7 +44592,7 @@ function asyncFor(array, visitCallback, doneCallback, options) {
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39706,7 +44672,7 @@ var _stringify = _interopRequireDefault(require("./stringify.js"));
 var _parse = _interopRequireDefault(require("./parse.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./nil.js":10,"./parse.js":11,"./stringify.js":15,"./v1.js":16,"./v3.js":17,"./v4.js":19,"./v5.js":20,"./validate.js":21,"./version.js":22}],9:[function(require,module,exports){
+},{"./nil.js":11,"./parse.js":12,"./stringify.js":16,"./v1.js":17,"./v3.js":18,"./v4.js":20,"./v5.js":21,"./validate.js":22,"./version.js":23}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39930,7 +44896,7 @@ function md5ii(a, b, c, d, x, s, t) {
 
 var _default = md5;
 exports.default = _default;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39939,7 +44905,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _default = '00000000-0000-0000-0000-000000000000';
 exports.default = _default;
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39985,7 +44951,7 @@ function parse(uuid) {
 
 var _default = parse;
 exports.default = _default;
-},{"./validate.js":21}],12:[function(require,module,exports){
+},{"./validate.js":22}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39994,7 +44960,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
 exports.default = _default;
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40016,7 +44982,7 @@ function rng() {
 
   return getRandomValues(rnds8);
 }
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40121,7 +45087,7 @@ function sha1(bytes) {
 
 var _default = sha1;
 exports.default = _default;
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40161,7 +45127,7 @@ function stringify(arr, offset = 0) {
 
 var _default = stringify;
 exports.default = _default;
-},{"./validate.js":21}],16:[function(require,module,exports){
+},{"./validate.js":22}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40269,7 +45235,7 @@ function v1(options, buf, offset) {
 
 var _default = v1;
 exports.default = _default;
-},{"./rng.js":13,"./stringify.js":15}],17:[function(require,module,exports){
+},{"./rng.js":14,"./stringify.js":16}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40286,7 +45252,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const v3 = (0, _v.default)('v3', 0x30, _md.default);
 var _default = v3;
 exports.default = _default;
-},{"./md5.js":9,"./v35.js":18}],18:[function(require,module,exports){
+},{"./md5.js":10,"./v35.js":19}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40365,7 +45331,7 @@ function _default(name, version, hashfunc) {
   generateUUID.URL = URL;
   return generateUUID;
 }
-},{"./parse.js":11,"./stringify.js":15}],19:[function(require,module,exports){
+},{"./parse.js":12,"./stringify.js":16}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40403,7 +45369,7 @@ function v4(options, buf, offset) {
 
 var _default = v4;
 exports.default = _default;
-},{"./rng.js":13,"./stringify.js":15}],20:[function(require,module,exports){
+},{"./rng.js":14,"./stringify.js":16}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40420,7 +45386,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const v5 = (0, _v.default)('v5', 0x50, _sha.default);
 var _default = v5;
 exports.default = _default;
-},{"./sha1.js":14,"./v35.js":18}],21:[function(require,module,exports){
+},{"./sha1.js":15,"./v35.js":19}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40438,7 +45404,7 @@ function validate(uuid) {
 
 var _default = validate;
 exports.default = _default;
-},{"./regex.js":12}],22:[function(require,module,exports){
+},{"./regex.js":13}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40460,7 +45426,7 @@ function version(uuid) {
 
 var _default = version;
 exports.default = _default;
-},{"./validate.js":21}],23:[function(require,module,exports){
+},{"./validate.js":22}],24:[function(require,module,exports){
 var bundleFn = arguments[3];
 var sources = arguments[4];
 var cache = arguments[5];
@@ -40542,7 +45508,7 @@ module.exports = function (fn, options) {
     return worker;
 };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /**
  * Represents octree data structure
  *
@@ -40804,7 +45770,7 @@ function createTree(options) {
 }
 
 
-},{"./lib/bounds3.js":25,"./lib/treeNode.js":26,"rafor":5}],25:[function(require,module,exports){
+},{"./lib/bounds3.js":26,"./lib/treeNode.js":27,"rafor":6}],26:[function(require,module,exports){
 module.exports = Bounds3;
 
 function Bounds3(x, y, z, half) {
@@ -40822,7 +45788,7 @@ Bounds3.prototype.contains = function contains(x, y, z) {
 };
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var Bounds3 = require('./bounds3.js');
 var MAX_ITEMS = 4;
 
@@ -40932,12 +45898,12 @@ function getChild(node, idx) {
   if (idx === 7) return node.q7;
 }
 
-},{"./bounds3.js":25}],27:[function(require,module,exports){
+},{"./bounds3.js":26}],28:[function(require,module,exports){
 module.exports = {
     ModifierArray: require("./arrays/ModifierArray"),
     ObjectArray: require("./arrays/ObjectArray")
 }
-},{"./arrays/ModifierArray":40,"./arrays/ObjectArray":41}],28:[function(require,module,exports){
+},{"./arrays/ModifierArray":41,"./arrays/ObjectArray":42}],29:[function(require,module,exports){
 module.exports = {
     BaseModifier: require("./modifiers/BaseModifier"),
     ConstantRotationModifier: require("./modifiers/ConstantRotationModifier"),
@@ -40945,7 +45911,7 @@ module.exports = {
     PlayerModifier: require("./modifiers/PlayerModifier"),
     VelocityDragModifier: require("./modifiers/VelocityDragModifier")
 }
-},{"./modifiers/BaseModifier":44,"./modifiers/ConstantRotationModifier":45,"./modifiers/LinearAccelerationModifier":46,"./modifiers/PlayerModifier":47,"./modifiers/VelocityDragModifier":48}],29:[function(require,module,exports){
+},{"./modifiers/BaseModifier":45,"./modifiers/ConstantRotationModifier":46,"./modifiers/LinearAccelerationModifier":47,"./modifiers/PlayerModifier":48,"./modifiers/VelocityDragModifier":49}],30:[function(require,module,exports){
 module.exports = {
     BaseObject: require("./objects/BaseObject"),
     BasePhysicalObject: require("./objects/BasePhysicalObject"),
@@ -40957,7 +45923,7 @@ module.exports = {
     NexusObject: require("./objects/NexusObject"),
     DepthkitObject: require("./objects/DepthkitObject")
 }
-},{"./objects/AudioSourceObject":52,"./objects/BaseObject":53,"./objects/BasePhysicalObject":54,"./objects/CollisionCloudObject":55,"./objects/DepthkitObject":56,"./objects/NexusObject":57,"./objects/PlayerObject":58,"./objects/PotreeObject":59,"./objects/TestObject":60}],30:[function(require,module,exports){
+},{"./objects/AudioSourceObject":53,"./objects/BaseObject":54,"./objects/BasePhysicalObject":55,"./objects/CollisionCloudObject":56,"./objects/DepthkitObject":57,"./objects/NexusObject":58,"./objects/PlayerObject":59,"./objects/PotreeObject":60,"./objects/TestObject":61}],31:[function(require,module,exports){
 var THREE = require("three")
 var ModifierArray = require("../arrays/ModifierArray")
 var {Serializable} = require("../Serialization")
@@ -41068,7 +46034,7 @@ function(scope){
 BaseObject.registerConstructor()
 
 module.exports = BaseObject
-},{"../Serialization":33,"../arrays/ModifierArray":40,"../utils/eulerShadowHandler":65,"../utils/vec3ShadowHandler":66,"../viewers/viewer":70,"three":6}],31:[function(require,module,exports){
+},{"../Serialization":34,"../arrays/ModifierArray":41,"../utils/eulerShadowHandler":66,"../utils/vec3ShadowHandler":67,"../viewers/viewer":72,"three":7}],32:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var {Serializable} = require("../Serialization")
 var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
@@ -41128,7 +46094,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
 BasePhysicalObject.registerConstructor()
 
 module.exports = BasePhysicalObject
-},{"../Serialization":33,"../utils/vec3ShadowHandler":66,"./BaseObject":30,"three":6}],32:[function(require,module,exports){
+},{"../Serialization":34,"../utils/vec3ShadowHandler":67,"./BaseObject":31,"three":7}],33:[function(require,module,exports){
 var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
@@ -41508,12 +46474,12 @@ window.BezierPathAnimation = BezierPathAnimation;
 module.exports = PlayerObject
 
 // Todo: Properly handle setting fov, and make it a serializable argument
-},{"../Serialization":33,"../modifiers/PlayerModifier":47,"../modifiers/VelocityDragModifier":48,"../utils/argumentProcessor":64,"./BasePhysicalObject":31,"three":6}],33:[function(require,module,exports){
+},{"../Serialization":34,"../modifiers/PlayerModifier":48,"../modifiers/VelocityDragModifier":49,"../utils/argumentProcessor":65,"./BasePhysicalObject":32,"three":7}],34:[function(require,module,exports){
 module.exports = {
     Serializable: require("./SerializationLib/Serializable"),
     DeserializationObjectContainer: require("./SerializationLib/DeserializationObjectContainer")
 }
-},{"./SerializationLib/DeserializationObjectContainer":34,"./SerializationLib/Serializable":35}],34:[function(require,module,exports){
+},{"./SerializationLib/DeserializationObjectContainer":35,"./SerializationLib/Serializable":36}],35:[function(require,module,exports){
 var Serializable = require("./Serializable")
 // Keeps track of deserialized objects and its dependencies!
 function isUuidProxyArgsObj(elem) {
@@ -41670,7 +46636,7 @@ class DeserializationObjectContainer{
 }
 
 module.exports = DeserializationObjectContainer
-},{"./Serializable":35}],35:[function(require,module,exports){
+},{"./Serializable":36}],36:[function(require,module,exports){
 const uuid = require("uuid")
 const argsProcessor = require("./argsProcessor")
 const _ = require("underscore")
@@ -42088,7 +47054,7 @@ function serializeElement(elem, isTopLevel=true, _dependencies=new DependencyArg
 }
 
 module.exports = Serializable
-},{"./argsProcessor":36,"underscore":7,"uuid":8}],36:[function(require,module,exports){
+},{"./argsProcessor":37,"underscore":8,"uuid":9}],37:[function(require,module,exports){
 const _ = require("underscore");
 const Serializable = require("./Serializable");
 function argsProcessor(defaultArgs, args) {
@@ -42109,7 +47075,7 @@ function argsProcessor(defaultArgs, args) {
 }
 
 module.exports = argsProcessor
-},{"./Serializable":35,"underscore":7}],37:[function(require,module,exports){
+},{"./Serializable":36,"underscore":8}],38:[function(require,module,exports){
 const argumentProcessor = require("./utils/ArgumentProcessor");
 
 module.exports = {
@@ -42118,7 +47084,7 @@ module.exports = {
     vec3ShadowHandler: require("./utils/vec3ShadowHandler"),
     eulerShadowHandler: require("./utils/eulerShadowHandler")
 }
-},{"./utils/ArgumentProcessor":61,"./utils/Subscription":62,"./utils/argumentProcessor":64,"./utils/eulerShadowHandler":65,"./utils/vec3ShadowHandler":66}],38:[function(require,module,exports){
+},{"./utils/ArgumentProcessor":62,"./utils/Subscription":63,"./utils/argumentProcessor":65,"./utils/eulerShadowHandler":66,"./utils/vec3ShadowHandler":67}],39:[function(require,module,exports){
 
 THREE = require("three")
 module.exports = {
@@ -42130,12 +47096,12 @@ module.exports = {
     Serialization: require("./Serialization")
 }
 
-},{"./Arrays":27,"./Modifiers":28,"./Objects":29,"./Serialization":33,"./Utils":37,"./Viewers":39,"three":6}],39:[function(require,module,exports){
+},{"./Arrays":28,"./Modifiers":29,"./Objects":30,"./Serialization":34,"./Utils":38,"./Viewers":40,"three":7}],40:[function(require,module,exports){
 module.exports = {
     Viewer: require("./viewers/Viewer"),
     EditorViewer: require("./viewers/EditorViewer")
 }
-},{"./viewers/EditorViewer":67,"./viewers/Viewer":68}],40:[function(require,module,exports){
+},{"./viewers/EditorViewer":69,"./viewers/Viewer":70}],41:[function(require,module,exports){
 var {Serializable} = require("../Serialization")
 var _ = require("underscore")
 var BaseModifier = require("../modifiers/BaseModifier")
@@ -42251,7 +47217,7 @@ class ModifierArray extends Serializable {
 }
 ModifierArray.registerConstructor()
 module.exports = ModifierArray
-},{"../Serialization":33,"../modifiers/BaseModifier":44,"underscore":7}],41:[function(require,module,exports){
+},{"../Serialization":34,"../modifiers/BaseModifier":45,"underscore":8}],42:[function(require,module,exports){
 var {Serializable} = require("../Serialization")
 var PlayerObject = require("../Objects/PlayerObject")
 class ObjectArray extends Serializable.createConstructor(
@@ -42419,7 +47385,7 @@ class OldObjectArray {
 }
 
 module.exports = ObjectArray
-},{"../Objects/PlayerObject":32,"../Serialization":33}],42:[function(require,module,exports){
+},{"../Objects/PlayerObject":33,"../Serialization":34}],43:[function(require,module,exports){
 var _depthkit2
 var THREE = require("three")
 
@@ -42825,7 +47791,7 @@ var SceneUtils = {
     },{"./depthkit":2}]},{},[3]);
     
     module.exports = _depthkit2.default;
-},{"./depthkit":42,"glslify":4,"three":6}],43:[function(require,module,exports){
+},{"./depthkit":43,"glslify":4,"three":7}],44:[function(require,module,exports){
 // Modified!
 /**
  * @author Filipe Caixeta / http://filipecaixeta.com.br
@@ -43224,7 +48190,7 @@ PCDLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
 } );
 
 module.exports = PCDLoader
-},{"three":6}],44:[function(require,module,exports){
+},{"three":7}],45:[function(require,module,exports){
 var ModifierArray = require("../arrays/ModifierArray")
 var Serialization = require("../Serialization")
 
@@ -43267,7 +48233,7 @@ class BaseModifier extends Serialization.Serializable {
 BaseModifier.registerConstructor()
 
 module.exports = BaseModifier
-},{"../Serialization":33,"../arrays/ModifierArray":40}],45:[function(require,module,exports){
+},{"../Serialization":34,"../arrays/ModifierArray":41}],46:[function(require,module,exports){
 var BaseModifier = require("./BaseModifier")
 var THREE = require("three")
 var Serialization = require("../Serialization")
@@ -43303,7 +48269,7 @@ class ConstantRotationModifier extends BaseModifier {
 }
 ConstantRotationModifier.registerConstructor()
 module.exports = ConstantRotationModifier
-},{"../Serialization":33,"../utils/vec3ShadowHandler":66,"./BaseModifier":44,"three":6}],46:[function(require,module,exports){
+},{"../Serialization":34,"../utils/vec3ShadowHandler":67,"./BaseModifier":45,"three":7}],47:[function(require,module,exports){
 var THREE = require('three')
 var BaseModifier = require("./BaseModifier")
 var Serialization = require("../Serialization")
@@ -43337,7 +48303,7 @@ class LinearAccelerationModifier extends BaseModifier{
 }
 LinearAccelerationModifier.registerConstructor()
 module.exports = LinearAccelerationModifier
-},{"../Serialization":33,"../utils/vec3ShadowHandler":66,"./BaseModifier":44,"three":6}],47:[function(require,module,exports){
+},{"../Serialization":34,"../utils/vec3ShadowHandler":67,"./BaseModifier":45,"three":7}],48:[function(require,module,exports){
 var { Serializable } = require("../Serialization");
 var BaseModifier = require("./BaseModifier")
 var BasePhysicalObject = require("../objects/BasePhysicalObject")
@@ -43492,7 +48458,7 @@ PlayerModifier.registerConstructor()
 
 // Serializable.registerClass(PlayerModifier)
 module.exports = PlayerModifier
-},{"../Serialization":33,"../objects/BasePhysicalObject":54,"./BaseModifier":44,"three":6}],48:[function(require,module,exports){
+},{"../Serialization":34,"../objects/BasePhysicalObject":55,"./BaseModifier":45,"three":7}],49:[function(require,module,exports){
 var BaseModifier = require("./BaseModifier")
 var {Serializable} = require("../Serialization")
 
@@ -43527,7 +48493,7 @@ class VelocityDragModifier extends BaseModifier{
 VelocityDragModifier.registerConstructor()
 
 module.exports = VelocityDragModifier
-},{"../Serialization":33,"./BaseModifier":44}],49:[function(require,module,exports){
+},{"../Serialization":34,"./BaseModifier":45}],50:[function(require,module,exports){
 /*
 Nexus
 Copyright (c) 2012-2020, Visual Computing Lab, ISTI - CNR
@@ -45152,7 +50118,7 @@ module.exports = {
     NexusObject: NexusObject
 }
 
-},{"./corto.em":50,"./meco":51,"webworkify":23}],50:[function(require,module,exports){
+},{"./corto.em":51,"./meco":52,"webworkify":24}],51:[function(require,module,exports){
 /*
 Corto
 Copyright (c) 2017-2020, Visual Computing Lab, ISTI - CNR
@@ -45371,7 +50337,7 @@ else if (typeof define === 'function' && define['amd'])
 else if (typeof exports === 'object')
 	exports["CortoDecoder"] = CortoDecoder;
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 /*
 Nexus
 Copyright (c) 2012-2020, Visual Computing Lab, ISTI - CNR
@@ -46334,7 +51300,7 @@ decodeDiff: function(diff, bitstream) {
 
 var tot = 0;
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 var BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
 var THREE = require("three")
@@ -46668,11 +51634,11 @@ class OldAudioSourceObject extends BasePhysicalObject {
 }
 // Serializable.registerClass(AudioSourceObject)
 module.exports = AudioSourceObject
-},{"../Serialization":33,"./BasePhysicalObject":54,"three":6}],53:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"../Serialization":33,"../arrays/ModifierArray":40,"../utils/eulerShadowHandler":65,"../utils/vec3ShadowHandler":66,"../viewers/viewer":70,"dup":30,"three":6}],54:[function(require,module,exports){
+},{"../Serialization":34,"./BasePhysicalObject":55,"three":7}],54:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"../Serialization":33,"../utils/vec3ShadowHandler":66,"./BaseObject":53,"dup":31,"three":6}],55:[function(require,module,exports){
+},{"../Serialization":34,"../arrays/ModifierArray":41,"../utils/eulerShadowHandler":66,"../utils/vec3ShadowHandler":67,"../viewers/viewer":72,"dup":31,"three":7}],55:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"../Serialization":34,"../utils/vec3ShadowHandler":67,"./BaseObject":54,"dup":32,"three":7}],56:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -46755,7 +51721,7 @@ class CollisionCloudObject extends Serializable.createConstructor(
 CollisionCloudObject.registerConstructor()
 
 module.exports = CollisionCloudObject
-},{"../Serialization":33,"../loaders/PCDLoader":43,"../utils/argumentProcessor":64,"./BaseObject":53,"yaot":24}],56:[function(require,module,exports){
+},{"../Serialization":34,"../loaders/PCDLoader":44,"../utils/argumentProcessor":65,"./BaseObject":54,"yaot":25}],57:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -46799,7 +51765,7 @@ class DepthkitObject extends Serializable.createConstructor(
 DepthkitObject.registerConstructor()
 
 module.exports = DepthkitObject
-},{"../Serialization":33,"../depthkit":42,"../utils/argumentProcessor":64,"./BasePhysicalObject":54,"three":6}],57:[function(require,module,exports){
+},{"../Serialization":34,"../depthkit":43,"../utils/argumentProcessor":65,"./BasePhysicalObject":55,"three":7}],58:[function(require,module,exports){
 var Nexus = require("../nexus/Nexus")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -46833,9 +51799,9 @@ class NexusObject extends Serializable.createConstructor(
 NexusObject.registerConstructor()
 
 module.exports = NexusObject
-},{"../Serialization":33,"../nexus/Nexus":49,"./BasePhysicalObject":54}],58:[function(require,module,exports){
-arguments[4][32][0].apply(exports,arguments)
-},{"../Serialization":33,"../modifiers/PlayerModifier":47,"../modifiers/VelocityDragModifier":48,"../utils/argumentProcessor":64,"./BasePhysicalObject":54,"dup":32,"three":6}],59:[function(require,module,exports){
+},{"../Serialization":34,"../nexus/Nexus":50,"./BasePhysicalObject":55}],59:[function(require,module,exports){
+arguments[4][33][0].apply(exports,arguments)
+},{"../Serialization":34,"../modifiers/PlayerModifier":48,"../modifiers/VelocityDragModifier":49,"../utils/argumentProcessor":65,"./BasePhysicalObject":55,"dup":33,"three":7}],60:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -46900,7 +51866,7 @@ class PotreeObject extends Serializable.createConstructor(
 PotreeObject.registerConstructor()
 
 module.exports = PotreeObject
-},{"../Serialization":33,"../utils/argumentProcessor":64,"./BasePhysicalObject":54}],60:[function(require,module,exports){
+},{"../Serialization":34,"../utils/argumentProcessor":65,"./BasePhysicalObject":55}],61:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
 var THREE = require("three")
@@ -46934,7 +51900,7 @@ class TestObject extends Serializable.createConstructor(
 TestObject.registerConstructor()
 
 module.exports = TestObject
-},{"../Serialization":33,"./BasePhysicalObject":54,"three":6}],61:[function(require,module,exports){
+},{"../Serialization":34,"./BasePhysicalObject":55,"three":7}],62:[function(require,module,exports){
 const _ = require("underscore")
 
 function argumentProcessor(defaultArgs, args) {
@@ -46954,7 +51920,7 @@ function argumentProcessor(defaultArgs, args) {
 }
 
 module.exports = argumentProcessor
-},{"underscore":7}],62:[function(require,module,exports){
+},{"underscore":8}],63:[function(require,module,exports){
 class Subscription {
     constructor() {
         this.subscribers = new Set()
@@ -46973,7 +51939,7 @@ class Subscription {
     }
 }
 module.exports = Subscription
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /**
  * @author mrdoob / http://mrdoob.com
  * @author Mugen87 / https://github.com/Mugen87
@@ -47148,9 +52114,9 @@ var VRButton = {
 };
 
 module.exports = VRButton;
-},{}],64:[function(require,module,exports){
-arguments[4][61][0].apply(exports,arguments)
-},{"dup":61,"underscore":7}],65:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
+arguments[4][62][0].apply(exports,arguments)
+},{"dup":62,"underscore":8}],66:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function eulerShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -47196,7 +52162,7 @@ function eulerShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = eulerShadowHandler
-},{"../Serialization":33}],66:[function(require,module,exports){
+},{"../Serialization":34}],67:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function vec3ShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -47231,35 +52197,149 @@ function vec3ShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = vec3ShadowHandler
-},{"../Serialization":33}],67:[function(require,module,exports){
+},{"../Serialization":34}],68:[function(require,module,exports){
+var css = "@import url(\"https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap\");\n.vapor-editor-button {\n  background-color: white;\n  height: 1em;\n  padding: 0.4em 1em 0.5em 1em;\n  font-size: 18px;\n  font-family: \"Roboto\", sans-serif;\n  transition: background-color 0.1s, opacity 0.1s;\n  pointer-events: auto;\n  cursor: pointer;\n}\n.vapor-editor-button:hover {\n  background-color: rgba(255,255,255,0.7);\n}\n.vapor-editor-disabled.vapor-editor-button,\n.vapor-editor-disabled *.vapor-editor-button {\n  cursor: default;\n  opacity: 0.5;\n  background-color: white;\n}\n.vapor-editor-overlay {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  background-color: rgba(255,255,255,0.5);\n  z-index: 2;\n  padding: 30px 30px 30px 30px;\n  box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -webkit-box-sizing: border-box;\n  pointer-events: none;\n}\n.vapor-editor-button-row {\n  display: flex;\n  align-items: flex-start;\n  flex-wrap: nowrap;\n  height: max-content;\n}\n.vapor-editor-button-row .vapor-editor-button {\n  margin: 0 1em 0 0;\n}\n.vapor-editor-button-row-stack {\n  display: flex;\n  flex-direction: column;\n}\n.vapor-editor-button-row-stack .vapor-editor-button-row {\n  margin-bottom: 1em;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\EditorViewer.css" }, { "insertAt": "bottom" })); module.exports = css;
+},{"browserify-css":2}],69:[function(require,module,exports){
 var Viewer = require("./Viewer")
 var THREE = require("three")
+var gsap = require("gsap")
+
+var EditorViewerCss = require("./EditorViewer.css")
+
 class EditorViewer extends Viewer {
-    constructor(...args) {
-        super(...args)
+    constructor(containerElement) {
+        super(containerElement, false)
         this.floorMat = new THREE.MeshBasicMaterial({wireframe:true, color:"grey"})
         this.floorGeom = new THREE.PlaneGeometry(200,200,100,100)
         this.floor = new THREE.Mesh(this.floorGeom, this.floorMat)
         this.floor.rotation.x = Math.PI/2
         this.scene.add(this.floor)
-    }
-    update(dt, playerOnly=false){
-        this._args.objects.forEach(object => {
-            if (object.assetsLoaded) {
-                if (playerOnly===true) {
-                    if (object.isPlayerObject) {
-                        object.update(dt)
-                    }
-                } else {
-                    object.update(dt)
-                }
-                
-            }
-        })
+
+        this.UIContainer = document.createElement("div")
+        this.UIContainer.classList.add("vapor-editor-overlay")
+        this.containerElement.appendChild(this.UIContainer)
+        var ar = new ButtonRow([new Button(()=>{ar.parent.add(br); ar.disabled=true},"Add"), new Button(undefined,"Select"), new Button(undefined,"Select from list"), new Button(undefined,"Settings")])
+        var br = new ButtonRow([new Button(()=>{ar.disabled = false; br.parent.remove(br)}, "Option")])
+        var ab = new ButtonRowStack([ar])
+        this.UIContainer.appendChild(ab.domElement)
     }
 }
+
+class Button {
+    constructor(buttonFunc=()=>{}, text="Button", fontPx=18, disabled=false) {
+        this.parent = null
+        this.function = buttonFunc
+        this._disabled = disabled
+        this.domElement = document.createElement("div")
+        this.domElement.innerHTML = text
+        this.domElement.classList.add("vapor-editor-button")
+        this.domElement.style.fontSize = (fontPx).toString()+"px"
+        this.domElement.onclick = ()=>{
+            if (!this.domElement.matches(".vapor-editor-disabled.vapor-editor-button, .vapor-editor-disabled *.vapor-editor-button")) {
+                this.disabled = true
+                buttonFunc()
+                this.disabled = false
+            }
+        }
+    }
+    get text() {
+        return this.domElement.innerHTML
+    }
+    set text(value) {
+        this.domElement.innerHTML = value
+    }
+    get disabled() {
+        return this._disabled
+    }
+    set disabled(value) {
+        if (value===true) {
+            this.domElement.classList.add("vapor-editor-disabled")
+            this._disabled = true
+        } else {
+            this.domElement.classList.remove("vapor-editor-disabled")
+            this._disabled = false
+        }
+    }
+}
+
+class ButtonRow {
+    constructor(listOfButtons=[]) {
+        this.parent = null
+        this._disabled = false
+        this.domElement = document.createElement("div")
+        this.domElement.classList.add("vapor-editor-button-row")
+        listOfButtons.forEach(button=>{
+            this.add(button)
+        })
+    }
+    get disabled() {
+        return this._disabled
+    }
+    set disabled(value) {
+        if (value===true) {
+            this.domElement.classList.add("vapor-editor-disabled")
+            this._disabled = true
+        } else {
+            this.domElement.classList.remove("vapor-editor-disabled")
+            this._disabled = false
+        }
+    }
+    add(button) {
+        this.domElement.appendChild(button.domElement)
+        button.parent = this
+    }
+    remove(button) {
+        if (button.parent !== this) {
+            throw new Error("attempt to remove child from non-parent")
+        }
+        this.domElement.removeChild(button.domElement)
+        button.parent = null
+    }
+}
+
+class ButtonRowStack {
+    constructor(listOfButtonRows=[]) {
+        this._disabled = false
+        this.domElement = document.createElement("div")
+        this.domElement.classList.add("vapor-editor-button-row-stack")
+        listOfButtonRows.forEach(buttonRows=>{
+            this.add(buttonRows)
+        })
+    }
+    get disabled() {
+        return this._disabled
+    }
+    set disabled(value) {
+        if (value===true) {
+            this.domElement.classList.add("vapor-editor-disabled")
+            this._disabled = true
+        } else {
+            this.domElement.classList.remove("vapor-editor-disabled")
+            this._disabled = false
+        }
+    }
+    add(buttonRow) {
+        this.domElement.appendChild(buttonRow.domElement)
+        var ogHeight = buttonRow.domElement.clientHeight // Todo: try method that doesnt use clientHeight, instead, transition using em sizes.
+        if (ogHeight!==0) {
+            buttonRow.domElement.style.maxHeight = "0px"
+            buttonRow.domElement.style.overflow = "hidden" //
+            gsap.TweenLite.to(buttonRow.domElement, {maxHeight: ogHeight.toString()+"px"}) // Todo: Cancel animation if new animation happens
+        }
+        
+        buttonRow.parent = this
+    }
+    remove(buttonRow) {
+        if (buttonRow.parent !== this) {
+            throw new Error("attempt to remove child from non-parent")
+        }
+        this.domElement.removeChild(buttonRow.domElement)
+        buttonRow.parent = null
+    }
+}
+
 module.exports = EditorViewer
-},{"./Viewer":68,"three":6}],68:[function(require,module,exports){
+},{"./EditorViewer.css":68,"./Viewer":70,"gsap":5,"three":7}],70:[function(require,module,exports){
 var THREE = require("three")
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var ThreeLoader = require('@pnext/three-loader')
@@ -47267,7 +52347,6 @@ var ObjectArray = require("../arrays/ObjectArray")
 var Subscription = require("../utils/Subscription")
 var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 var VRButton = require("../utils/VRButton")
-
 
 require("./viewer.css")
 
@@ -47728,9 +52807,9 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../Serialization":33,"../arrays/ObjectArray":41,"../utils/Subscription":62,"../utils/VRButton":63,"./viewer.css":69,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":6}],69:[function(require,module,exports){
-var css = "canvas.vaporViewer {\n  height: 100%;\n  width: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":2}],70:[function(require,module,exports){
-arguments[4][68][0].apply(exports,arguments)
-},{"../Serialization":33,"../arrays/ObjectArray":41,"../utils/Subscription":62,"../utils/VRButton":63,"./viewer.css":69,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":68,"three":6}]},{},[38])(38)
+},{"../Serialization":34,"../arrays/ObjectArray":42,"../utils/Subscription":63,"../utils/VRButton":64,"./viewer.css":71,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"three":7}],71:[function(require,module,exports){
+var css = "canvas.vaporViewer {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
+},{"browserify-css":2}],72:[function(require,module,exports){
+arguments[4][70][0].apply(exports,arguments)
+},{"../Serialization":34,"../arrays/ObjectArray":42,"../utils/Subscription":63,"../utils/VRButton":64,"./viewer.css":71,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":3,"dup":70,"three":7}]},{},[39])(39)
 });

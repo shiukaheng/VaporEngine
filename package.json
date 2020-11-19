@@ -16,7 +16,7 @@
     "bezier-js": "^2.6.1",
     "css-element-queries": "^1.2.3",
     "glslify": "^7.1.1",
-    "gsap": "^3.2.6",
+    "gsap": "^3.5.1",
     "potree-core": "^1.0.7",
     "three": "^0.122.0",
     "three-mesh-ui": "^4.1.5",

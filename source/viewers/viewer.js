@@ -6,7 +6,6 @@ var Subscription = require("../utils/Subscription")
 var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 var VRButton = require("../utils/VRButton")
 
-
 require("./viewer.css")
 
 class SettingsInterface{
