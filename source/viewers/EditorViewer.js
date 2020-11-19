@@ -1,6 +1,7 @@
 var Viewer = require("./Viewer")
 var THREE = require("three")
 var gsap = require("gsap")
+var Serializable = require("../SerializationLib/Serializable")
 
 var EditorViewerCss = require("./EditorViewer.css")
 
@@ -17,7 +18,18 @@ class EditorViewer extends Viewer {
         this.UIContainer.classList.add("vapor-editor-overlay")
         this.containerElement.appendChild(this.UIContainer)
         var ar = new ButtonRow([new Button(()=>{ar.parent.add(br); ar.disabled=true},"Add"), new Button(undefined,"Select"), new Button(undefined,"Select from list"), new Button(undefined,"Settings")])
-        var br = new ButtonRow([new Button(()=>{ar.disabled = false; br.parent.remove(br)}, "Option")])
+        var scm = Serializable.getSerializableClassesManager()
+        var buttonList = []
+        Object.keys(scm.classList).forEach(className=>{
+            if (scm.classList[className].prototype instanceof scm.classList["BaseObject"]) {
+                buttonList.push(new Button(()=>{
+                    ar.disabled = false
+                    br.parent.remove(br)
+                }, className))
+            }
+        })
+        var br = new ButtonRow(buttonList)
+        // var br = new ButtonRow([new Button(()=>{ar.disabled = false; br.parent.remove(br)}, "Option")])
         var ab = new ButtonRowStack([ar])
         this.UIContainer.appendChild(ab.domElement)
     }
@@ -121,8 +133,8 @@ class ButtonRowStack {
         var ogHeight = buttonRow.domElement.clientHeight // Todo: try method that doesnt use clientHeight, instead, transition using em sizes.
         if (ogHeight!==0) {
             buttonRow.domElement.style.maxHeight = "0px"
-            buttonRow.domElement.style.overflow = "hidden" //
-            gsap.TweenLite.to(buttonRow.domElement, {maxHeight: ogHeight.toString()+"px"}) // Todo: Cancel animation if new animation happens
+            buttonRow.domElement.style.overflowY = "hidden" //
+            gsap.TweenLite.fromTo(buttonRow.domElement, {maxHeight: "0px"}, {maxHeight: ogHeight.toString()+"px", duration:0.5}) // Todo: Cancel animation if new animation happens
         }
         
         buttonRow.parent = this

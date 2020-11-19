@@ -41,6 +41,16 @@
     align-items: flex-start;
     flex-wrap: nowrap;
     height: max-content;
+    max-width: 100%;
+    pointer-events: auto;
+    overflow-x: scroll;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari, Opera */
+.vapor-editor-button-row::-webkit-scrollbar { 
+    display: none;
 }
 
 .vapor-editor-button-row .vapor-editor-button {
@@ -50,6 +60,7 @@
 .vapor-editor-button-row-stack {
     display: flex;
     flex-direction: column;
+    max-width: 100%;
 }
 
 .vapor-editor-button-row-stack .vapor-editor-button-row {

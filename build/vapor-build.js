@@ -480,7 +480,7 @@ module.exports = function(strings) {
   }
 
   /*!
-   * GSAP 3.2.6
+   * GSAP 3.5.1
    * https://greensock.com
    *
    * @license Copyright 2008-2020, GreenSock. All rights reserved.
@@ -533,12 +533,12 @@ module.exports = function(strings) {
       _isFuncOrString = function _isFuncOrString(value) {
     return _isFunction(value) || _isString(value);
   },
+      _isTypedArray = typeof ArrayBuffer === "function" && ArrayBuffer.isView || function () {},
       _isArray = Array.isArray,
       _strictNumExp = /(?:-?\.?\d|\.)+/gi,
       _numExp = /[-+=.]*\d+[.e\-+]*\d*[e\-\+]*\d*/g,
       _numWithUnitExp = /[-+=.]*\d+[.e-]*\d*[a-z%]*/g,
       _complexStringNumExp = /[-+=.]*\d+(?:\.|e-|e)*\d*/gi,
-      _parenthesesExp = /\(([^()]+)\)/i,
       _relExp = /[+-]=-?[\.\d]+/,
       _delimitedValueExp = /[#\-+.]*\b[a-z\d-=+%.]+/gi,
       _globalTimeline,
@@ -576,10 +576,7 @@ module.exports = function(strings) {
     var target = targets[0],
         harnessPlugin,
         i;
-
-    if (!_isObject(target) && !_isFunction(target)) {
-      targets = [targets];
-    }
+    _isObject(target) || _isFunction(target) || (targets = [targets]);
 
     if (!(harnessPlugin = (target._gsap || {}).harness)) {
       i = _harnessPlugins.length;
@@ -600,9 +597,8 @@ module.exports = function(strings) {
       _getCache = function _getCache(target) {
     return target._gsap || _harness(toArray(target))[0]._gsap;
   },
-      _getProperty = function _getProperty(target, property) {
-    var currentValue = target[property];
-    return _isFunction(currentValue) ? target[property]() : _isUndefined(currentValue) && target.getAttribute(property) || currentValue;
+      _getProperty = function _getProperty(target, property, v) {
+    return (v = target[property]) && _isFunction(v) ? target[property]() : _isUndefined(v) && target.getAttribute && target.getAttribute(property) || v;
   },
       _forEachName = function _forEachName(names, func) {
     return (names = names.split(",")).forEach(func) || names;
@@ -624,10 +620,7 @@ module.exports = function(strings) {
         vars = params[varsIndex],
         irVars;
 
-    if (isLegacy) {
-      vars.duration = params[1];
-    }
-
+    isLegacy && (vars.duration = params[1]);
     vars.parent = parent;
 
     if (type) {
@@ -639,12 +632,7 @@ module.exports = function(strings) {
       }
 
       vars.immediateRender = _isNotFalse(irVars.immediateRender);
-
-      if (type < 2) {
-        vars.runBackwards = 1;
-      } else {
-        vars.startAt = params[varsIndex - 1];
-      }
+      type < 2 ? vars.runBackwards = 1 : vars.startAt = params[varsIndex - 1];
     }
 
     return vars;
@@ -660,44 +648,31 @@ module.exports = function(strings) {
 
     for (i = 0; i < l; i++) {
       tween = a[i];
-
-      if (tween && tween._lazy) {
-        tween.render(tween._lazy[0], tween._lazy[1], true)._lazy = 0;
-      }
+      tween && tween._lazy && (tween.render(tween._lazy[0], tween._lazy[1], true)._lazy = 0);
     }
   },
       _lazySafeRender = function _lazySafeRender(animation, time, suppressEvents, force) {
-    if (_lazyTweens.length) {
-      _lazyRender();
-    }
-
+    _lazyTweens.length && _lazyRender();
     animation.render(time, suppressEvents, force);
-
-    if (_lazyTweens.length) {
-      _lazyRender();
-    }
+    _lazyTweens.length && _lazyRender();
   },
       _numericIfPossible = function _numericIfPossible(value) {
     var n = parseFloat(value);
-    return (n || n === 0) && (value + "").match(_delimitedValueExp).length < 2 ? n : value;
+    return (n || n === 0) && (value + "").match(_delimitedValueExp).length < 2 ? n : _isString(value) ? value.trim() : value;
   },
       _passThrough = function _passThrough(p) {
     return p;
   },
       _setDefaults = function _setDefaults(obj, defaults) {
     for (var p in defaults) {
-      if (!(p in obj)) {
-        obj[p] = defaults[p];
-      }
+      p in obj || (obj[p] = defaults[p]);
     }
 
     return obj;
   },
       _setKeyframeDefaults = function _setKeyframeDefaults(obj, defaults) {
     for (var p in defaults) {
-      if (!(p in obj) && p !== "duration" && p !== "ease") {
-        obj[p] = defaults[p];
-      }
+      p in obj || p === "duration" || p === "ease" || (obj[p] = defaults[p]);
     }
   },
       _merge = function _merge(base, toMerge) {
@@ -719,9 +694,7 @@ module.exports = function(strings) {
         p;
 
     for (p in obj) {
-      if (!(p in excluding)) {
-        copy[p] = obj[p];
-      }
+      p in excluding || (copy[p] = obj[p]);
     }
 
     return copy;
@@ -733,7 +706,7 @@ module.exports = function(strings) {
     if (_isNotFalse(vars.inherit)) {
       while (parent) {
         func(vars, parent.vars.defaults);
-        parent = parent.parent;
+        parent = parent.parent || parent._dp;
       }
     }
 
@@ -812,18 +785,17 @@ module.exports = function(strings) {
     child._next = child._prev = child.parent = null;
   },
       _removeFromParent = function _removeFromParent(child, onlyIfParentHasAutoRemove) {
-    if (child.parent && (!onlyIfParentHasAutoRemove || child.parent.autoRemoveChildren)) {
-      child.parent.remove(child);
-    }
-
+    child.parent && (!onlyIfParentHasAutoRemove || child.parent.autoRemoveChildren) && child.parent.remove(child);
     child._act = 0;
   },
-      _uncache = function _uncache(animation) {
-    var a = animation;
+      _uncache = function _uncache(animation, child) {
+    if (animation && (!child || child._end > animation._dur || child._start < 0)) {
+      var a = animation;
 
-    while (a) {
-      a._dirty = 1;
-      a = a.parent;
+      while (a) {
+        a._dirty = 1;
+        a = a.parent;
+      }
     }
 
     return animation;
@@ -854,6 +826,19 @@ module.exports = function(strings) {
       _setEnd = function _setEnd(animation) {
     return animation._end = _round(animation._start + (animation._tDur / Math.abs(animation._ts || animation._rts || _tinyNum) || 0));
   },
+      _alignPlayhead = function _alignPlayhead(animation, totalTime) {
+    var parent = animation._dp;
+
+    if (parent && parent.smoothChildTiming && animation._ts) {
+      animation._start = _round(animation._dp._time - (animation._ts > 0 ? totalTime / animation._ts : ((animation._dirty ? animation.totalDuration() : animation._tDur) - totalTime) / -animation._ts));
+
+      _setEnd(animation);
+
+      parent._dirty || _uncache(parent, animation);
+    }
+
+    return animation;
+  },
       _postAddChecks = function _postAddChecks(timeline, child) {
     var t;
 
@@ -865,7 +850,7 @@ module.exports = function(strings) {
       }
     }
 
-    if (_uncache(timeline)._dp && timeline._initted && timeline._time >= timeline._dur && timeline._ts) {
+    if (_uncache(timeline, child)._dp && timeline._initted && timeline._time >= timeline._dur && timeline._ts) {
       if (timeline._dur < timeline.duration()) {
         t = timeline;
 
@@ -889,6 +874,9 @@ module.exports = function(strings) {
     skipChecks || _postAddChecks(timeline, child);
     return timeline;
   },
+      _scrollTrigger = function _scrollTrigger(animation, trigger) {
+    return (_globals.ScrollTrigger || _missingPlugin("scrollTrigger", trigger)) && _globals.ScrollTrigger.create(trigger, animation);
+  },
       _attemptInitTween = function _attemptInitTween(tween, totalTime, force, suppressEvents) {
     _initTween(tween, totalTime);
 
@@ -904,8 +892,8 @@ module.exports = function(strings) {
     }
   },
       _renderZeroDurationTween = function _renderZeroDurationTween(tween, totalTime, suppressEvents, force) {
-    var prevRatio = tween._zTime < 0 ? 0 : 1,
-        ratio = totalTime < 0 ? 0 : 1,
+    var prevRatio = tween.ratio,
+        ratio = totalTime < 0 || !totalTime && prevRatio && !tween._start && tween._zTime > _tinyNum && !tween._dp._lock || (tween._ts < 0 || tween._dp._ts < 0) && tween.data !== "isFromStart" && tween.data !== "isStart" ? 0 : 1,
         repeatDelay = tween._rDelay,
         tTime = 0,
         pt,
@@ -919,25 +907,20 @@ module.exports = function(strings) {
 
       if (iteration !== prevIteration) {
         prevRatio = 1 - ratio;
-
-        if (tween.vars.repeatRefresh && tween._initted) {
-          tween.invalidate();
-        }
+        tween.vars.repeatRefresh && tween._initted && tween.invalidate();
       }
-    }
-
-    if (!tween._initted && _attemptInitTween(tween, totalTime, force, suppressEvents)) {
-      return;
     }
 
     if (ratio !== prevRatio || force || tween._zTime === _tinyNum || !totalTime && tween._zTime) {
-      tween._zTime = totalTime || (suppressEvents ? _tinyNum : 0);
-      tween.ratio = ratio;
-
-      if (tween._from) {
-        ratio = 1 - ratio;
+      if (!tween._initted && _attemptInitTween(tween, totalTime, force, suppressEvents)) {
+        return;
       }
 
+      prevIteration = tween._zTime;
+      tween._zTime = totalTime || (suppressEvents ? _tinyNum : 0);
+      suppressEvents || (suppressEvents = totalTime && !prevIteration);
+      tween.ratio = ratio;
+      tween._from && (ratio = 1 - ratio);
       tween._time = 0;
       tween._tTime = tTime;
       suppressEvents || _callback(tween, "onStart");
@@ -948,25 +931,21 @@ module.exports = function(strings) {
         pt = pt._next;
       }
 
-      if (!ratio && tween._startAt && !tween._onUpdate && tween._start) {
-        tween._startAt.render(totalTime, true, force);
-      }
-
-      tween._onUpdate && (suppressEvents || _callback(tween, "onUpdate"));
-
-      if (tTime && tween._repeat && !suppressEvents && tween.parent) {
-        _callback(tween, "onRepeat");
-      }
+      tween._startAt && totalTime < 0 && tween._startAt.render(totalTime, true, true);
+      tween._onUpdate && !suppressEvents && _callback(tween, "onUpdate");
+      tTime && tween._repeat && !suppressEvents && tween.parent && _callback(tween, "onRepeat");
 
       if ((totalTime >= tween._tDur || totalTime < 0) && tween.ratio === ratio) {
-        tween.ratio && _removeFromParent(tween, 1);
+        ratio && _removeFromParent(tween, 1);
 
         if (!suppressEvents) {
-          _callback(tween, tween.ratio ? "onComplete" : "onReverseComplete", true);
+          _callback(tween, ratio ? "onComplete" : "onReverseComplete", true);
 
           tween._prom && tween._prom();
         }
       }
+    } else if (!tween._zTime) {
+      tween._zTime = totalTime;
     }
   },
       _findNextPauseTween = function _findNextPauseTween(animation, prevTime, time) {
@@ -994,19 +973,15 @@ module.exports = function(strings) {
       }
     }
   },
-      _setDuration = function _setDuration(animation, duration, skipUncache) {
+      _setDuration = function _setDuration(animation, duration, skipUncache, leavePlayhead) {
     var repeat = animation._repeat,
-        dur = _round(duration) || 0;
+        dur = _round(duration) || 0,
+        totalProgress = animation._tTime / animation._tDur;
+    totalProgress && !leavePlayhead && (animation._time *= dur / animation._dur);
     animation._dur = dur;
-    animation._tDur = !repeat ? dur : repeat < 0 ? 1e12 : _round(dur * (repeat + 1) + animation._rDelay * repeat);
-
-    if (animation._time > dur) {
-      animation._time = dur;
-      animation._tTime = Math.min(animation._tTime, animation._tDur);
-    }
-
-    !skipUncache && _uncache(animation.parent);
-    animation.parent && _setEnd(animation);
+    animation._tDur = !repeat ? dur : repeat < 0 ? 1e10 : _round(dur * (repeat + 1) + animation._rDelay * repeat);
+    totalProgress && !leavePlayhead ? _alignPlayhead(animation, animation._tTime = animation._tDur * totalProgress) : animation.parent && _setEnd(animation);
+    skipUncache || _uncache(animation.parent, animation);
     return animation;
   },
       _onUpdateTotalDuration = function _onUpdateTotalDuration(animation) {
@@ -1033,10 +1008,7 @@ module.exports = function(strings) {
       i = position.indexOf("=");
 
       if (i < 0) {
-        if (!(position in labels)) {
-          labels[position] = clippedDuration;
-        }
-
+        position in labels || (labels[position] = clippedDuration);
         return labels[position];
       }
 
@@ -1053,7 +1025,7 @@ module.exports = function(strings) {
     return value < min ? min : value > max ? max : value;
   },
       getUnit = function getUnit(value) {
-    return (value + "").substr((parseFloat(value) + "").length);
+    return (value = (value + "").substr((parseFloat(value) + "").length)) && isNaN(value) ? value : "";
   },
       clamp = function clamp(min, max, value) {
     return _conditionalReturn(value, function (v) {
@@ -1146,14 +1118,8 @@ module.exports = function(strings) {
           x = j % wrapAt - originX;
           y = originY - (j / wrapAt | 0);
           distances[j] = d = !axis ? _sqrt(x * x + y * y) : Math.abs(axis === "y" ? y : x);
-
-          if (d > max) {
-            max = d;
-          }
-
-          if (d < min) {
-            min = d;
-          }
+          d > max && (max = d);
+          d < min && (min = d);
         }
 
         from === "random" && shuffle(distances);
@@ -1172,7 +1138,7 @@ module.exports = function(strings) {
       _roundModifier = function _roundModifier(v) {
     var p = v < 1 ? Math.pow(10, (v + "").length - 2) : 1;
     return function (raw) {
-      return ~~(Math.round(parseFloat(raw) / v) * v * p) / p + (_isNumber(raw) ? 0 : getUnit(raw));
+      return Math.floor(Math.round(parseFloat(raw) / v) * v * p) / p + (_isNumber(raw) ? 0 : getUnit(raw));
     };
   },
       snap = function snap(snapTo, value) {
@@ -1227,7 +1193,7 @@ module.exports = function(strings) {
   },
       random = function random(min, max, roundingIncrement, returnFunction) {
     return _conditionalReturn(_isArray(min) ? !max : roundingIncrement === true ? !!(roundingIncrement = 0) : !returnFunction, function () {
-      return _isArray(min) ? min[~~(Math.random() * min.length)] : (roundingIncrement = roundingIncrement || 1e-5) && (returnFunction = roundingIncrement < 1 ? Math.pow(10, (roundingIncrement + "").length - 2) : 1) && ~~(Math.round((min + Math.random() * (max - min)) / roundingIncrement) * roundingIncrement * returnFunction) / returnFunction;
+      return _isArray(min) ? min[~~(Math.random() * min.length)] : (roundingIncrement = roundingIncrement || 1e-5) && (returnFunction = roundingIncrement < 1 ? Math.pow(10, (roundingIncrement + "").length - 2) : 1) && Math.floor(Math.round((min + Math.random() * (max - min)) / roundingIncrement) * roundingIncrement * returnFunction) / returnFunction;
     });
   },
       pipe = function pipe() {
@@ -1264,7 +1230,7 @@ module.exports = function(strings) {
     var range = max - min,
         total = range * 2;
     return _isArray(min) ? _wrapArray(min, wrapYoyo(0, min.length - 1), max) : _conditionalReturn(value, function (value) {
-      value = (total + (value - min) % total) % total;
+      value = (total + (value - min) % total) % total || 0;
       return min + (value > range ? total - value : value);
     });
   },
@@ -1280,7 +1246,7 @@ module.exports = function(strings) {
       end = value.indexOf(")", i);
       isArray = value.charAt(i + 7) === "[";
       nums = value.substr(i + 7, end - i - 7).match(isArray ? _delimitedValueExp : _strictNumExp);
-      s += value.substr(prev, i - prev) + random(isArray ? nums : +nums[0], +nums[1], +nums[2] || 1e-5);
+      s += value.substr(prev, i - prev) + random(isArray ? nums : +nums[0], isArray ? 0 : +nums[1], +nums[2] || 1e-5);
       prev = end + 1;
     }
 
@@ -1290,7 +1256,7 @@ module.exports = function(strings) {
     var inRange = inMax - inMin,
         outRange = outMax - outMin;
     return _conditionalReturn(value, function (value) {
-      return outMin + (value - inMin) / inRange * outRange;
+      return outMin + ((value - inMin) / inRange * outRange || 0);
     });
   },
       interpolate = function interpolate(start, end, progress, mutate) {
@@ -1387,10 +1353,7 @@ module.exports = function(strings) {
       _interrupt = function _interrupt(animation) {
     _removeFromParent(animation);
 
-    if (animation.progress() < 1) {
-      _callback(animation, "onInterrupt");
-    }
-
+    animation.progress() < 1 && _callback(animation, "onInterrupt");
     return animation;
   },
       _quickTween,
@@ -1442,9 +1405,7 @@ module.exports = function(strings) {
 
     _addGlobal(name, Plugin);
 
-    if (config.register) {
-      config.register(gsap, Plugin, PropTween);
-    }
+    config.register && config.register(gsap, Plugin, PropTween);
   },
       _255 = 255,
       _colorLookup = {
@@ -1511,11 +1472,7 @@ module.exports = function(strings) {
           l = +a[2] / 100;
           g = l <= .5 ? l * (s + 1) : l + s - l * s;
           r = l * 2 - g;
-
-          if (a.length > 3) {
-            a[3] *= 1;
-          }
-
+          a.length > 3 && (a[3] *= 1);
           a[0] = _hue(h + 1 / 3, r, g);
           a[1] = _hue(h, r, g);
           a[2] = _hue(h - 1 / 3, r, g);
@@ -1641,41 +1598,42 @@ module.exports = function(strings) {
         _adjustedLag = 33,
         _startTime = _getTime(),
         _lastUpdate = _startTime,
-        _gap = 1 / 240,
+        _gap = 1000 / 240,
         _nextTime = _gap,
         _listeners = [],
         _id,
         _req,
         _raf,
         _self,
+        _delta,
+        _i,
         _tick = function _tick(v) {
       var elapsed = _getTime() - _lastUpdate,
           manual = v === true,
           overlap,
-          dispatch;
+          dispatch,
+          time,
+          frame;
 
-      if (elapsed > _lagThreshold) {
-        _startTime += elapsed - _adjustedLag;
-      }
-
+      elapsed > _lagThreshold && (_startTime += elapsed - _adjustedLag);
       _lastUpdate += elapsed;
-      _self.time = (_lastUpdate - _startTime) / 1000;
-      overlap = _self.time - _nextTime;
+      time = _lastUpdate - _startTime;
+      overlap = time - _nextTime;
 
       if (overlap > 0 || manual) {
-        _self.frame++;
-        _nextTime += overlap + (overlap >= _gap ? 0.004 : _gap - overlap);
+        frame = ++_self.frame;
+        _delta = time - _self.time * 1000;
+        _self.time = time = time / 1000;
+        _nextTime += overlap + (overlap >= _gap ? 4 : _gap - overlap);
         dispatch = 1;
       }
 
-      if (!manual) {
-        _id = _req(_tick);
-      }
+      manual || (_id = _req(_tick));
 
       if (dispatch) {
-        _listeners.forEach(function (l) {
-          return l(_self.time, elapsed, _self.frame, v);
-        });
+        for (_i = 0; _i < _listeners.length; _i++) {
+          _listeners[_i](time, _delta, frame, v);
+        }
       }
     };
 
@@ -1684,6 +1642,9 @@ module.exports = function(strings) {
       frame: 0,
       tick: function tick() {
         _tick(true);
+      },
+      deltaRatio: function deltaRatio(fps) {
+        return _delta / (1000 / (fps || 60));
       },
       wake: function wake() {
         if (_coreReady) {
@@ -1701,7 +1662,7 @@ module.exports = function(strings) {
           _id && _self.sleep();
 
           _req = _raf || function (f) {
-            return setTimeout(f, (_nextTime - _self.time) * 1000 + 1 | 0);
+            return setTimeout(f, _nextTime - _self.time * 1000 + 1 | 0);
           };
 
           _tickerActive = 1;
@@ -1719,8 +1680,8 @@ module.exports = function(strings) {
         _adjustedLag = Math.min(adjustedLag, _lagThreshold, 0);
       },
       fps: function fps(_fps) {
-        _gap = 1 / (_fps || 240);
-        _nextTime = _self.time + _gap;
+        _gap = 1000 / (_fps || 240);
+        _nextTime = _self.time * 1000 + _gap;
       },
       add: function add(callback) {
         _listeners.indexOf(callback) < 0 && _listeners.push(callback);
@@ -1729,7 +1690,7 @@ module.exports = function(strings) {
       },
       remove: function remove(callback) {
         var i;
-        ~(i = _listeners.indexOf(callback)) && _listeners.splice(i, 1);
+        ~(i = _listeners.indexOf(callback)) && _listeners.splice(i, 1) && _i >= i && _i--;
       },
       _listeners: _listeners
     };
@@ -1761,15 +1722,42 @@ module.exports = function(strings) {
 
     return obj;
   },
+      _valueInParentheses = function _valueInParentheses(value) {
+    var open = value.indexOf("(") + 1,
+        close = value.indexOf(")"),
+        nested = value.indexOf("(", open);
+    return value.substring(open, ~nested && nested < close ? value.indexOf(")", close + 1) : close);
+  },
       _configEaseFromString = function _configEaseFromString(name) {
     var split = (name + "").split("("),
         ease = _easeMap[split[0]];
-    return ease && split.length > 1 && ease.config ? ease.config.apply(null, ~name.indexOf("{") ? [_parseObjectInString(split[1])] : _parenthesesExp.exec(name)[1].split(",").map(_numericIfPossible)) : _easeMap._CE && _customEaseExp.test(name) ? _easeMap._CE("", name) : ease;
+    return ease && split.length > 1 && ease.config ? ease.config.apply(null, ~name.indexOf("{") ? [_parseObjectInString(split[1])] : _valueInParentheses(name).split(",").map(_numericIfPossible)) : _easeMap._CE && _customEaseExp.test(name) ? _easeMap._CE("", name) : ease;
   },
       _invertEase = function _invertEase(ease) {
     return function (p) {
       return 1 - ease(1 - p);
     };
+  },
+      _propagateYoyoEase = function _propagateYoyoEase(timeline, isYoyo) {
+    var child = timeline._first,
+        ease;
+
+    while (child) {
+      if (child instanceof Timeline) {
+        _propagateYoyoEase(child, isYoyo);
+      } else if (child.vars.yoyoEase && (!child._yoyo || !child._repeat) && child._yoyo !== isYoyo) {
+        if (child.timeline) {
+          _propagateYoyoEase(child.timeline, isYoyo);
+        } else {
+          ease = child._ease;
+          child._ease = child._yEase;
+          child._yEase = ease;
+          child._yoyo = isYoyo;
+        }
+      }
+
+      child = child._next;
+    }
   },
       _parseEase = function _parseEase(ease, defaultEase) {
     return !ease ? defaultEase : (_isFunction(ease) ? ease : _easeMap[ease] || _configEaseFromString(ease)) || defaultEase;
@@ -1888,7 +1876,7 @@ module.exports = function(strings) {
   });
 
   _insertEase("Sine", function (p) {
-    return -_cos(p * _HALF_PI) + 1;
+    return p === 1 ? 1 : -_cos(p * _HALF_PI) + 1;
   });
 
   _insertEase("Back", _configBack("in"), _configBack("out"), _configBack());
@@ -1935,7 +1923,7 @@ module.exports = function(strings) {
 
       this._ts = 1;
 
-      _setDuration(this, +vars.duration, 1);
+      _setDuration(this, +vars.duration, 1, 1);
 
       this.data = vars.data;
       _tickerActive || _ticker.wake();
@@ -1976,16 +1964,10 @@ module.exports = function(strings) {
         return this._tTime;
       }
 
-      var parent = this.parent || this._dp;
+      var parent = this._dp;
 
       if (parent && parent.smoothChildTiming && this._ts) {
-        this._start = _round(parent._time - (this._ts > 0 ? _totalTime / this._ts : ((this._dirty ? this.totalDuration() : this._tDur) - _totalTime) / -this._ts));
-
-        _setEnd(this);
-
-        if (!parent._dirty) {
-          _uncache(parent);
-        }
+        _alignPlayhead(this, _totalTime);
 
         while (parent.parent) {
           if (parent.parent._time !== parent._start + (parent._ts >= 0 ? parent._tTime / parent._ts : (parent.totalDuration() - parent._tTime) / -parent._ts)) {
@@ -1995,12 +1977,12 @@ module.exports = function(strings) {
           parent = parent.parent;
         }
 
-        if (!this.parent && this._dp.autoRemoveChildren) {
+        if (!this.parent && this._dp.autoRemoveChildren && (this._ts > 0 && _totalTime < this._tDur || this._ts < 0 && _totalTime > 0 || !this._tDur && !_totalTime)) {
           _addToTimeline(this._dp, this, this._start - this._delay);
         }
       }
 
-      if (this._tTime !== _totalTime || !this._dur && !suppressEvents || this._initted && Math.abs(this._zTime) === _tinyNum) {
+      if (this._tTime !== _totalTime || !this._dur && !suppressEvents || this._initted && Math.abs(this._zTime) === _tinyNum || !_totalTime && !this._initted && (this.add || this._ptLookup)) {
         this._ts || (this._pTime = _totalTime);
 
         _lazySafeRender(this, _totalTime, suppressEvents);
@@ -2039,7 +2021,7 @@ module.exports = function(strings) {
       var tTime = this.parent && this._ts ? _parentToChildTotalTime(this.parent._time, this) : this._tTime;
       this._rts = +value || 0;
       this._ts = this._ps || value === -_tinyNum ? 0 : this._rts;
-      return _recacheAncestors(this.totalTime(_clamp(0, this._tDur, tTime), true));
+      return _recacheAncestors(this.totalTime(_clamp(-this._delay, this._tDur, tTime), true));
     };
 
     _proto.paused = function paused(value) {
@@ -2084,6 +2066,18 @@ module.exports = function(strings) {
       return !parent ? this._tTime : wrapRepeats && (!this._ts || this._repeat && this._time && this.totalProgress() < 1) ? this._tTime % (this._dur + this._rDelay) : !this._ts ? this._tTime : _parentToChildTotalTime(parent.rawTime(wrapRepeats), this);
     };
 
+    _proto.globalTime = function globalTime(rawTime) {
+      var animation = this,
+          time = arguments.length ? rawTime : animation.rawTime();
+
+      while (animation) {
+        time = animation._start + time / (animation._ts || 1);
+        animation = animation._dp;
+      }
+
+      return time;
+    };
+
     _proto.repeat = function repeat(value) {
       if (arguments.length) {
         this._repeat = value;
@@ -2120,26 +2114,17 @@ module.exports = function(strings) {
     };
 
     _proto.play = function play(from, suppressEvents) {
-      if (from != null) {
-        this.seek(from, suppressEvents);
-      }
-
+      from != null && this.seek(from, suppressEvents);
       return this.reversed(false).paused(false);
     };
 
     _proto.reverse = function reverse(from, suppressEvents) {
-      if (from != null) {
-        this.seek(from || this.totalDuration(), suppressEvents);
-      }
-
+      from != null && this.seek(from || this.totalDuration(), suppressEvents);
       return this.reversed(true).paused(false);
     };
 
     _proto.pause = function pause(atTime, suppressEvents) {
-      if (atTime != null) {
-        this.seek(atTime, suppressEvents);
-      }
-
+      atTime != null && this.seek(atTime, suppressEvents);
       return this.paused(true);
     };
 
@@ -2149,10 +2134,7 @@ module.exports = function(strings) {
 
     _proto.reversed = function reversed(value) {
       if (arguments.length) {
-        if (!!value !== this.reversed()) {
-          this.timeScale(-this._rts || (value ? -_tinyNum : 0));
-        }
-
+        !!value !== this.reversed() && this.timeScale(-this._rts || (value ? -_tinyNum : 0));
         return this;
       }
 
@@ -2165,11 +2147,11 @@ module.exports = function(strings) {
       return this;
     };
 
-    _proto.isActive = function isActive(hasStarted) {
+    _proto.isActive = function isActive() {
       var parent = this.parent || this._dp,
           start = this._start,
           rawTime;
-      return !!(!parent || this._ts && (this._initted || !hasStarted) && parent.isActive(hasStarted) && (rawTime = parent.rawTime(true)) >= start && rawTime < this.endTime(true) - _tinyNum);
+      return !!(!parent || this._ts && this._initted && parent.isActive() && (rawTime = parent.rawTime(true)) >= start && rawTime < this.endTime(true) - _tinyNum);
     };
 
     _proto.eventCallback = function eventCallback(type, callback, params) {
@@ -2180,14 +2162,8 @@ module.exports = function(strings) {
           delete vars[type];
         } else {
           vars[type] = callback;
-
-          if (params) {
-            vars[type + "Params"] = params;
-          }
-
-          if (type === "onUpdate") {
-            this._onUpdate = callback;
-          }
+          params && (vars[type + "Params"] = params);
+          type === "onUpdate" && (this._onUpdate = callback);
         }
 
         return this;
@@ -2260,6 +2236,7 @@ module.exports = function(strings) {
       _this.autoRemoveChildren = !!vars.autoRemoveChildren;
       _this._sort = _isNotFalse(vars.sortChildren);
       _this.parent && _postAddChecks(_this.parent, _assertThisInitialized(_this));
+      vars.scrollTrigger && _scrollTrigger(_assertThisInitialized(_this), vars.scrollTrigger);
       return _this;
     }
 
@@ -2346,13 +2323,8 @@ module.exports = function(strings) {
         prevPaused = !timeScale;
 
         if (crossingStart) {
-          if (!dur) {
-            prevTime = this._zTime;
-          }
-
-          if (totalTime || !suppressEvents) {
-            this._zTime = totalTime;
-          }
+          dur || (prevTime = this._zTime);
+          (totalTime || !suppressEvents) && (this._zTime = totalTime);
         }
 
         if (this._repeat) {
@@ -2360,18 +2332,22 @@ module.exports = function(strings) {
           cycleDuration = dur + this._rDelay;
           time = _round(tTime % cycleDuration);
 
-          if (time > dur || tDur === tTime) {
+          if (tTime === tDur) {
+            iteration = this._repeat;
             time = dur;
-          }
+          } else {
+            iteration = ~~(tTime / cycleDuration);
 
-          iteration = ~~(tTime / cycleDuration);
+            if (iteration && iteration === tTime / cycleDuration) {
+              time = dur;
+              iteration--;
+            }
 
-          if (iteration && iteration === tTime / cycleDuration) {
-            time = dur;
-            iteration--;
+            time > dur && (time = dur);
           }
 
           prevIteration = _animationCycle(this._tTime, cycleDuration);
+          !prevTime && this._tTime && prevIteration !== iteration && (prevIteration = iteration);
 
           if (yoyo && iteration & 1) {
             time = dur - time;
@@ -2381,28 +2357,23 @@ module.exports = function(strings) {
           if (iteration !== prevIteration && !this._lock) {
             var rewinding = yoyo && prevIteration & 1,
                 doesWrap = rewinding === (yoyo && iteration & 1);
-
-            if (iteration < prevIteration) {
-              rewinding = !rewinding;
-            }
-
+            iteration < prevIteration && (rewinding = !rewinding);
             prevTime = rewinding ? 0 : dur;
             this._lock = 1;
-            this.render(prevTime, suppressEvents, !dur)._lock = 0;
-
-            if (!suppressEvents && this.parent) {
-              _callback(this, "onRepeat");
-            }
-
+            this.render(prevTime || (isYoyo ? 0 : _round(iteration * cycleDuration)), suppressEvents, !dur)._lock = 0;
+            !suppressEvents && this.parent && _callback(this, "onRepeat");
             this.vars.repeatRefresh && !isYoyo && (this.invalidate()._lock = 1);
 
             if (prevTime !== this._time || prevPaused !== !this._ts) {
               return this;
             }
 
+            dur = this._dur;
+            tDur = this._tDur;
+
             if (doesWrap) {
               this._lock = 2;
-              prevTime = rewinding ? dur + 0.0001 : -0.0001;
+              prevTime = rewinding ? dur : -0.0001;
               this.render(prevTime, true);
               this.vars.repeatRefresh && !isYoyo && this.invalidate();
             }
@@ -2412,6 +2383,8 @@ module.exports = function(strings) {
             if (!this._ts && !prevPaused) {
               return this;
             }
+
+            _propagateYoyoEase(this, isYoyo);
           }
         }
 
@@ -2433,9 +2406,7 @@ module.exports = function(strings) {
           this._zTime = totalTime;
         }
 
-        if (!prevTime && time && !suppressEvents) {
-          _callback(this, "onStart");
-        }
+        !prevTime && time && !suppressEvents && _callback(this, "onStart");
 
         if (time >= prevTime && totalTime >= 0) {
           child = this._first;
@@ -2497,17 +2468,14 @@ module.exports = function(strings) {
           }
         }
 
-        if (this._onUpdate && !suppressEvents) {
-          _callback(this, "onUpdate", true);
-        }
+        this._onUpdate && !suppressEvents && _callback(this, "onUpdate", true);
+        if (tTime === tDur && tDur >= this.totalDuration() || !tTime && prevTime) if (prevStart === this._start || Math.abs(timeScale) !== Math.abs(this._ts)) if (!this._lock) {
+          (totalTime || !dur) && (tTime === tDur && this._ts > 0 || !tTime && this._ts < 0) && _removeFromParent(this, 1);
 
-        if (tTime === tDur && tDur >= this.totalDuration() || !tTime && this._ts < 0) if (prevStart === this._start || Math.abs(timeScale) !== Math.abs(this._ts)) if (!this._lock) {
-          (totalTime || !dur) && (totalTime && this._ts > 0 || !tTime && this._ts < 0) && _removeFromParent(this, 1);
-
-          if (!suppressEvents && !(totalTime < 0 && !prevTime)) {
+          if (!suppressEvents && !(totalTime < 0 && !prevTime) && (tTime || prevTime)) {
             _callback(this, tTime === tDur ? "onComplete" : "onReverseComplete", true);
 
-            this._prom && this._prom();
+            this._prom && !(tTime < tDur && this.timeScale() > 0) && this._prom();
           }
         }
       }
@@ -2527,7 +2495,7 @@ module.exports = function(strings) {
           child.forEach(function (obj) {
             return _this2.add(obj, position);
           });
-          return _uncache(this);
+          return this;
         }
 
         if (_isString(child)) {
@@ -2567,17 +2535,10 @@ module.exports = function(strings) {
       while (child) {
         if (child._start >= ignoreBeforeTime) {
           if (child instanceof Tween) {
-            if (tweens) {
-              a.push(child);
-            }
+            tweens && a.push(child);
           } else {
-            if (timelines) {
-              a.push(child);
-            }
-
-            if (nested) {
-              a.push.apply(a, child.getChildren(true, tweens, timelines));
-            }
+            timelines && a.push(child);
+            nested && a.push.apply(a, child.getChildren(true, tweens, timelines));
           }
         }
 
@@ -2623,7 +2584,7 @@ module.exports = function(strings) {
 
       this._forcing = 1;
 
-      if (!this.parent && !this._dp && this._ts) {
+      if (!this._dp && this._ts) {
         this._start = _round(_ticker.time - (this._ts > 0 ? _totalTime2 / this._ts : (this.totalDuration() - _totalTime2) / -this._ts));
       }
 
@@ -2678,11 +2639,12 @@ module.exports = function(strings) {
       var a = [],
           parsedTargets = toArray(targets),
           child = this._first,
+          isGlobalTime = _isNumber(onlyActive),
           children;
 
       while (child) {
         if (child instanceof Tween) {
-          if (_arrayContainsAny(child._targets, parsedTargets) && (!onlyActive || child.isActive(onlyActive === "started"))) {
+          if (_arrayContainsAny(child._targets, parsedTargets) && (isGlobalTime ? (!_overwritingTween || child._initted && child._ts) && child.globalTime(0) <= onlyActive && child.globalTime(child.totalDuration()) > onlyActive : !onlyActive || child.isActive())) {
             a.push(child);
           }
         } else if ((children = child.getTweensOf(parsedTargets, onlyActive)).length) {
@@ -2708,18 +2670,13 @@ module.exports = function(strings) {
         ease: "none",
         lazy: false,
         time: endTime,
+        overwrite: "auto",
         duration: vars.duration || Math.abs((endTime - (startAt && "time" in startAt ? startAt.time : tl._time)) / tl.timeScale()) || _tinyNum,
         onStart: function onStart() {
           tl.pause();
           var duration = vars.duration || Math.abs((endTime - tl._time) / tl.timeScale());
-
-          if (tween._dur !== duration) {
-            _setDuration(tween, duration).render(tween._time, true, true);
-          }
-
-          if (_onStart) {
-            _onStart.apply(tween, onStartParams || []);
-          }
+          tween._dur !== duration && _setDuration(tween, duration, 0, 1).render(tween._time, true, true);
+          _onStart && _onStart.apply(tween, onStartParams || []);
         }
       }));
 
@@ -2770,6 +2727,7 @@ module.exports = function(strings) {
       while (child) {
         if (child._start >= ignoreBeforeTime) {
           child._start += amount;
+          child._end += amount;
         }
 
         child = child._next;
@@ -2812,12 +2770,8 @@ module.exports = function(strings) {
         child = next;
       }
 
-      this._time = this._tTime = 0;
-
-      if (includeLabels) {
-        this.labels = {};
-      }
-
+      this._time = this._tTime = this._pTime = 0;
+      includeLabels && (this.labels = {});
       return _uncache(this);
     };
 
@@ -2827,7 +2781,6 @@ module.exports = function(strings) {
           child = self._last,
           prevStart = _bigNum,
           prev,
-          end,
           start,
           parent;
 
@@ -2840,11 +2793,7 @@ module.exports = function(strings) {
 
         while (child) {
           prev = child._prev;
-
-          if (child._dirty) {
-            child.totalDuration();
-          }
-
+          child._dirty && child.totalDuration();
           start = child._start;
 
           if (start > prevStart && self._sort && child._ts && !self._lock) {
@@ -2863,20 +2812,15 @@ module.exports = function(strings) {
               self._tTime -= start;
             }
 
-            self.shiftChildren(-start, false, -1e20);
+            self.shiftChildren(-start, false, -1e999);
             prevStart = 0;
           }
 
-          end = _setEnd(child);
-
-          if (end > max && child._ts) {
-            max = end;
-          }
-
+          child._end > max && child._ts && (max = child._end);
           child = prev;
         }
 
-        _setDuration(self, self === _globalTimeline && self._time > max ? self._time : Math.min(_bigNum, max), 1);
+        _setDuration(self, self === _globalTimeline && self._time > max ? self._time : max, 1, 1);
 
         self._dirty = 0;
       }
@@ -2899,9 +2843,7 @@ module.exports = function(strings) {
             child = child._next;
           }
 
-          if (!child) {
-            _ticker.sleep();
-          }
+          child || _ticker.sleep();
         }
       }
     };
@@ -2979,10 +2921,7 @@ module.exports = function(strings) {
     return pt;
   },
       _addPropTween = function _addPropTween(target, prop, start, end, index, targets, modifier, stringFilter, funcParam) {
-    if (_isFunction(end)) {
-      end = end(index || 0, target, targets);
-    }
-
+    _isFunction(end) && (end = end(index || 0, target, targets));
     var currentValue = target[prop],
         parsedStart = start !== "get" ? start : !_isFunction(currentValue) ? currentValue : funcParam ? target[prop.indexOf("set") || !_isFunction(target["get" + prop.substr(3)]) ? prop : "get" + prop.substr(3)](funcParam) : target[prop](),
         setter = !_isFunction(currentValue) ? _setterPlain : funcParam ? _setterFuncWithParam : _setterFunc,
@@ -2999,17 +2938,10 @@ module.exports = function(strings) {
     }
 
     if (parsedStart !== end) {
-      if (!isNaN(parsedStart + end)) {
+      if (!isNaN(parsedStart * end)) {
         pt = new PropTween(this._pt, target, prop, +parsedStart || 0, end - (parsedStart || 0), typeof currentValue === "boolean" ? _renderBoolean : _renderPlain, 0, setter);
-
-        if (funcParam) {
-          pt.fp = funcParam;
-        }
-
-        if (modifier) {
-          pt.modifier(modifier, this, target);
-        }
-
+        funcParam && (pt.fp = funcParam);
+        modifier && pt.modifier(modifier, this, target);
         return this._pt = pt;
       }
 
@@ -3018,11 +2950,9 @@ module.exports = function(strings) {
     }
   },
       _processVars = function _processVars(vars, index, target, targets, tween) {
-    if (_isFunction(vars)) {
-      vars = _parseFuncOrString(vars, tween, index, target, targets);
-    }
+    _isFunction(vars) && (vars = _parseFuncOrString(vars, tween, index, target, targets));
 
-    if (!_isObject(vars) || vars.style && vars.nodeType || _isArray(vars)) {
+    if (!_isObject(vars) || vars.style && vars.nodeType || _isArray(vars) || _isTypedArray(vars)) {
       return _isString(vars) ? _parseFuncOrString(vars, tween, index, target, targets) : vars;
     }
 
@@ -3085,12 +3015,9 @@ module.exports = function(strings) {
         plugin,
         ptLookup,
         index,
-        harnessVars;
-
-    if (tl && (!keyframes || !ease)) {
-      ease = "none";
-    }
-
+        harnessVars,
+        overwritten;
+    tl && (!keyframes || !ease) && (ease = "none");
     tween._ease = _parseEase(ease, _defaults.ease);
     tween._yEase = yoyoEase ? _invertEase(_parseEase(yoyoEase === true ? ease : yoyoEase, _defaults.ease)) : 0;
 
@@ -3101,9 +3028,10 @@ module.exports = function(strings) {
     }
 
     if (!tl) {
-      if (prevStartAt) {
-        prevStartAt.render(-1, true).kill();
-      }
+      harness = targets[0] ? _getCache(targets[0]).harness : 0;
+      harnessVars = harness && vars[harness.prop];
+      cleanVars = _copyExcluding(vars, _reservedProps);
+      prevStartAt && prevStartAt.render(-1, true).kill();
 
       if (startAt) {
         _removeFromParent(tween._startAt = Tween.set(targets, _setDefaults({
@@ -3122,8 +3050,9 @@ module.exports = function(strings) {
 
         if (immediateRender) {
           if (time > 0) {
-            !autoRevert && (tween._startAt = 0);
-          } else if (dur) {
+            autoRevert || (tween._startAt = 0);
+          } else if (dur && !(time < 0 && prevStartAt)) {
+            time && (tween._zTime = time);
             return;
           }
         }
@@ -3131,18 +3060,18 @@ module.exports = function(strings) {
         if (prevStartAt) {
           !autoRevert && (tween._startAt = 0);
         } else {
-          if (time) {
-            immediateRender = false;
-          }
-
-          _removeFromParent(tween._startAt = Tween.set(targets, _merge(_copyExcluding(vars, _reservedProps), {
+          time && (immediateRender = false);
+          p = _setDefaults({
             overwrite: false,
             data: "isFromStart",
             lazy: immediateRender && _isNotFalse(lazy),
             immediateRender: immediateRender,
             stagger: 0,
             parent: parent
-          })));
+          }, cleanVars);
+          harnessVars && (p[harness.prop] = harnessVars);
+
+          _removeFromParent(tween._startAt = Tween.set(targets, p));
 
           if (!immediateRender) {
             _initTween(tween._startAt, _tinyNum);
@@ -3152,21 +3081,14 @@ module.exports = function(strings) {
         }
       }
 
-      cleanVars = _copyExcluding(vars, _reservedProps);
       tween._pt = 0;
-      harness = targets[0] ? _getCache(targets[0]).harness : 0;
-      harnessVars = harness && vars[harness.prop];
       lazy = dur && _isNotFalse(lazy) || lazy && !dur;
 
       for (i = 0; i < targets.length; i++) {
         target = targets[i];
         gsData = target._gsap || _harness(targets)[i]._gsap;
         tween._ptLookup[i] = ptLookup = {};
-
-        if (_lazyLookup[gsData.id]) {
-          _lazyRender();
-        }
-
+        _lazyLookup[gsData.id] && _lazyTweens.length && _lazyRender();
         index = fullTargets === targets ? i : fullTargets.indexOf(target);
 
         if (harness && (plugin = new harness()).init(target, harnessVars || cleanVars, tween, index, fullTargets) !== false) {
@@ -3176,52 +3098,40 @@ module.exports = function(strings) {
             ptLookup[name] = pt;
           });
 
-          if (plugin.priority) {
-            hasPriority = 1;
-          }
+          plugin.priority && (hasPriority = 1);
         }
 
         if (!harness || harnessVars) {
           for (p in cleanVars) {
             if (_plugins[p] && (plugin = _checkPlugin(p, cleanVars, tween, index, target, fullTargets))) {
-              if (plugin.priority) {
-                hasPriority = 1;
-              }
+              plugin.priority && (hasPriority = 1);
             } else {
               ptLookup[p] = pt = _addPropTween.call(tween, target, p, "get", cleanVars[p], index, fullTargets, 0, vars.stringFilter);
             }
           }
         }
 
-        if (tween._op && tween._op[i]) {
-          tween.kill(target, tween._op[i]);
-        }
+        tween._op && tween._op[i] && tween.kill(target, tween._op[i]);
 
         if (autoOverwrite && tween._pt) {
           _overwritingTween = tween;
 
-          _globalTimeline.killTweensOf(target, ptLookup, "started");
+          _globalTimeline.killTweensOf(target, ptLookup, tween.globalTime(0));
 
+          overwritten = !tween.parent;
           _overwritingTween = 0;
         }
 
-        if (tween._pt && lazy) {
-          _lazyLookup[gsData.id] = 1;
-        }
+        tween._pt && lazy && (_lazyLookup[gsData.id] = 1);
       }
 
-      if (hasPriority) {
-        _sortPropTweensByPriority(tween);
-      }
-
-      if (tween._onInit) {
-        tween._onInit(tween);
-      }
+      hasPriority && _sortPropTweensByPriority(tween);
+      tween._onInit && tween._onInit(tween);
     }
 
     tween._from = !tl && !!vars.runBackwards;
     tween._onUpdate = onUpdate;
-    tween._initted = 1;
+    tween._initted = (!tween._op || tween._pt) && !overwritten;
   },
       _addAliasesToVars = function _addAliasesToVars(targets, vars) {
     var harness = targets[0] ? _getCache(targets[0]).harness : 0,
@@ -3254,7 +3164,7 @@ module.exports = function(strings) {
     return _isFunction(value) ? value.call(tween, i, target, targets) : _isString(value) && ~value.indexOf("random(") ? _replaceRandom(value) : value;
   },
       _staggerTweenProps = _callbackNames + "repeat,repeatDelay,yoyo,repeatRefresh,yoyoEase",
-      _staggerPropsToSkip = (_staggerTweenProps + ",id,stagger,delay,duration,paused").split(",");
+      _staggerPropsToSkip = (_staggerTweenProps + ",id,stagger,delay,duration,paused,scrollTrigger").split(",");
 
   var Tween = function (_Animation2) {
     _inheritsLoose(Tween, _Animation2);
@@ -3277,8 +3187,10 @@ module.exports = function(strings) {
           overwrite = _this3$vars.overwrite,
           keyframes = _this3$vars.keyframes,
           defaults = _this3$vars.defaults,
+          scrollTrigger = _this3$vars.scrollTrigger,
+          yoyoEase = _this3$vars.yoyoEase,
           parent = _this3.parent,
-          parsedTargets = (_isArray(targets) ? _isNumber(targets[0]) : "length" in vars) ? [targets] : toArray(targets),
+          parsedTargets = (_isArray(targets) || _isTypedArray(targets) ? _isNumber(targets[0]) : "length" in vars) ? [targets] : toArray(targets),
           tl,
           i,
           copy,
@@ -3315,10 +3227,7 @@ module.exports = function(strings) {
           if (_isObject(stagger)) {
             for (p in stagger) {
               if (~_staggerTweenProps.indexOf(p)) {
-                if (!staggerVarsToMerge) {
-                  staggerVarsToMerge = {};
-                }
-
+                staggerVarsToMerge || (staggerVarsToMerge = {});
                 staggerVarsToMerge[p] = stagger[p];
               }
             }
@@ -3334,15 +3243,8 @@ module.exports = function(strings) {
             }
 
             copy.stagger = 0;
-
-            if (staggerVarsToMerge) {
-              _merge(copy, staggerVarsToMerge);
-            }
-
-            if (vars.yoyoEase && !vars.repeat) {
-              copy.yoyoEase = vars.yoyoEase;
-            }
-
+            yoyoEase && (copy.yoyoEase = yoyoEase);
+            staggerVarsToMerge && _merge(copy, staggerVarsToMerge);
             curTarget = parsedTargets[i];
             copy.duration = +_parseFuncOrString(duration, _assertThisInitialized(_this3), i, curTarget, parsedTargets);
             copy.delay = (+_parseFuncOrString(delay, _assertThisInitialized(_this3), i, curTarget, parsedTargets) || 0) - _this3._delay;
@@ -3356,7 +3258,7 @@ module.exports = function(strings) {
             tl.to(curTarget, copy, staggerFunc(i, curTarget, parsedTargets));
           }
 
-          duration = delay = 0;
+          tl.duration() ? duration = delay = 0 : _this3.timeline = 0;
         }
 
         duration || _this3.duration(duration = tl.duration());
@@ -3374,12 +3276,13 @@ module.exports = function(strings) {
 
       parent && _postAddChecks(parent, _assertThisInitialized(_this3));
 
-      if (immediateRender || !duration && !keyframes && _this3._start === parent._time && _isNotFalse(immediateRender) && _hasNoPausedAncestors(_assertThisInitialized(_this3)) && parent.data !== "nested") {
+      if (immediateRender || !duration && !keyframes && _this3._start === _round(parent._time) && _isNotFalse(immediateRender) && _hasNoPausedAncestors(_assertThisInitialized(_this3)) && parent.data !== "nested") {
         _this3._tTime = -_tinyNum;
 
         _this3.render(Math.max(0, -delay));
       }
 
+      scrollTrigger && _scrollTrigger(_assertThisInitialized(_this3), scrollTrigger);
       return _this3;
     }
 
@@ -3410,15 +3313,18 @@ module.exports = function(strings) {
           cycleDuration = dur + this._rDelay;
           time = _round(tTime % cycleDuration);
 
-          if (time > dur || tDur === tTime) {
+          if (tTime === tDur) {
+            iteration = this._repeat;
             time = dur;
-          }
+          } else {
+            iteration = ~~(tTime / cycleDuration);
 
-          iteration = ~~(tTime / cycleDuration);
+            if (iteration && iteration === tTime / cycleDuration) {
+              time = dur;
+              iteration--;
+            }
 
-          if (iteration && iteration === tTime / cycleDuration) {
-            time = dur;
-            iteration--;
+            time > dur && (time = dur);
           }
 
           isYoyo = this._yoyo && iteration & 1;
@@ -3435,15 +3341,17 @@ module.exports = function(strings) {
           }
 
           if (iteration !== prevIteration) {
+            timeline && this._yEase && _propagateYoyoEase(timeline, isYoyo);
+
             if (this.vars.repeatRefresh && !isYoyo && !this._lock) {
               this._lock = force = 1;
-              this.render(cycleDuration * iteration, true).invalidate()._lock = 0;
+              this.render(_round(cycleDuration * iteration), true).invalidate()._lock = 0;
             }
           }
         }
 
         if (!this._initted) {
-          if (_attemptInitTween(this, time, force, suppressEvents)) {
+          if (_attemptInitTween(this, totalTime < 0 ? totalTime : time, force, suppressEvents)) {
             this._tTime = 0;
             return this;
           }
@@ -3467,10 +3375,7 @@ module.exports = function(strings) {
           this.ratio = ratio = 1 - ratio;
         }
 
-        if (!prevTime && time && !suppressEvents) {
-          _callback(this, "onStart");
-        }
-
+        time && !prevTime && !suppressEvents && _callback(this, "onStart");
         pt = this._pt;
 
         while (pt) {
@@ -3481,28 +3386,21 @@ module.exports = function(strings) {
         timeline && timeline.render(totalTime < 0 ? totalTime : !time && isYoyo ? -_tinyNum : timeline._dur * ratio, suppressEvents, force) || this._startAt && (this._zTime = totalTime);
 
         if (this._onUpdate && !suppressEvents) {
-          if (totalTime < 0 && this._startAt) {
-            this._startAt.render(totalTime, true, force);
-          }
+          totalTime < 0 && this._startAt && this._startAt.render(totalTime, true, force);
 
           _callback(this, "onUpdate");
         }
 
-        if (this._repeat) if (iteration !== prevIteration && this.vars.onRepeat && !suppressEvents && this.parent) {
-          _callback(this, "onRepeat");
-        }
+        this._repeat && iteration !== prevIteration && this.vars.onRepeat && !suppressEvents && this.parent && _callback(this, "onRepeat");
 
         if ((tTime === this._tDur || !tTime) && this._tTime === tTime) {
-          if (totalTime < 0 && this._startAt && !this._onUpdate) {
-            this._startAt.render(totalTime, true, force);
-          }
+          totalTime < 0 && this._startAt && !this._onUpdate && this._startAt.render(totalTime, true, true);
+          (totalTime || !dur) && (tTime === this._tDur && this._ts > 0 || !tTime && this._ts < 0) && _removeFromParent(this, 1);
 
-          (totalTime || !dur) && (totalTime && this._ts > 0 || !tTime && this._ts < 0) && _removeFromParent(this, 1);
-
-          if (!suppressEvents && !(totalTime < 0 && !prevTime) && !(tTime < tDur && this.timeScale() > 0)) {
+          if (!suppressEvents && !(totalTime < 0 && !prevTime) && (tTime || prevTime)) {
             _callback(this, tTime === tDur ? "onComplete" : "onReverseComplete", true);
 
-            this._prom && this._prom();
+            this._prom && !(tTime < tDur && this.timeScale() > 0) && this._prom();
           }
         }
       }
@@ -3535,7 +3433,9 @@ module.exports = function(strings) {
       }
 
       if (this.timeline) {
-        this.timeline.killTweensOf(targets, vars, _overwritingTween && _overwritingTween.vars.overwrite !== true);
+        var tDur = this.timeline.totalDuration();
+        this.timeline.killTweensOf(targets, vars, _overwritingTween && _overwritingTween.vars.overwrite !== true)._first || _interrupt(this);
+        this.parent && tDur !== this.timeline.totalDuration() && _setDuration(this, this._dur * this.timeline._tDur / tDur, 0, 1);
         return this;
       }
 
@@ -3552,6 +3452,7 @@ module.exports = function(strings) {
           i;
 
       if ((!vars || vars === "all") && _arraysMatch(parsedTargets, killingTargets)) {
+        vars === "all" && (this._pt = 0);
         return _interrupt(this);
       }
 
@@ -3604,10 +3505,7 @@ module.exports = function(strings) {
         }
       }
 
-      if (this._initted && !this._pt && firstPT) {
-        _interrupt(this);
-      }
-
+      this._initted && !this._pt && firstPT && _interrupt(this);
       return this;
     };
 
@@ -3722,11 +3620,7 @@ module.exports = function(strings) {
 
     while (pt) {
       next = pt._next;
-
-      if (pt.p === property) {
-        pt.modifier(modifier, tween, target);
-      }
-
+      pt.p === property && pt.modifier(modifier, tween, target);
       pt = next;
     }
   },
@@ -3815,7 +3709,7 @@ module.exports = function(strings) {
     return PropTween;
   }();
 
-  _forEachName(_callbackNames + "parent,duration,ease,delay,overwrite,runBackwards,startAt,yoyo,immediateRender,repeat,repeatDelay,data,paused,reversed,lazy,callbackScope,stringFilter,id,yoyoEase,stagger,inherit,repeatRefresh,keyframes,autoRevert", function (name) {
+  _forEachName(_callbackNames + "parent,duration,ease,delay,overwrite,runBackwards,startAt,yoyo,immediateRender,repeat,repeatDelay,data,paused,reversed,lazy,callbackScope,stringFilter,id,yoyoEase,stagger,inherit,repeatRefresh,keyframes,autoRevert,scrollTrigger", function (name) {
     return _reservedProps[name] = 1;
   });
 
@@ -3846,17 +3740,12 @@ module.exports = function(strings) {
       return _globalTimeline.getTweensOf(targets, onlyActive);
     },
     getProperty: function getProperty(target, property, unit, uncache) {
-      if (_isString(target)) {
-        target = toArray(target)[0];
-      }
+      _isString(target) && (target = toArray(target)[0]);
 
       var getter = _getCache(target || {}).get,
           format = unit ? _passThrough : _numericIfPossible;
 
-      if (unit === "native") {
-        unit = "";
-      }
-
+      unit === "native" && (unit = "");
       return !target ? target : !property ? function (property, unit, uncache) {
         return format((_plugins[property] && _plugins[property].get || getter)(target, property, unit, uncache));
       } : format((_plugins[property] && _plugins[property].get || getter)(target, property, unit, uncache));
@@ -3882,26 +3771,24 @@ module.exports = function(strings) {
 
       var Plugin = _plugins[property],
           cache = _getCache(target),
+          p = cache.harness && (cache.harness.aliases || {})[property] || property,
           setter = Plugin ? function (value) {
         var p = new Plugin();
         _quickTween._pt = 0;
         p.init(target, unit ? value + unit : value, _quickTween, 0, [target]);
         p.render(1, p);
         _quickTween._pt && _renderPropTweens(1, _quickTween);
-      } : cache.set(target, property);
+      } : cache.set(target, p);
 
       return Plugin ? setter : function (value) {
-        return setter(target, property, unit ? value + unit : value, cache, 1);
+        return setter(target, p, unit ? value + unit : value, cache, 1);
       };
     },
     isTweening: function isTweening(targets) {
       return _globalTimeline.getTweensOf(targets, true).length > 0;
     },
     defaults: function defaults(value) {
-      if (value && value.ease) {
-        value.ease = _parseEase(value.ease, _defaults.ease);
-      }
-
+      value && value.ease && (value.ease = _parseEase(value.ease, _defaults.ease));
       return _mergeDeep(_defaults, value || {});
     },
     config: function config(value) {
@@ -4078,8 +3965,11 @@ module.exports = function(strings) {
   var gsap = _gsap.registerPlugin({
     name: "attr",
     init: function init(target, vars, tween, index, targets) {
-      for (var p in vars) {
-        this.add(target, "setAttribute", (target.getAttribute(p) || 0) + "", vars[p], index, targets, 0, 0, p);
+      var p, pt;
+
+      for (p in vars) {
+        pt = this.add(target, "setAttribute", (target.getAttribute(p) || 0) + "", vars[p], index, targets, 0, 0, p);
+        pt && (pt.op = p);
 
         this._props.push(p);
       }
@@ -4094,7 +3984,7 @@ module.exports = function(strings) {
       }
     }
   }, _buildModifierPlugin("roundProps", _roundModifier), _buildModifierPlugin("modifiers"), _buildModifierPlugin("snap", snap)) || _gsap;
-  Tween.version = Timeline.version = gsap.version = "3.2.6";
+  Tween.version = Timeline.version = gsap.version = "3.5.1";
   _coreReady = 1;
 
   if (_windowExists()) {
@@ -4212,7 +4102,7 @@ module.exports = function(strings) {
     return i < 0 ? null : (i === 3 ? "ms" : i >= 0 ? _prefixes[i] : "") + property;
   },
       _initCore = function _initCore() {
-    if (_windowExists$1()) {
+    if (_windowExists$1() && window.document) {
       _win$1 = window;
       _doc$1 = _win$1.document;
       _docElement = _doc$1.documentElement;
@@ -4221,7 +4111,7 @@ module.exports = function(strings) {
       };
       _tempDivStyler = _createElement("div");
       _transformProp = _checkPropPrefix(_transformProp);
-      _transformOriginProp = _checkPropPrefix(_transformOriginProp);
+      _transformOriginProp = _transformProp + "Origin";
       _tempDiv.style.cssText = "border-width:0;line-height:0;position:absolute;padding:0";
       _supports3D = !!_checkPropPrefix("perspective");
       _pluginInitted = 1;
@@ -4295,7 +4185,7 @@ module.exports = function(strings) {
     if (property) {
       var style = target.style;
 
-      if (property in _transformProps) {
+      if (property in _transformProps && property !== _transformOriginProp) {
         property = _transformProp;
       }
 
@@ -4385,10 +4275,7 @@ module.exports = function(strings) {
   },
       _get = function _get(target, property, unit, uncache) {
     var value;
-
-    if (!_pluginInitted) {
-      _initCore();
-    }
+    _pluginInitted || _initCore();
 
     if (property in _propertyAliases && property !== "transform") {
       property = _propertyAliases[property];
@@ -4419,6 +4306,8 @@ module.exports = function(strings) {
       if (s && s !== start) {
         prop = p;
         start = s;
+      } else if (prop === "borderColor") {
+        start = _getComputedProperty(target, "borderTopColor");
       }
     }
 
@@ -4631,21 +4520,10 @@ module.exports = function(strings) {
       }
 
       matrix = _getComputedTransformMatrixAsArray(target);
-
-      if (temp) {
-        style.display = temp;
-      } else {
-        _removeProperty(target, "display");
-      }
+      temp ? style.display = temp : _removeProperty(target, "display");
 
       if (addedToDOM) {
-        if (nextSibling) {
-          parent.insertBefore(target, nextSibling);
-        } else if (parent) {
-          parent.appendChild(target);
-        } else {
-          _docElement.removeChild(target);
-        }
+        nextSibling ? parent.insertBefore(target, nextSibling) : parent ? parent.appendChild(target) : _docElement.removeChild(target);
       }
     }
 
@@ -4858,9 +4736,9 @@ module.exports = function(strings) {
       }
 
       if (cache.svg) {
-        matrix = target.getAttribute("transform");
+        t1 = target.getAttribute("transform");
         cache.forceCSS = target.setAttribute("transform", "") || !_isNullTransform(_getComputedProperty(target, _transformProp));
-        matrix && target.setAttribute("transform", matrix);
+        t1 && target.setAttribute("transform", t1);
       }
     }
 
@@ -5199,10 +5077,7 @@ module.exports = function(strings) {
           cache,
           smooth,
           hasPriority;
-
-      if (!_pluginInitted) {
-        _initCore();
-      }
+      _pluginInitted || _initCore();
 
       for (p in vars) {
         if (p === "autoRound") {
@@ -5233,7 +5108,7 @@ module.exports = function(strings) {
           }
         } else if (p.substr(0, 2) === "--") {
           this.add(style, "setProperty", getComputedStyle(target).getPropertyValue(p) + "", endValue + "", index, targets, 0, 0, p);
-        } else {
+        } else if (type !== "undefined") {
           startValue = _get(target, p);
           startNum = parseFloat(startValue);
           relative = type === "string" && endValue.charAt(1) === "=" ? +(endValue.charAt(0) + "1") : 0;
@@ -5255,10 +5130,7 @@ module.exports = function(strings) {
 
             if (p !== "scale" && p !== "transform") {
               p = _propertyAliases[p];
-
-              if (~p.indexOf(",")) {
-                p = p.split(",")[0];
-              }
+              ~p.indexOf(",") && (p = p.split(",")[0]);
             }
           }
 
@@ -5284,10 +5156,7 @@ module.exports = function(strings) {
                 _applySVGOrigin(target, endValue, 0, smooth, 0, this);
               } else {
                 endUnit = parseFloat(endValue.split(" ")[2]) || 0;
-
-                if (endUnit !== cache.zOrigin) {
-                  _addNonTweeningPT(this, cache, "zOrigin", cache.zOrigin, endUnit);
-                }
+                endUnit !== cache.zOrigin && _addNonTweeningPT(this, cache, "zOrigin", cache.zOrigin, endUnit);
 
                 _addNonTweeningPT(this, style, p, _firstTwoOnly(startValue), _firstTwoOnly(endValue));
               }
@@ -5320,12 +5189,8 @@ module.exports = function(strings) {
           if (isTransformRelated || (endNum || endNum === 0) && (startNum || startNum === 0) && !_complexExp.test(endValue) && p in style) {
             startUnit = (startValue + "").substr((startNum + "").length);
             endNum || (endNum = 0);
-            endUnit = (endValue + "").substr((endNum + "").length) || (p in _config.units ? _config.units[p] : startUnit);
-
-            if (startUnit !== endUnit) {
-              startNum = _convertToUnit(target, p, startValue, endUnit);
-            }
-
+            endUnit = getUnit(endValue) || (p in _config.units ? _config.units[p] : startUnit);
+            startUnit !== endUnit && (startNum = _convertToUnit(target, p, startValue, endUnit));
             this._pt = new PropTween(this._pt, isTransformRelated ? cache : style, p, startNum, relative ? relative * endNum : endNum - startNum, endUnit === "px" && vars.autoRound !== false && !isTransformRelated ? _renderRoundedCSSProp : _renderCSSProp);
             this._pt.u = endUnit || 0;
 
@@ -5349,9 +5214,7 @@ module.exports = function(strings) {
         }
       }
 
-      if (hasPriority) {
-        _sortPropTweensByPriority(this);
-      }
+      hasPriority && _sortPropTweensByPriority(this);
     },
     get: _get,
     aliases: _propertyAliases,
@@ -42766,21 +42629,19 @@ function asyncFor(array, visitCallback, doneCallback, options) {
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define('underscore', factory) :
-  (function() {
-  	var current = global._;
-  	var exports = factory();
-  	global._ = exports;
-  	exports.noConflict = function() { global._ = current; return exports; };
-  })();
+  (global = global || self, (function () {
+    var current = global._;
+    var exports = global._ = factory();
+    exports.noConflict = function () { global._ = current; return exports; };
+  }()));
 }(this, (function () {
-
-  //     Underscore.js 1.10.2
+  //     Underscore.js 1.11.0
   //     https://underscorejs.org
   //     (c) 2009-2020 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
   //     Underscore may be freely distributed under the MIT license.
 
-  // Baseline setup
-  // --------------
+  // Current version.
+  var VERSION = '1.11.0';
 
   // Establish the root object, `window` (`self`) in the browser, `global`
   // on the server, or `this` in some virtual machines. We use `self`
@@ -42800,76 +42661,27 @@ function asyncFor(array, visitCallback, doneCallback, options) {
       toString = ObjProto.toString,
       hasOwnProperty = ObjProto.hasOwnProperty;
 
-  // All **ECMAScript 5** native function implementations that we hope to use
+  // Modern feature detection.
+  var supportsArrayBuffer = typeof ArrayBuffer !== 'undefined';
+
+  // All **ECMAScript 5+** native function implementations that we hope to use
   // are declared here.
   var nativeIsArray = Array.isArray,
       nativeKeys = Object.keys,
-      nativeCreate = Object.create;
+      nativeCreate = Object.create,
+      nativeIsView = supportsArrayBuffer && ArrayBuffer.isView;
 
   // Create references to these builtin functions because we override them.
-  var _isNaN = root.isNaN,
-      _isFinite = root.isFinite;
+  var _isNaN = isNaN,
+      _isFinite = isFinite;
 
-  // Naked function reference for surrogate-prototype-swapping.
-  var Ctor = function(){};
+  // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
+  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
+  var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
+    'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
 
-  // The Underscore object. All exported functions below are added to it in the
-  // modules/index-all.js using the mixin function.
-  function _(obj) {
-    if (obj instanceof _) return obj;
-    if (!(this instanceof _)) return new _(obj);
-    this._wrapped = obj;
-  }
-
-  // Current version.
-  var VERSION = _.VERSION = '1.10.2';
-
-  // Internal function that returns an efficient (for current engines) version
-  // of the passed-in callback, to be repeatedly applied in other Underscore
-  // functions.
-  function optimizeCb(func, context, argCount) {
-    if (context === void 0) return func;
-    switch (argCount == null ? 3 : argCount) {
-      case 1: return function(value) {
-        return func.call(context, value);
-      };
-      // The 2-argument case is omitted because we’re not using it.
-      case 3: return function(value, index, collection) {
-        return func.call(context, value, index, collection);
-      };
-      case 4: return function(accumulator, value, index, collection) {
-        return func.call(context, accumulator, value, index, collection);
-      };
-    }
-    return function() {
-      return func.apply(context, arguments);
-    };
-  }
-
-  // An internal function to generate callbacks that can be applied to each
-  // element in a collection, returning the desired result — either `identity`,
-  // an arbitrary callback, a property matcher, or a property accessor.
-  function baseIteratee(value, context, argCount) {
-    if (value == null) return identity;
-    if (isFunction(value)) return optimizeCb(value, context, argCount);
-    if (isObject(value) && !isArray(value)) return matcher(value);
-    return property(value);
-  }
-
-  // External wrapper for our callback generator. Users may customize
-  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
-  // This abstraction hides the internal-only argCount argument.
-  _.iteratee = iteratee;
-  function iteratee(value, context) {
-    return baseIteratee(value, context, Infinity);
-  }
-
-  // The function we actually call internally. It invokes _.iteratee if
-  // overridden, otherwise baseIteratee.
-  function cb(value, context, argCount) {
-    if (_.iteratee !== iteratee) return _.iteratee(value, context);
-    return baseIteratee(value, context, argCount);
-  }
+  // The largest integer that can be represented exactly.
+  var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
 
   // Some functions take a variable number of arguments, or a few expected
   // arguments at the beginning and then a variable number of values to operate
@@ -42899,26 +42711,536 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     };
   }
 
-  // An internal function for creating a new object that inherits from another.
-  function baseCreate(prototype) {
-    if (!isObject(prototype)) return {};
-    if (nativeCreate) return nativeCreate(prototype);
-    Ctor.prototype = prototype;
-    var result = new Ctor;
-    Ctor.prototype = null;
-    return result;
+  // Is a given variable an object?
+  function isObject(obj) {
+    var type = typeof obj;
+    return type === 'function' || type === 'object' && !!obj;
   }
 
+  // Is a given value equal to null?
+  function isNull(obj) {
+    return obj === null;
+  }
+
+  // Is a given variable undefined?
+  function isUndefined(obj) {
+    return obj === void 0;
+  }
+
+  // Is a given value a boolean?
+  function isBoolean(obj) {
+    return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
+  }
+
+  // Is a given value a DOM element?
+  function isElement(obj) {
+    return !!(obj && obj.nodeType === 1);
+  }
+
+  // Internal function for creating a `toString`-based type tester.
+  function tagTester(name) {
+    return function(obj) {
+      return toString.call(obj) === '[object ' + name + ']';
+    };
+  }
+
+  var isString = tagTester('String');
+
+  var isNumber = tagTester('Number');
+
+  var isDate = tagTester('Date');
+
+  var isRegExp = tagTester('RegExp');
+
+  var isError = tagTester('Error');
+
+  var isSymbol = tagTester('Symbol');
+
+  var isMap = tagTester('Map');
+
+  var isWeakMap = tagTester('WeakMap');
+
+  var isSet = tagTester('Set');
+
+  var isWeakSet = tagTester('WeakSet');
+
+  var isArrayBuffer = tagTester('ArrayBuffer');
+
+  var isDataView = tagTester('DataView');
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native `Array.isArray`.
+  var isArray = nativeIsArray || tagTester('Array');
+
+  var isFunction = tagTester('Function');
+
+  // Optimize `isFunction` if appropriate. Work around some `typeof` bugs in old
+  // v8, IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
+  var nodelist = root.document && root.document.childNodes;
+  if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
+    isFunction = function(obj) {
+      return typeof obj == 'function' || false;
+    };
+  }
+
+  var isFunction$1 = isFunction;
+
+  // Internal function to check whether `key` is an own property name of `obj`.
+  function has(obj, key) {
+    return obj != null && hasOwnProperty.call(obj, key);
+  }
+
+  var isArguments = tagTester('Arguments');
+
+  // Define a fallback version of the method in browsers (ahem, IE < 9), where
+  // there isn't any inspectable "Arguments" type.
+  (function() {
+    if (!isArguments(arguments)) {
+      isArguments = function(obj) {
+        return has(obj, 'callee');
+      };
+    }
+  }());
+
+  var isArguments$1 = isArguments;
+
+  // Is a given object a finite number?
+  function isFinite$1(obj) {
+    return !isSymbol(obj) && _isFinite(obj) && !isNaN(parseFloat(obj));
+  }
+
+  // Is the given value `NaN`?
+  function isNaN$1(obj) {
+    return isNumber(obj) && _isNaN(obj);
+  }
+
+  // Predicate-generating function. Often useful outside of Underscore.
+  function constant(value) {
+    return function() {
+      return value;
+    };
+  }
+
+  // Common internal logic for `isArrayLike` and `isBufferLike`.
+  function createSizePropertyCheck(getSizeProperty) {
+    return function(collection) {
+      var sizeProperty = getSizeProperty(collection);
+      return typeof sizeProperty == 'number' && sizeProperty >= 0 && sizeProperty <= MAX_ARRAY_INDEX;
+    }
+  }
+
+  // Internal helper to generate a function to obtain property `key` from `obj`.
   function shallowProperty(key) {
     return function(obj) {
       return obj == null ? void 0 : obj[key];
     };
   }
 
-  function _has(obj, path) {
-    return obj != null && hasOwnProperty.call(obj, path);
+  // Internal helper to obtain the `byteLength` property of an object.
+  var getByteLength = shallowProperty('byteLength');
+
+  // Internal helper to determine whether we should spend extensive checks against
+  // `ArrayBuffer` et al.
+  var isBufferLike = createSizePropertyCheck(getByteLength);
+
+  // Is a given value a typed array?
+  var typedArrayPattern = /\[object ((I|Ui)nt(8|16|32)|Float(32|64)|Uint8Clamped|Big(I|Ui)nt64)Array\]/;
+  function isTypedArray(obj) {
+    // `ArrayBuffer.isView` is the most future-proof, so use it when available.
+    // Otherwise, fall back on the above regular expression.
+    return nativeIsView ? (nativeIsView(obj) && !isDataView(obj)) :
+                  isBufferLike(obj) && typedArrayPattern.test(toString.call(obj));
   }
 
+  var isTypedArray$1 = supportsArrayBuffer ? isTypedArray : constant(false);
+
+  // Internal helper to obtain the `length` property of an object.
+  var getLength = shallowProperty('length');
+
+  // Internal helper for collection methods to determine whether a collection
+  // should be iterated as an array or as an object.
+  // Related: https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
+  // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
+  var isArrayLike = createSizePropertyCheck(getLength);
+
+  // Internal helper to create a simple lookup structure.
+  // `collectNonEnumProps` used to depend on `_.contains`, but this led to
+  // circular imports. `emulatedSet` is a one-off solution that only works for
+  // arrays of strings.
+  function emulatedSet(keys) {
+    var hash = {};
+    for (var l = keys.length, i = 0; i < l; ++i) hash[keys[i]] = true;
+    return {
+      contains: function(key) { return hash[key]; },
+      push: function(key) {
+        hash[key] = true;
+        return keys.push(key);
+      }
+    };
+  }
+
+  // Internal helper. Checks `keys` for the presence of keys in IE < 9 that won't
+  // be iterated by `for key in ...` and thus missed. Extends `keys` in place if
+  // needed.
+  function collectNonEnumProps(obj, keys) {
+    keys = emulatedSet(keys);
+    var nonEnumIdx = nonEnumerableProps.length;
+    var constructor = obj.constructor;
+    var proto = isFunction$1(constructor) && constructor.prototype || ObjProto;
+
+    // Constructor is a special case.
+    var prop = 'constructor';
+    if (has(obj, prop) && !keys.contains(prop)) keys.push(prop);
+
+    while (nonEnumIdx--) {
+      prop = nonEnumerableProps[nonEnumIdx];
+      if (prop in obj && obj[prop] !== proto[prop] && !keys.contains(prop)) {
+        keys.push(prop);
+      }
+    }
+  }
+
+  // Retrieve the names of an object's own properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`.
+  function keys(obj) {
+    if (!isObject(obj)) return [];
+    if (nativeKeys) return nativeKeys(obj);
+    var keys = [];
+    for (var key in obj) if (has(obj, key)) keys.push(key);
+    // Ahem, IE < 9.
+    if (hasEnumBug) collectNonEnumProps(obj, keys);
+    return keys;
+  }
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  function isEmpty(obj) {
+    if (obj == null) return true;
+    // Skip the more expensive `toString`-based type checks if `obj` has no
+    // `.length`.
+    if (isArrayLike(obj) && (isArray(obj) || isString(obj) || isArguments$1(obj))) return obj.length === 0;
+    return keys(obj).length === 0;
+  }
+
+  // Returns whether an object has a given set of `key:value` pairs.
+  function isMatch(object, attrs) {
+    var _keys = keys(attrs), length = _keys.length;
+    if (object == null) return !length;
+    var obj = Object(object);
+    for (var i = 0; i < length; i++) {
+      var key = _keys[i];
+      if (attrs[key] !== obj[key] || !(key in obj)) return false;
+    }
+    return true;
+  }
+
+  // If Underscore is called as a function, it returns a wrapped object that can
+  // be used OO-style. This wrapper holds altered versions of all functions added
+  // through `_.mixin`. Wrapped objects may be chained.
+  function _(obj) {
+    if (obj instanceof _) return obj;
+    if (!(this instanceof _)) return new _(obj);
+    this._wrapped = obj;
+  }
+
+  _.VERSION = VERSION;
+
+  // Extracts the result from a wrapped and chained object.
+  _.prototype.value = function() {
+    return this._wrapped;
+  };
+
+  // Provide unwrapping proxies for some methods used in engine operations
+  // such as arithmetic and JSON stringification.
+  _.prototype.valueOf = _.prototype.toJSON = _.prototype.value;
+
+  _.prototype.toString = function() {
+    return String(this._wrapped);
+  };
+
+  // Internal recursive comparison function for `_.isEqual`.
+  function eq(a, b, aStack, bStack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the [Harmony `egal` proposal](https://wiki.ecmascript.org/doku.php?id=harmony:egal).
+    if (a === b) return a !== 0 || 1 / a === 1 / b;
+    // `null` or `undefined` only equal to itself (strict comparison).
+    if (a == null || b == null) return false;
+    // `NaN`s are equivalent, but non-reflexive.
+    if (a !== a) return b !== b;
+    // Exhaust primitive checks
+    var type = typeof a;
+    if (type !== 'function' && type !== 'object' && typeof b != 'object') return false;
+    return deepEq(a, b, aStack, bStack);
+  }
+
+  // Internal recursive comparison function for `_.isEqual`.
+  function deepEq(a, b, aStack, bStack) {
+    // Unwrap any wrapped objects.
+    if (a instanceof _) a = a._wrapped;
+    if (b instanceof _) b = b._wrapped;
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className !== toString.call(b)) return false;
+    switch (className) {
+      // These types are compared by value.
+      case '[object RegExp]':
+        // RegExps are coerced to strings for comparison (Note: '' + /a/i === '/a/i')
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return '' + a === '' + b;
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive.
+        // Object(NaN) is equivalent to NaN.
+        if (+a !== +a) return +b !== +b;
+        // An `egal` comparison is performed for other numeric values.
+        return +a === 0 ? 1 / +a === 1 / b : +a === +b;
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a === +b;
+      case '[object Symbol]':
+        return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b);
+      case '[object ArrayBuffer]':
+        // Coerce to `DataView` so we can fall through to the next case.
+        return deepEq(new DataView(a), new DataView(b), aStack, bStack);
+      case '[object DataView]':
+        var byteLength = getByteLength(a);
+        if (byteLength !== getByteLength(b)) {
+          return false;
+        }
+        while (byteLength--) {
+          if (a.getUint8(byteLength) !== b.getUint8(byteLength)) {
+            return false;
+          }
+        }
+        return true;
+    }
+
+    if (isTypedArray$1(a)) {
+      // Coerce typed arrays to `DataView`.
+      return deepEq(new DataView(a.buffer), new DataView(b.buffer), aStack, bStack);
+    }
+
+    var areArrays = className === '[object Array]';
+    if (!areArrays) {
+      if (typeof a != 'object' || typeof b != 'object') return false;
+
+      // Objects with different constructors are not equivalent, but `Object`s or `Array`s
+      // from different frames are.
+      var aCtor = a.constructor, bCtor = b.constructor;
+      if (aCtor !== bCtor && !(isFunction$1(aCtor) && aCtor instanceof aCtor &&
+                               isFunction$1(bCtor) && bCtor instanceof bCtor)
+                          && ('constructor' in a && 'constructor' in b)) {
+        return false;
+      }
+    }
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+
+    // Initializing stack of traversed objects.
+    // It's done here since we only need them for objects and arrays comparison.
+    aStack = aStack || [];
+    bStack = bStack || [];
+    var length = aStack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (aStack[length] === a) return bStack[length] === b;
+    }
+
+    // Add the first object to the stack of traversed objects.
+    aStack.push(a);
+    bStack.push(b);
+
+    // Recursively compare objects and arrays.
+    if (areArrays) {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      length = a.length;
+      if (length !== b.length) return false;
+      // Deep compare the contents, ignoring non-numeric properties.
+      while (length--) {
+        if (!eq(a[length], b[length], aStack, bStack)) return false;
+      }
+    } else {
+      // Deep compare objects.
+      var _keys = keys(a), key;
+      length = _keys.length;
+      // Ensure that both objects contain the same number of properties before comparing deep equality.
+      if (keys(b).length !== length) return false;
+      while (length--) {
+        // Deep compare each member
+        key = _keys[length];
+        if (!(has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    aStack.pop();
+    bStack.pop();
+    return true;
+  }
+
+  // Perform a deep comparison to check if two objects are equal.
+  function isEqual(a, b) {
+    return eq(a, b);
+  }
+
+  // Retrieve all the enumerable property names of an object.
+  function allKeys(obj) {
+    if (!isObject(obj)) return [];
+    var keys = [];
+    for (var key in obj) keys.push(key);
+    // Ahem, IE < 9.
+    if (hasEnumBug) collectNonEnumProps(obj, keys);
+    return keys;
+  }
+
+  // Retrieve the values of an object's properties.
+  function values(obj) {
+    var _keys = keys(obj);
+    var length = _keys.length;
+    var values = Array(length);
+    for (var i = 0; i < length; i++) {
+      values[i] = obj[_keys[i]];
+    }
+    return values;
+  }
+
+  // Convert an object into a list of `[key, value]` pairs.
+  // The opposite of `_.object` with one argument.
+  function pairs(obj) {
+    var _keys = keys(obj);
+    var length = _keys.length;
+    var pairs = Array(length);
+    for (var i = 0; i < length; i++) {
+      pairs[i] = [_keys[i], obj[_keys[i]]];
+    }
+    return pairs;
+  }
+
+  // Invert the keys and values of an object. The values must be serializable.
+  function invert(obj) {
+    var result = {};
+    var _keys = keys(obj);
+    for (var i = 0, length = _keys.length; i < length; i++) {
+      result[obj[_keys[i]]] = _keys[i];
+    }
+    return result;
+  }
+
+  // Return a sorted list of the function names available on the object.
+  function functions(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (isFunction$1(obj[key])) names.push(key);
+    }
+    return names.sort();
+  }
+
+  // An internal function for creating assigner functions.
+  function createAssigner(keysFunc, defaults) {
+    return function(obj) {
+      var length = arguments.length;
+      if (defaults) obj = Object(obj);
+      if (length < 2 || obj == null) return obj;
+      for (var index = 1; index < length; index++) {
+        var source = arguments[index],
+            keys = keysFunc(source),
+            l = keys.length;
+        for (var i = 0; i < l; i++) {
+          var key = keys[i];
+          if (!defaults || obj[key] === void 0) obj[key] = source[key];
+        }
+      }
+      return obj;
+    };
+  }
+
+  // Extend a given object with all the properties in passed-in object(s).
+  var extend = createAssigner(allKeys);
+
+  // Assigns a given object with all the own properties in the passed-in
+  // object(s).
+  // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
+  var extendOwn = createAssigner(keys);
+
+  // Fill in a given object with default properties.
+  var defaults = createAssigner(allKeys, true);
+
+  // Create a naked function reference for surrogate-prototype-swapping.
+  function ctor() {
+    return function(){};
+  }
+
+  // An internal function for creating a new object that inherits from another.
+  function baseCreate(prototype) {
+    if (!isObject(prototype)) return {};
+    if (nativeCreate) return nativeCreate(prototype);
+    var Ctor = ctor();
+    Ctor.prototype = prototype;
+    var result = new Ctor;
+    Ctor.prototype = null;
+    return result;
+  }
+
+  // Creates an object that inherits from the given prototype object.
+  // If additional properties are provided then they will be added to the
+  // created object.
+  function create(prototype, props) {
+    var result = baseCreate(prototype);
+    if (props) extendOwn(result, props);
+    return result;
+  }
+
+  // Create a (shallow-cloned) duplicate of an object.
+  function clone(obj) {
+    if (!isObject(obj)) return obj;
+    return isArray(obj) ? obj.slice() : extend({}, obj);
+  }
+
+  // Invokes `interceptor` with the `obj` and then returns `obj`.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  function tap(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  }
+
+  // Shortcut function for checking if an object has a given property directly on
+  // itself (in other words, not on a prototype). Unlike the internal `has`
+  // function, this public version can also traverse nested properties.
+  function has$1(obj, path) {
+    if (!isArray(path)) {
+      return has(obj, path);
+    }
+    var length = path.length;
+    for (var i = 0; i < length; i++) {
+      var key = path[i];
+      if (obj == null || !hasOwnProperty.call(obj, key)) {
+        return false;
+      }
+      obj = obj[key];
+    }
+    return !!length;
+  }
+
+  // Keep the identity function around for default iteratees.
+  function identity(value) {
+    return value;
+  }
+
+  // Returns a predicate for checking whether an object has a given set of
+  // `key:value` pairs.
+  function matcher(attrs) {
+    attrs = extendOwn({}, attrs);
+    return function(obj) {
+      return isMatch(obj, attrs);
+    };
+  }
+
+  // Internal function to obtain a nested property in `obj` along `path`.
   function deepGet(obj, path) {
     var length = path.length;
     for (var i = 0; i < length; i++) {
@@ -42928,597 +43250,277 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     return length ? obj : void 0;
   }
 
-  // Helper for collection methods to determine whether a collection
-  // should be iterated as an array or as an object.
-  // Related: https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
-  // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
-  var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
-  var getLength = shallowProperty('length');
-  function isArrayLike(collection) {
-    var length = getLength(collection);
-    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+  // Creates a function that, when passed an object, will traverse that object’s
+  // properties down the given `path`, specified as an array of keys or indices.
+  function property(path) {
+    if (!isArray(path)) {
+      return shallowProperty(path);
+    }
+    return function(obj) {
+      return deepGet(obj, path);
+    };
   }
 
-  // Collection Functions
-  // --------------------
+  // Internal function that returns an efficient (for current engines) version
+  // of the passed-in callback, to be repeatedly applied in other Underscore
+  // functions.
+  function optimizeCb(func, context, argCount) {
+    if (context === void 0) return func;
+    switch (argCount == null ? 3 : argCount) {
+      case 1: return function(value) {
+        return func.call(context, value);
+      };
+      // The 2-argument case is omitted because we’re not using it.
+      case 3: return function(value, index, collection) {
+        return func.call(context, value, index, collection);
+      };
+      case 4: return function(accumulator, value, index, collection) {
+        return func.call(context, accumulator, value, index, collection);
+      };
+    }
+    return function() {
+      return func.apply(context, arguments);
+    };
+  }
 
-  // The cornerstone, an `each` implementation, aka `forEach`.
-  // Handles raw objects in addition to array-likes. Treats all
-  // sparse array-likes as if they were dense.
-  function each(obj, iteratee, context) {
-    iteratee = optimizeCb(iteratee, context);
-    var i, length;
-    if (isArrayLike(obj)) {
-      for (i = 0, length = obj.length; i < length; i++) {
-        iteratee(obj[i], i, obj);
+  // An internal function to generate callbacks that can be applied to each
+  // element in a collection, returning the desired result — either `_.identity`,
+  // an arbitrary callback, a property matcher, or a property accessor.
+  function baseIteratee(value, context, argCount) {
+    if (value == null) return identity;
+    if (isFunction$1(value)) return optimizeCb(value, context, argCount);
+    if (isObject(value) && !isArray(value)) return matcher(value);
+    return property(value);
+  }
+
+  // External wrapper for our callback generator. Users may customize
+  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
+  // This abstraction hides the internal-only `argCount` argument.
+  function iteratee(value, context) {
+    return baseIteratee(value, context, Infinity);
+  }
+  _.iteratee = iteratee;
+
+  // The function we call internally to generate a callback. It invokes
+  // `_.iteratee` if overridden, otherwise `baseIteratee`.
+  function cb(value, context, argCount) {
+    if (_.iteratee !== iteratee) return _.iteratee(value, context);
+    return baseIteratee(value, context, argCount);
+  }
+
+  // Returns the results of applying the `iteratee` to each element of `obj`.
+  // In contrast to `_.map` it returns an object.
+  function mapObject(obj, iteratee, context) {
+    iteratee = cb(iteratee, context);
+    var _keys = keys(obj),
+        length = _keys.length,
+        results = {};
+    for (var index = 0; index < length; index++) {
+      var currentKey = _keys[index];
+      results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
+    }
+    return results;
+  }
+
+  // Predicate-generating function. Often useful outside of Underscore.
+  function noop(){}
+
+  // Generates a function for a given object that returns a given property.
+  function propertyOf(obj) {
+    if (obj == null) {
+      return function(){};
+    }
+    return function(path) {
+      return !isArray(path) ? obj[path] : deepGet(obj, path);
+    };
+  }
+
+  // Run a function **n** times.
+  function times(n, iteratee, context) {
+    var accum = Array(Math.max(0, n));
+    iteratee = optimizeCb(iteratee, context, 1);
+    for (var i = 0; i < n; i++) accum[i] = iteratee(i);
+    return accum;
+  }
+
+  // Return a random integer between `min` and `max` (inclusive).
+  function random(min, max) {
+    if (max == null) {
+      max = min;
+      min = 0;
+    }
+    return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  // A (possibly faster) way to get the current timestamp as an integer.
+  var now = Date.now || function() {
+    return new Date().getTime();
+  };
+
+  // Internal helper to generate functions for escaping and unescaping strings
+  // to/from HTML interpolation.
+  function createEscaper(map) {
+    var escaper = function(match) {
+      return map[match];
+    };
+    // Regexes for identifying a key that needs to be escaped.
+    var source = '(?:' + keys(map).join('|') + ')';
+    var testRegexp = RegExp(source);
+    var replaceRegexp = RegExp(source, 'g');
+    return function(string) {
+      string = string == null ? '' : '' + string;
+      return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
+    };
+  }
+
+  // Internal list of HTML entities for escaping.
+  var escapeMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '`': '&#x60;'
+  };
+
+  // Function for escaping strings to HTML interpolation.
+  var _escape = createEscaper(escapeMap);
+
+  // Internal list of HTML entities for unescaping.
+  var unescapeMap = invert(escapeMap);
+
+  // Function for unescaping strings from HTML interpolation.
+  var _unescape = createEscaper(unescapeMap);
+
+  // By default, Underscore uses ERB-style template delimiters. Change the
+  // following template settings to use alternative delimiters.
+  var templateSettings = _.templateSettings = {
+    evaluate: /<%([\s\S]+?)%>/g,
+    interpolate: /<%=([\s\S]+?)%>/g,
+    escape: /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `_.templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /(.)^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    "'": "'",
+    '\\': '\\',
+    '\r': 'r',
+    '\n': 'n',
+    '\u2028': 'u2028',
+    '\u2029': 'u2029'
+  };
+
+  var escapeRegExp = /\\|'|\r|\n|\u2028|\u2029/g;
+
+  function escapeChar(match) {
+    return '\\' + escapes[match];
+  }
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  // NB: `oldSettings` only exists for backwards compatibility.
+  function template(text, settings, oldSettings) {
+    if (!settings && oldSettings) settings = oldSettings;
+    settings = defaults({}, settings, _.templateSettings);
+
+    // Combine delimiters into one regular expression via alternation.
+    var matcher = RegExp([
+      (settings.escape || noMatch).source,
+      (settings.interpolate || noMatch).source,
+      (settings.evaluate || noMatch).source
+    ].join('|') + '|$', 'g');
+
+    // Compile the template source, escaping string literals appropriately.
+    var index = 0;
+    var source = "__p+='";
+    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
+      source += text.slice(index, offset).replace(escapeRegExp, escapeChar);
+      index = offset + match.length;
+
+      if (escape) {
+        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
+      } else if (interpolate) {
+        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+      } else if (evaluate) {
+        source += "';\n" + evaluate + "\n__p+='";
       }
-    } else {
-      var _keys = keys(obj);
-      for (i = 0, length = _keys.length; i < length; i++) {
-        iteratee(obj[_keys[i]], _keys[i], obj);
+
+      // Adobe VMs need the match returned to produce the correct offset.
+      return match;
+    });
+    source += "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __t,__p='',__j=Array.prototype.join," +
+      "print=function(){__p+=__j.call(arguments,'');};\n" +
+      source + 'return __p;\n';
+
+    var render;
+    try {
+      render = new Function(settings.variable || 'obj', '_', source);
+    } catch (e) {
+      e.source = source;
+      throw e;
+    }
+
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled source as a convenience for precompilation.
+    var argument = settings.variable || 'obj';
+    template.source = 'function(' + argument + '){\n' + source + '}';
+
+    return template;
+  }
+
+  // Traverses the children of `obj` along `path`. If a child is a function, it
+  // is invoked with its parent as context. Returns the value of the final
+  // child, or `fallback` if any child is undefined.
+  function result(obj, path, fallback) {
+    if (!isArray(path)) path = [path];
+    var length = path.length;
+    if (!length) {
+      return isFunction$1(fallback) ? fallback.call(obj) : fallback;
+    }
+    for (var i = 0; i < length; i++) {
+      var prop = obj == null ? void 0 : obj[path[i]];
+      if (prop === void 0) {
+        prop = fallback;
+        i = length; // Ensure we don't continue iterating.
       }
+      obj = isFunction$1(prop) ? prop.call(obj) : prop;
     }
     return obj;
   }
 
-  // Return the results of applying the iteratee to each element.
-  function map(obj, iteratee, context) {
-    iteratee = cb(iteratee, context);
-    var _keys = !isArrayLike(obj) && keys(obj),
-        length = (_keys || obj).length,
-        results = Array(length);
-    for (var index = 0; index < length; index++) {
-      var currentKey = _keys ? _keys[index] : index;
-      results[index] = iteratee(obj[currentKey], currentKey, obj);
-    }
-    return results;
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  function uniqueId(prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
   }
 
-  // Create a reducing function iterating left or right.
-  function createReduce(dir) {
-    // Wrap code that reassigns argument variables in a separate function than
-    // the one that accesses `arguments.length` to avoid a perf hit. (#1991)
-    var reducer = function(obj, iteratee, memo, initial) {
-      var _keys = !isArrayLike(obj) && keys(obj),
-          length = (_keys || obj).length,
-          index = dir > 0 ? 0 : length - 1;
-      if (!initial) {
-        memo = obj[_keys ? _keys[index] : index];
-        index += dir;
-      }
-      for (; index >= 0 && index < length; index += dir) {
-        var currentKey = _keys ? _keys[index] : index;
-        memo = iteratee(memo, obj[currentKey], currentKey, obj);
-      }
-      return memo;
-    };
-
-    return function(obj, iteratee, memo, context) {
-      var initial = arguments.length >= 3;
-      return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial);
-    };
+  // Start chaining a wrapped Underscore object.
+  function chain(obj) {
+    var instance = _(obj);
+    instance._chain = true;
+    return instance;
   }
 
-  // **Reduce** builds up a single result from a list of values, aka `inject`,
-  // or `foldl`.
-  var reduce = createReduce(1);
-
-  // The right-associative version of reduce, also known as `foldr`.
-  var reduceRight = createReduce(-1);
-
-  // Return the first value which passes a truth test.
-  function find(obj, predicate, context) {
-    var keyFinder = isArrayLike(obj) ? findIndex : findKey;
-    var key = keyFinder(obj, predicate, context);
-    if (key !== void 0 && key !== -1) return obj[key];
-  }
-
-  // Return all the elements that pass a truth test.
-  function filter(obj, predicate, context) {
-    var results = [];
-    predicate = cb(predicate, context);
-    each(obj, function(value, index, list) {
-      if (predicate(value, index, list)) results.push(value);
-    });
-    return results;
-  }
-
-  // Return all the elements for which a truth test fails.
-  function reject(obj, predicate, context) {
-    return filter(obj, negate(cb(predicate)), context);
-  }
-
-  // Determine whether all of the elements match a truth test.
-  function every(obj, predicate, context) {
-    predicate = cb(predicate, context);
-    var _keys = !isArrayLike(obj) && keys(obj),
-        length = (_keys || obj).length;
-    for (var index = 0; index < length; index++) {
-      var currentKey = _keys ? _keys[index] : index;
-      if (!predicate(obj[currentKey], currentKey, obj)) return false;
-    }
-    return true;
-  }
-
-  // Determine if at least one element in the object matches a truth test.
-  function some(obj, predicate, context) {
-    predicate = cb(predicate, context);
-    var _keys = !isArrayLike(obj) && keys(obj),
-        length = (_keys || obj).length;
-    for (var index = 0; index < length; index++) {
-      var currentKey = _keys ? _keys[index] : index;
-      if (predicate(obj[currentKey], currentKey, obj)) return true;
-    }
-    return false;
-  }
-
-  // Determine if the array or object contains a given item (using `===`).
-  function contains(obj, item, fromIndex, guard) {
-    if (!isArrayLike(obj)) obj = values(obj);
-    if (typeof fromIndex != 'number' || guard) fromIndex = 0;
-    return indexOf(obj, item, fromIndex) >= 0;
-  }
-
-  // Invoke a method (with arguments) on every item in a collection.
-  var invoke = restArguments(function(obj, path, args) {
-    var contextPath, func;
-    if (isFunction(path)) {
-      func = path;
-    } else if (isArray(path)) {
-      contextPath = path.slice(0, -1);
-      path = path[path.length - 1];
-    }
-    return map(obj, function(context) {
-      var method = func;
-      if (!method) {
-        if (contextPath && contextPath.length) {
-          context = deepGet(context, contextPath);
-        }
-        if (context == null) return void 0;
-        method = context[path];
-      }
-      return method == null ? method : method.apply(context, args);
-    });
-  });
-
-  // Convenience version of a common use case of `map`: fetching a property.
-  function pluck(obj, key) {
-    return map(obj, property(key));
-  }
-
-  // Convenience version of a common use case of `filter`: selecting only objects
-  // containing specific `key:value` pairs.
-  function where(obj, attrs) {
-    return filter(obj, matcher(attrs));
-  }
-
-  // Convenience version of a common use case of `find`: getting the first object
-  // containing specific `key:value` pairs.
-  function findWhere(obj, attrs) {
-    return find(obj, matcher(attrs));
-  }
-
-  // Return the maximum element (or element-based computation).
-  function max(obj, iteratee, context) {
-    var result = -Infinity, lastComputed = -Infinity,
-        value, computed;
-    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
-      obj = isArrayLike(obj) ? obj : values(obj);
-      for (var i = 0, length = obj.length; i < length; i++) {
-        value = obj[i];
-        if (value != null && value > result) {
-          result = value;
-        }
-      }
-    } else {
-      iteratee = cb(iteratee, context);
-      each(obj, function(v, index, list) {
-        computed = iteratee(v, index, list);
-        if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
-          result = v;
-          lastComputed = computed;
-        }
-      });
-    }
-    return result;
-  }
-
-  // Return the minimum element (or element-based computation).
-  function min(obj, iteratee, context) {
-    var result = Infinity, lastComputed = Infinity,
-        value, computed;
-    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
-      obj = isArrayLike(obj) ? obj : values(obj);
-      for (var i = 0, length = obj.length; i < length; i++) {
-        value = obj[i];
-        if (value != null && value < result) {
-          result = value;
-        }
-      }
-    } else {
-      iteratee = cb(iteratee, context);
-      each(obj, function(v, index, list) {
-        computed = iteratee(v, index, list);
-        if (computed < lastComputed || computed === Infinity && result === Infinity) {
-          result = v;
-          lastComputed = computed;
-        }
-      });
-    }
-    return result;
-  }
-
-  // Shuffle a collection.
-  function shuffle(obj) {
-    return sample(obj, Infinity);
-  }
-
-  // Sample **n** random values from a collection using the modern version of the
-  // [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
-  // If **n** is not specified, returns a single random element.
-  // The internal `guard` argument allows it to work with `map`.
-  function sample(obj, n, guard) {
-    if (n == null || guard) {
-      if (!isArrayLike(obj)) obj = values(obj);
-      return obj[random(obj.length - 1)];
-    }
-    var sample = isArrayLike(obj) ? clone(obj) : values(obj);
-    var length = getLength(sample);
-    n = Math.max(Math.min(n, length), 0);
-    var last = length - 1;
-    for (var index = 0; index < n; index++) {
-      var rand = random(index, last);
-      var temp = sample[index];
-      sample[index] = sample[rand];
-      sample[rand] = temp;
-    }
-    return sample.slice(0, n);
-  }
-
-  // Sort the object's values by a criterion produced by an iteratee.
-  function sortBy(obj, iteratee, context) {
-    var index = 0;
-    iteratee = cb(iteratee, context);
-    return pluck(map(obj, function(value, key, list) {
-      return {
-        value: value,
-        index: index++,
-        criteria: iteratee(value, key, list)
-      };
-    }).sort(function(left, right) {
-      var a = left.criteria;
-      var b = right.criteria;
-      if (a !== b) {
-        if (a > b || a === void 0) return 1;
-        if (a < b || b === void 0) return -1;
-      }
-      return left.index - right.index;
-    }), 'value');
-  }
-
-  // An internal function used for aggregate "group by" operations.
-  function group(behavior, partition) {
-    return function(obj, iteratee, context) {
-      var result = partition ? [[], []] : {};
-      iteratee = cb(iteratee, context);
-      each(obj, function(value, index) {
-        var key = iteratee(value, index, obj);
-        behavior(result, value, key);
-      });
-      return result;
-    };
-  }
-
-  // Groups the object's values by a criterion. Pass either a string attribute
-  // to group by, or a function that returns the criterion.
-  var groupBy = group(function(result, value, key) {
-    if (_has(result, key)) result[key].push(value); else result[key] = [value];
-  });
-
-  // Indexes the object's values by a criterion, similar to `groupBy`, but for
-  // when you know that your index values will be unique.
-  var indexBy = group(function(result, value, key) {
-    result[key] = value;
-  });
-
-  // Counts instances of an object that group by a certain criterion. Pass
-  // either a string attribute to count by, or a function that returns the
-  // criterion.
-  var countBy = group(function(result, value, key) {
-    if (_has(result, key)) result[key]++; else result[key] = 1;
-  });
-
-  var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
-  // Safely create a real, live array from anything iterable.
-  function toArray(obj) {
-    if (!obj) return [];
-    if (isArray(obj)) return slice.call(obj);
-    if (isString(obj)) {
-      // Keep surrogate pair characters together
-      return obj.match(reStrSymbol);
-    }
-    if (isArrayLike(obj)) return map(obj, identity);
-    return values(obj);
-  }
-
-  // Return the number of elements in an object.
-  function size(obj) {
-    if (obj == null) return 0;
-    return isArrayLike(obj) ? obj.length : keys(obj).length;
-  }
-
-  // Split a collection into two arrays: one whose elements all satisfy the given
-  // predicate, and one whose elements all do not satisfy the predicate.
-  var partition = group(function(result, value, pass) {
-    result[pass ? 0 : 1].push(value);
-  }, true);
-
-  // Array Functions
-  // ---------------
-
-  // Get the first element of an array. Passing **n** will return the first N
-  // values in the array. The **guard** check allows it to work with `map`.
-  function first(array, n, guard) {
-    if (array == null || array.length < 1) return n == null ? void 0 : [];
-    if (n == null || guard) return array[0];
-    return initial(array, array.length - n);
-  }
-
-  // Returns everything but the last entry of the array. Especially useful on
-  // the arguments object. Passing **n** will return all the values in
-  // the array, excluding the last N.
-  function initial(array, n, guard) {
-    return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
-  }
-
-  // Get the last element of an array. Passing **n** will return the last N
-  // values in the array.
-  function last(array, n, guard) {
-    if (array == null || array.length < 1) return n == null ? void 0 : [];
-    if (n == null || guard) return array[array.length - 1];
-    return rest(array, Math.max(0, array.length - n));
-  }
-
-  // Returns everything but the first entry of the array. Especially useful on
-  // the arguments object. Passing an **n** will return the rest N values in the
-  // array.
-  function rest(array, n, guard) {
-    return slice.call(array, n == null || guard ? 1 : n);
-  }
-
-  // Trim out all falsy values from an array.
-  function compact(array) {
-    return filter(array, Boolean);
-  }
-
-  // Internal implementation of a recursive `flatten` function.
-  function _flatten(input, shallow, strict, output) {
-    output = output || [];
-    var idx = output.length;
-    for (var i = 0, length = getLength(input); i < length; i++) {
-      var value = input[i];
-      if (isArrayLike(value) && (isArray(value) || isArguments(value))) {
-        // Flatten current level of array or arguments object.
-        if (shallow) {
-          var j = 0, len = value.length;
-          while (j < len) output[idx++] = value[j++];
-        } else {
-          _flatten(value, shallow, strict, output);
-          idx = output.length;
-        }
-      } else if (!strict) {
-        output[idx++] = value;
-      }
-    }
-    return output;
-  }
-
-  // Flatten out an array, either recursively (by default), or just one level.
-  function flatten(array, shallow) {
-    return _flatten(array, shallow, false);
-  }
-
-  // Return a version of the array that does not contain the specified value(s).
-  var without = restArguments(function(array, otherArrays) {
-    return difference(array, otherArrays);
-  });
-
-  // Produce a duplicate-free version of the array. If the array has already
-  // been sorted, you have the option of using a faster algorithm.
-  // The faster algorithm will not work with an iteratee if the iteratee
-  // is not a one-to-one function, so providing an iteratee will disable
-  // the faster algorithm.
-  function uniq(array, isSorted, iteratee, context) {
-    if (!isBoolean(isSorted)) {
-      context = iteratee;
-      iteratee = isSorted;
-      isSorted = false;
-    }
-    if (iteratee != null) iteratee = cb(iteratee, context);
-    var result = [];
-    var seen = [];
-    for (var i = 0, length = getLength(array); i < length; i++) {
-      var value = array[i],
-          computed = iteratee ? iteratee(value, i, array) : value;
-      if (isSorted && !iteratee) {
-        if (!i || seen !== computed) result.push(value);
-        seen = computed;
-      } else if (iteratee) {
-        if (!contains(seen, computed)) {
-          seen.push(computed);
-          result.push(value);
-        }
-      } else if (!contains(result, value)) {
-        result.push(value);
-      }
-    }
-    return result;
-  }
-
-  // Produce an array that contains the union: each distinct element from all of
-  // the passed-in arrays.
-  var union = restArguments(function(arrays) {
-    return uniq(_flatten(arrays, true, true));
-  });
-
-  // Produce an array that contains every item shared between all the
-  // passed-in arrays.
-  function intersection(array) {
-    var result = [];
-    var argsLength = arguments.length;
-    for (var i = 0, length = getLength(array); i < length; i++) {
-      var item = array[i];
-      if (contains(result, item)) continue;
-      var j;
-      for (j = 1; j < argsLength; j++) {
-        if (!contains(arguments[j], item)) break;
-      }
-      if (j === argsLength) result.push(item);
-    }
-    return result;
-  }
-
-  // Take the difference between one array and a number of other arrays.
-  // Only the elements present in just the first array will remain.
-  var difference = restArguments(function(array, rest) {
-    rest = _flatten(rest, true, true);
-    return filter(array, function(value){
-      return !contains(rest, value);
-    });
-  });
-
-  // Complement of zip. Unzip accepts an array of arrays and groups
-  // each array's elements on shared indices.
-  function unzip(array) {
-    var length = array && max(array, getLength).length || 0;
-    var result = Array(length);
-
-    for (var index = 0; index < length; index++) {
-      result[index] = pluck(array, index);
-    }
-    return result;
-  }
-
-  // Zip together multiple lists into a single array -- elements that share
-  // an index go together.
-  var zip = restArguments(unzip);
-
-  // Converts lists into objects. Pass either a single array of `[key, value]`
-  // pairs, or two parallel arrays of the same length -- one of keys, and one of
-  // the corresponding values. Passing by pairs is the reverse of pairs.
-  function object(list, values) {
-    var result = {};
-    for (var i = 0, length = getLength(list); i < length; i++) {
-      if (values) {
-        result[list[i]] = values[i];
-      } else {
-        result[list[i][0]] = list[i][1];
-      }
-    }
-    return result;
-  }
-
-  // Generator function to create the findIndex and findLastIndex functions.
-  function createPredicateIndexFinder(dir) {
-    return function(array, predicate, context) {
-      predicate = cb(predicate, context);
-      var length = getLength(array);
-      var index = dir > 0 ? 0 : length - 1;
-      for (; index >= 0 && index < length; index += dir) {
-        if (predicate(array[index], index, array)) return index;
-      }
-      return -1;
-    };
-  }
-
-  // Returns the first index on an array-like that passes a predicate test.
-  var findIndex = createPredicateIndexFinder(1);
-  var findLastIndex = createPredicateIndexFinder(-1);
-
-  // Use a comparator function to figure out the smallest index at which
-  // an object should be inserted so as to maintain order. Uses binary search.
-  function sortedIndex(array, obj, iteratee, context) {
-    iteratee = cb(iteratee, context, 1);
-    var value = iteratee(obj);
-    var low = 0, high = getLength(array);
-    while (low < high) {
-      var mid = Math.floor((low + high) / 2);
-      if (iteratee(array[mid]) < value) low = mid + 1; else high = mid;
-    }
-    return low;
-  }
-
-  // Generator function to create the indexOf and lastIndexOf functions.
-  function createIndexFinder(dir, predicateFind, sortedIndex) {
-    return function(array, item, idx) {
-      var i = 0, length = getLength(array);
-      if (typeof idx == 'number') {
-        if (dir > 0) {
-          i = idx >= 0 ? idx : Math.max(idx + length, i);
-        } else {
-          length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
-        }
-      } else if (sortedIndex && idx && length) {
-        idx = sortedIndex(array, item);
-        return array[idx] === item ? idx : -1;
-      }
-      if (item !== item) {
-        idx = predicateFind(slice.call(array, i, length), isNaN);
-        return idx >= 0 ? idx + i : -1;
-      }
-      for (idx = dir > 0 ? i : length - 1; idx >= 0 && idx < length; idx += dir) {
-        if (array[idx] === item) return idx;
-      }
-      return -1;
-    };
-  }
-
-  // Return the position of the first occurrence of an item in an array,
-  // or -1 if the item is not included in the array.
-  // If the array is large and already in sort order, pass `true`
-  // for **isSorted** to use binary search.
-  var indexOf = createIndexFinder(1, findIndex, sortedIndex);
-  var lastIndexOf = createIndexFinder(-1, findLastIndex);
-
-  // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python `range()` function. See
-  // [the Python documentation](https://docs.python.org/library/functions.html#range).
-  function range(start, stop, step) {
-    if (stop == null) {
-      stop = start || 0;
-      start = 0;
-    }
-    if (!step) {
-      step = stop < start ? -1 : 1;
-    }
-
-    var length = Math.max(Math.ceil((stop - start) / step), 0);
-    var range = Array(length);
-
-    for (var idx = 0; idx < length; idx++, start += step) {
-      range[idx] = start;
-    }
-
-    return range;
-  }
-
-  // Chunk a single array into multiple arrays, each containing `count` or fewer
-  // items.
-  function chunk(array, count) {
-    if (count == null || count < 1) return [];
-    var result = [];
-    var i = 0, length = array.length;
-    while (i < length) {
-      result.push(slice.call(array, i, i += count));
-    }
-    return result;
-  }
-
-  // Function (ahem) Functions
-  // ------------------
-
-  // Determines whether to execute a function as a constructor
-  // or a normal function with the provided arguments.
+  // Internal function to execute `sourceFunc` bound to `context` with optional
+  // `args`. Determines whether to execute a function as a constructor or as a
+  // normal function.
   function executeBound(sourceFunc, boundFunc, context, callingContext, args) {
     if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args);
     var self = baseCreate(sourceFunc.prototype);
@@ -43527,21 +43529,10 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     return self;
   }
 
-  // Create a function bound to a given object (assigning `this`, and arguments,
-  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
-  // available.
-  var bind = restArguments(function(func, context, args) {
-    if (!isFunction(func)) throw new TypeError('Bind must be called on a function');
-    var bound = restArguments(function(callArgs) {
-      return executeBound(func, bound, context, this, args.concat(callArgs));
-    });
-    return bound;
-  });
-
   // Partially apply a function by creating a version that has had some of its
-  // arguments pre-filled, without changing its dynamic `this` context. _ acts
+  // arguments pre-filled, without changing its dynamic `this` context. `_` acts
   // as a placeholder by default, allowing any combination of arguments to be
-  // pre-filled. Set `partial.placeholder` for a custom placeholder argument.
+  // pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
   var partial = restArguments(function(func, boundArgs) {
     var placeholder = partial.placeholder;
     var bound = function() {
@@ -43558,17 +43549,55 @@ function asyncFor(array, visitCallback, doneCallback, options) {
 
   partial.placeholder = _;
 
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally).
+  var bind = restArguments(function(func, context, args) {
+    if (!isFunction$1(func)) throw new TypeError('Bind must be called on a function');
+    var bound = restArguments(function(callArgs) {
+      return executeBound(func, bound, context, this, args.concat(callArgs));
+    });
+    return bound;
+  });
+
+  // Internal implementation of a recursive `flatten` function.
+  function flatten(input, depth, strict, output) {
+    output = output || [];
+    if (!depth && depth !== 0) {
+      depth = Infinity;
+    } else if (depth <= 0) {
+      return output.concat(input);
+    }
+    var idx = output.length;
+    for (var i = 0, length = getLength(input); i < length; i++) {
+      var value = input[i];
+      if (isArrayLike(value) && (isArray(value) || isArguments$1(value))) {
+        // Flatten current level of array or arguments object.
+        if (depth > 1) {
+          flatten(value, depth - 1, strict, output);
+          idx = output.length;
+        } else {
+          var j = 0, len = value.length;
+          while (j < len) output[idx++] = value[j++];
+        }
+      } else if (!strict) {
+        output[idx++] = value;
+      }
+    }
+    return output;
+  }
+
   // Bind a number of an object's methods to that object. Remaining arguments
   // are the method names to be bound. Useful for ensuring that all callbacks
   // defined on an object belong to it.
-  var bindAll = restArguments(function(obj, _keys) {
-    _keys = _flatten(_keys, false, false);
-    var index = _keys.length;
+  var bindAll = restArguments(function(obj, keys) {
+    keys = flatten(keys, false, false);
+    var index = keys.length;
     if (index < 1) throw new Error('bindAll must be passed function names');
     while (index--) {
-      var key = _keys[index];
+      var key = keys[index];
       obj[key] = bind(obj[key], obj);
     }
+    return obj;
   });
 
   // Memoize an expensive function by storing its results.
@@ -43576,7 +43605,7 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     var memoize = function(key) {
       var cache = memoize.cache;
       var address = '' + (hasher ? hasher.apply(this, arguments) : key);
-      if (!_has(cache, address)) cache[address] = func.apply(this, arguments);
+      if (!has(cache, address)) cache[address] = func.apply(this, arguments);
       return cache[address];
     };
     memoize.cache = {};
@@ -43641,10 +43670,10 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     return throttled;
   }
 
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds. If `immediate` is passed, trigger the function on the
-  // leading edge, instead of the trailing.
+  // When a sequence of calls of the returned function ends, the argument
+  // function is triggered. The end of a sequence is defined by the `wait`
+  // parameter. If `immediate` is passed, the argument function will be
+  // triggered at the beginning of the sequence instead of at the end.
   function debounce(func, wait, immediate) {
     var timeout, result;
 
@@ -43710,7 +43739,8 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     };
   }
 
-  // Returns a function that will only be executed up to (but not including) the Nth call.
+  // Returns a function that will only be executed up to (but not including) the
+  // Nth call.
   function before(times, func) {
     var memo;
     return function() {
@@ -43726,136 +43756,7 @@ function asyncFor(array, visitCallback, doneCallback, options) {
   // often you call it. Useful for lazy initialization.
   var once = partial(before, 2);
 
-  // Object Functions
-  // ----------------
-
-  // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
-  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
-  var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
-    'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
-
-  function collectNonEnumProps(obj, _keys) {
-    var nonEnumIdx = nonEnumerableProps.length;
-    var constructor = obj.constructor;
-    var proto = isFunction(constructor) && constructor.prototype || ObjProto;
-
-    // Constructor is a special case.
-    var prop = 'constructor';
-    if (_has(obj, prop) && !contains(_keys, prop)) _keys.push(prop);
-
-    while (nonEnumIdx--) {
-      prop = nonEnumerableProps[nonEnumIdx];
-      if (prop in obj && obj[prop] !== proto[prop] && !contains(_keys, prop)) {
-        _keys.push(prop);
-      }
-    }
-  }
-
-  // Retrieve the names of an object's own properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`.
-  function keys(obj) {
-    if (!isObject(obj)) return [];
-    if (nativeKeys) return nativeKeys(obj);
-    var _keys = [];
-    for (var key in obj) if (_has(obj, key)) _keys.push(key);
-    // Ahem, IE < 9.
-    if (hasEnumBug) collectNonEnumProps(obj, _keys);
-    return _keys;
-  }
-
-  // Retrieve all the property names of an object.
-  function allKeys(obj) {
-    if (!isObject(obj)) return [];
-    var _keys = [];
-    for (var key in obj) _keys.push(key);
-    // Ahem, IE < 9.
-    if (hasEnumBug) collectNonEnumProps(obj, _keys);
-    return _keys;
-  }
-
-  // Retrieve the values of an object's properties.
-  function values(obj) {
-    var _keys = keys(obj);
-    var length = _keys.length;
-    var values = Array(length);
-    for (var i = 0; i < length; i++) {
-      values[i] = obj[_keys[i]];
-    }
-    return values;
-  }
-
-  // Returns the results of applying the iteratee to each element of the object.
-  // In contrast to map it returns an object.
-  function mapObject(obj, iteratee, context) {
-    iteratee = cb(iteratee, context);
-    var _keys = keys(obj),
-        length = _keys.length,
-        results = {};
-    for (var index = 0; index < length; index++) {
-      var currentKey = _keys[index];
-      results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
-    }
-    return results;
-  }
-
-  // Convert an object into a list of `[key, value]` pairs.
-  // The opposite of object.
-  function pairs(obj) {
-    var _keys = keys(obj);
-    var length = _keys.length;
-    var pairs = Array(length);
-    for (var i = 0; i < length; i++) {
-      pairs[i] = [_keys[i], obj[_keys[i]]];
-    }
-    return pairs;
-  }
-
-  // Invert the keys and values of an object. The values must be serializable.
-  function invert(obj) {
-    var result = {};
-    var _keys = keys(obj);
-    for (var i = 0, length = _keys.length; i < length; i++) {
-      result[obj[_keys[i]]] = _keys[i];
-    }
-    return result;
-  }
-
-  // Return a sorted list of the function names available on the object.
-  function functions(obj) {
-    var names = [];
-    for (var key in obj) {
-      if (isFunction(obj[key])) names.push(key);
-    }
-    return names.sort();
-  }
-
-  // An internal function for creating assigner functions.
-  function createAssigner(keysFunc, defaults) {
-    return function(obj) {
-      var length = arguments.length;
-      if (defaults) obj = Object(obj);
-      if (length < 2 || obj == null) return obj;
-      for (var index = 1; index < length; index++) {
-        var source = arguments[index],
-            _keys = keysFunc(source),
-            l = _keys.length;
-        for (var i = 0; i < l; i++) {
-          var key = _keys[i];
-          if (!defaults || obj[key] === void 0) obj[key] = source[key];
-        }
-      }
-      return obj;
-    };
-  }
-
-  // Extend a given object with all the properties in passed-in object(s).
-  var extend = createAssigner(allKeys);
-
-  // Assigns a given object with all the own properties in the passed-in object(s).
-  // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
-  var extendOwn = createAssigner(keys);
-
-  // Returns the first key on an object that passes a predicate test.
+  // Returns the first key on an object that passes a truth test.
   function findKey(obj, predicate, context) {
     predicate = cb(predicate, context);
     var _keys = keys(obj), key;
@@ -43865,528 +43766,600 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     }
   }
 
-  // Internal pick helper function to determine if `obj` has key `key`.
+  // Internal function to generate `_.findIndex` and `_.findLastIndex`.
+  function createPredicateIndexFinder(dir) {
+    return function(array, predicate, context) {
+      predicate = cb(predicate, context);
+      var length = getLength(array);
+      var index = dir > 0 ? 0 : length - 1;
+      for (; index >= 0 && index < length; index += dir) {
+        if (predicate(array[index], index, array)) return index;
+      }
+      return -1;
+    };
+  }
+
+  // Returns the first index on an array-like that passes a truth test.
+  var findIndex = createPredicateIndexFinder(1);
+
+  // Returns the last index on an array-like that passes a truth test.
+  var findLastIndex = createPredicateIndexFinder(-1);
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  function sortedIndex(array, obj, iteratee, context) {
+    iteratee = cb(iteratee, context, 1);
+    var value = iteratee(obj);
+    var low = 0, high = getLength(array);
+    while (low < high) {
+      var mid = Math.floor((low + high) / 2);
+      if (iteratee(array[mid]) < value) low = mid + 1; else high = mid;
+    }
+    return low;
+  }
+
+  // Internal function to generate the `_.indexOf` and `_.lastIndexOf` functions.
+  function createIndexFinder(dir, predicateFind, sortedIndex) {
+    return function(array, item, idx) {
+      var i = 0, length = getLength(array);
+      if (typeof idx == 'number') {
+        if (dir > 0) {
+          i = idx >= 0 ? idx : Math.max(idx + length, i);
+        } else {
+          length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
+        }
+      } else if (sortedIndex && idx && length) {
+        idx = sortedIndex(array, item);
+        return array[idx] === item ? idx : -1;
+      }
+      if (item !== item) {
+        idx = predicateFind(slice.call(array, i, length), isNaN$1);
+        return idx >= 0 ? idx + i : -1;
+      }
+      for (idx = dir > 0 ? i : length - 1; idx >= 0 && idx < length; idx += dir) {
+        if (array[idx] === item) return idx;
+      }
+      return -1;
+    };
+  }
+
+  // Return the position of the first occurrence of an item in an array,
+  // or -1 if the item is not included in the array.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  var indexOf = createIndexFinder(1, findIndex, sortedIndex);
+
+  // Return the position of the last occurrence of an item in an array,
+  // or -1 if the item is not included in the array.
+  var lastIndexOf = createIndexFinder(-1, findLastIndex);
+
+  // Return the first value which passes a truth test.
+  function find(obj, predicate, context) {
+    var keyFinder = isArrayLike(obj) ? findIndex : findKey;
+    var key = keyFinder(obj, predicate, context);
+    if (key !== void 0 && key !== -1) return obj[key];
+  }
+
+  // Convenience version of a common use case of `_.find`: getting the first
+  // object containing specific `key:value` pairs.
+  function findWhere(obj, attrs) {
+    return find(obj, matcher(attrs));
+  }
+
+  // The cornerstone for collection functions, an `each`
+  // implementation, aka `forEach`.
+  // Handles raw objects in addition to array-likes. Treats all
+  // sparse array-likes as if they were dense.
+  function each(obj, iteratee, context) {
+    iteratee = optimizeCb(iteratee, context);
+    var i, length;
+    if (isArrayLike(obj)) {
+      for (i = 0, length = obj.length; i < length; i++) {
+        iteratee(obj[i], i, obj);
+      }
+    } else {
+      var _keys = keys(obj);
+      for (i = 0, length = _keys.length; i < length; i++) {
+        iteratee(obj[_keys[i]], _keys[i], obj);
+      }
+    }
+    return obj;
+  }
+
+  // Return the results of applying the iteratee to each element.
+  function map(obj, iteratee, context) {
+    iteratee = cb(iteratee, context);
+    var _keys = !isArrayLike(obj) && keys(obj),
+        length = (_keys || obj).length,
+        results = Array(length);
+    for (var index = 0; index < length; index++) {
+      var currentKey = _keys ? _keys[index] : index;
+      results[index] = iteratee(obj[currentKey], currentKey, obj);
+    }
+    return results;
+  }
+
+  // Internal helper to create a reducing function, iterating left or right.
+  function createReduce(dir) {
+    // Wrap code that reassigns argument variables in a separate function than
+    // the one that accesses `arguments.length` to avoid a perf hit. (#1991)
+    var reducer = function(obj, iteratee, memo, initial) {
+      var _keys = !isArrayLike(obj) && keys(obj),
+          length = (_keys || obj).length,
+          index = dir > 0 ? 0 : length - 1;
+      if (!initial) {
+        memo = obj[_keys ? _keys[index] : index];
+        index += dir;
+      }
+      for (; index >= 0 && index < length; index += dir) {
+        var currentKey = _keys ? _keys[index] : index;
+        memo = iteratee(memo, obj[currentKey], currentKey, obj);
+      }
+      return memo;
+    };
+
+    return function(obj, iteratee, memo, context) {
+      var initial = arguments.length >= 3;
+      return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial);
+    };
+  }
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`.
+  var reduce = createReduce(1);
+
+  // The right-associative version of reduce, also known as `foldr`.
+  var reduceRight = createReduce(-1);
+
+  // Return all the elements that pass a truth test.
+  function filter(obj, predicate, context) {
+    var results = [];
+    predicate = cb(predicate, context);
+    each(obj, function(value, index, list) {
+      if (predicate(value, index, list)) results.push(value);
+    });
+    return results;
+  }
+
+  // Return all the elements for which a truth test fails.
+  function reject(obj, predicate, context) {
+    return filter(obj, negate(cb(predicate)), context);
+  }
+
+  // Determine whether all of the elements pass a truth test.
+  function every(obj, predicate, context) {
+    predicate = cb(predicate, context);
+    var _keys = !isArrayLike(obj) && keys(obj),
+        length = (_keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = _keys ? _keys[index] : index;
+      if (!predicate(obj[currentKey], currentKey, obj)) return false;
+    }
+    return true;
+  }
+
+  // Determine if at least one element in the object passes a truth test.
+  function some(obj, predicate, context) {
+    predicate = cb(predicate, context);
+    var _keys = !isArrayLike(obj) && keys(obj),
+        length = (_keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = _keys ? _keys[index] : index;
+      if (predicate(obj[currentKey], currentKey, obj)) return true;
+    }
+    return false;
+  }
+
+  // Determine if the array or object contains a given item (using `===`).
+  function contains(obj, item, fromIndex, guard) {
+    if (!isArrayLike(obj)) obj = values(obj);
+    if (typeof fromIndex != 'number' || guard) fromIndex = 0;
+    return indexOf(obj, item, fromIndex) >= 0;
+  }
+
+  // Invoke a method (with arguments) on every item in a collection.
+  var invoke = restArguments(function(obj, path, args) {
+    var contextPath, func;
+    if (isFunction$1(path)) {
+      func = path;
+    } else if (isArray(path)) {
+      contextPath = path.slice(0, -1);
+      path = path[path.length - 1];
+    }
+    return map(obj, function(context) {
+      var method = func;
+      if (!method) {
+        if (contextPath && contextPath.length) {
+          context = deepGet(context, contextPath);
+        }
+        if (context == null) return void 0;
+        method = context[path];
+      }
+      return method == null ? method : method.apply(context, args);
+    });
+  });
+
+  // Convenience version of a common use case of `_.map`: fetching a property.
+  function pluck(obj, key) {
+    return map(obj, property(key));
+  }
+
+  // Convenience version of a common use case of `_.filter`: selecting only
+  // objects containing specific `key:value` pairs.
+  function where(obj, attrs) {
+    return filter(obj, matcher(attrs));
+  }
+
+  // Return the maximum element (or element-based computation).
+  function max(obj, iteratee, context) {
+    var result = -Infinity, lastComputed = -Infinity,
+        value, computed;
+    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
+      obj = isArrayLike(obj) ? obj : values(obj);
+      for (var i = 0, length = obj.length; i < length; i++) {
+        value = obj[i];
+        if (value != null && value > result) {
+          result = value;
+        }
+      }
+    } else {
+      iteratee = cb(iteratee, context);
+      each(obj, function(v, index, list) {
+        computed = iteratee(v, index, list);
+        if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
+          result = v;
+          lastComputed = computed;
+        }
+      });
+    }
+    return result;
+  }
+
+  // Return the minimum element (or element-based computation).
+  function min(obj, iteratee, context) {
+    var result = Infinity, lastComputed = Infinity,
+        value, computed;
+    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
+      obj = isArrayLike(obj) ? obj : values(obj);
+      for (var i = 0, length = obj.length; i < length; i++) {
+        value = obj[i];
+        if (value != null && value < result) {
+          result = value;
+        }
+      }
+    } else {
+      iteratee = cb(iteratee, context);
+      each(obj, function(v, index, list) {
+        computed = iteratee(v, index, list);
+        if (computed < lastComputed || computed === Infinity && result === Infinity) {
+          result = v;
+          lastComputed = computed;
+        }
+      });
+    }
+    return result;
+  }
+
+  // Sample **n** random values from a collection using the modern version of the
+  // [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+  // If **n** is not specified, returns a single random element.
+  // The internal `guard` argument allows it to work with `_.map`.
+  function sample(obj, n, guard) {
+    if (n == null || guard) {
+      if (!isArrayLike(obj)) obj = values(obj);
+      return obj[random(obj.length - 1)];
+    }
+    var sample = isArrayLike(obj) ? clone(obj) : values(obj);
+    var length = getLength(sample);
+    n = Math.max(Math.min(n, length), 0);
+    var last = length - 1;
+    for (var index = 0; index < n; index++) {
+      var rand = random(index, last);
+      var temp = sample[index];
+      sample[index] = sample[rand];
+      sample[rand] = temp;
+    }
+    return sample.slice(0, n);
+  }
+
+  // Shuffle a collection.
+  function shuffle(obj) {
+    return sample(obj, Infinity);
+  }
+
+  // Sort the object's values by a criterion produced by an iteratee.
+  function sortBy(obj, iteratee, context) {
+    var index = 0;
+    iteratee = cb(iteratee, context);
+    return pluck(map(obj, function(value, key, list) {
+      return {
+        value: value,
+        index: index++,
+        criteria: iteratee(value, key, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria;
+      var b = right.criteria;
+      if (a !== b) {
+        if (a > b || a === void 0) return 1;
+        if (a < b || b === void 0) return -1;
+      }
+      return left.index - right.index;
+    }), 'value');
+  }
+
+  // An internal function used for aggregate "group by" operations.
+  function group(behavior, partition) {
+    return function(obj, iteratee, context) {
+      var result = partition ? [[], []] : {};
+      iteratee = cb(iteratee, context);
+      each(obj, function(value, index) {
+        var key = iteratee(value, index, obj);
+        behavior(result, value, key);
+      });
+      return result;
+    };
+  }
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  var groupBy = group(function(result, value, key) {
+    if (has(result, key)) result[key].push(value); else result[key] = [value];
+  });
+
+  // Indexes the object's values by a criterion, similar to `_.groupBy`, but for
+  // when you know that your index values will be unique.
+  var indexBy = group(function(result, value, key) {
+    result[key] = value;
+  });
+
+  // Counts instances of an object that group by a certain criterion. Pass
+  // either a string attribute to count by, or a function that returns the
+  // criterion.
+  var countBy = group(function(result, value, key) {
+    if (has(result, key)) result[key]++; else result[key] = 1;
+  });
+
+  // Split a collection into two arrays: one whose elements all pass the given
+  // truth test, and one whose elements all do not pass the truth test.
+  var partition = group(function(result, value, pass) {
+    result[pass ? 0 : 1].push(value);
+  }, true);
+
+  // Safely create a real, live array from anything iterable.
+  var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
+  function toArray(obj) {
+    if (!obj) return [];
+    if (isArray(obj)) return slice.call(obj);
+    if (isString(obj)) {
+      // Keep surrogate pair characters together.
+      return obj.match(reStrSymbol);
+    }
+    if (isArrayLike(obj)) return map(obj, identity);
+    return values(obj);
+  }
+
+  // Return the number of elements in a collection.
+  function size(obj) {
+    if (obj == null) return 0;
+    return isArrayLike(obj) ? obj.length : keys(obj).length;
+  }
+
+  // Internal `_.pick` helper function to determine whether `key` is an enumerable
+  // property name of `obj`.
   function keyInObj(value, key, obj) {
     return key in obj;
   }
 
-  // Return a copy of the object only containing the whitelisted properties.
-  var pick = restArguments(function(obj, _keys) {
-    var result = {}, iteratee = _keys[0];
+  // Return a copy of the object only containing the allowed properties.
+  var pick = restArguments(function(obj, keys) {
+    var result = {}, iteratee = keys[0];
     if (obj == null) return result;
-    if (isFunction(iteratee)) {
-      if (_keys.length > 1) iteratee = optimizeCb(iteratee, _keys[1]);
-      _keys = allKeys(obj);
+    if (isFunction$1(iteratee)) {
+      if (keys.length > 1) iteratee = optimizeCb(iteratee, keys[1]);
+      keys = allKeys(obj);
     } else {
       iteratee = keyInObj;
-      _keys = _flatten(_keys, false, false);
+      keys = flatten(keys, false, false);
       obj = Object(obj);
     }
-    for (var i = 0, length = _keys.length; i < length; i++) {
-      var key = _keys[i];
+    for (var i = 0, length = keys.length; i < length; i++) {
+      var key = keys[i];
       var value = obj[key];
       if (iteratee(value, key, obj)) result[key] = value;
     }
     return result;
   });
 
-  // Return a copy of the object without the blacklisted properties.
-  var omit = restArguments(function(obj, _keys) {
-    var iteratee = _keys[0], context;
-    if (isFunction(iteratee)) {
+  // Return a copy of the object without the disallowed properties.
+  var omit = restArguments(function(obj, keys) {
+    var iteratee = keys[0], context;
+    if (isFunction$1(iteratee)) {
       iteratee = negate(iteratee);
-      if (_keys.length > 1) context = _keys[1];
+      if (keys.length > 1) context = keys[1];
     } else {
-      _keys = map(_flatten(_keys, false, false), String);
+      keys = map(flatten(keys, false, false), String);
       iteratee = function(value, key) {
-        return !contains(_keys, key);
+        return !contains(keys, key);
       };
     }
     return pick(obj, iteratee, context);
   });
 
-  // Fill in a given object with default properties.
-  var defaults = createAssigner(allKeys, true);
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N.
+  function initial(array, n, guard) {
+    return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
+  }
 
-  // Creates an object that inherits from the given prototype object.
-  // If additional properties are provided then they will be added to the
-  // created object.
-  function create(prototype, props) {
-    var result = baseCreate(prototype);
-    if (props) extendOwn(result, props);
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. The **guard** check allows it to work with `_.map`.
+  function first(array, n, guard) {
+    if (array == null || array.length < 1) return n == null || guard ? void 0 : [];
+    if (n == null || guard) return array[0];
+    return initial(array, array.length - n);
+  }
+
+  // Returns everything but the first entry of the `array`. Especially useful on
+  // the `arguments` object. Passing an **n** will return the rest N values in the
+  // `array`.
+  function rest(array, n, guard) {
+    return slice.call(array, n == null || guard ? 1 : n);
+  }
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array.
+  function last(array, n, guard) {
+    if (array == null || array.length < 1) return n == null || guard ? void 0 : [];
+    if (n == null || guard) return array[array.length - 1];
+    return rest(array, Math.max(0, array.length - n));
+  }
+
+  // Trim out all falsy values from an array.
+  function compact(array) {
+    return filter(array, Boolean);
+  }
+
+  // Flatten out an array, either recursively (by default), or up to `depth`.
+  // Passing `true` or `false` as `depth` means `1` or `Infinity`, respectively.
+  function flatten$1(array, depth) {
+    return flatten(array, depth, false);
+  }
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  var difference = restArguments(function(array, rest) {
+    rest = flatten(rest, true, true);
+    return filter(array, function(value){
+      return !contains(rest, value);
+    });
+  });
+
+  // Return a version of the array that does not contain the specified value(s).
+  var without = restArguments(function(array, otherArrays) {
+    return difference(array, otherArrays);
+  });
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // The faster algorithm will not work with an iteratee if the iteratee
+  // is not a one-to-one function, so providing an iteratee will disable
+  // the faster algorithm.
+  function uniq(array, isSorted, iteratee, context) {
+    if (!isBoolean(isSorted)) {
+      context = iteratee;
+      iteratee = isSorted;
+      isSorted = false;
+    }
+    if (iteratee != null) iteratee = cb(iteratee, context);
+    var result = [];
+    var seen = [];
+    for (var i = 0, length = getLength(array); i < length; i++) {
+      var value = array[i],
+          computed = iteratee ? iteratee(value, i, array) : value;
+      if (isSorted && !iteratee) {
+        if (!i || seen !== computed) result.push(value);
+        seen = computed;
+      } else if (iteratee) {
+        if (!contains(seen, computed)) {
+          seen.push(computed);
+          result.push(value);
+        }
+      } else if (!contains(result, value)) {
+        result.push(value);
+      }
+    }
     return result;
   }
 
-  // Create a (shallow-cloned) duplicate of an object.
-  function clone(obj) {
-    if (!isObject(obj)) return obj;
-    return isArray(obj) ? obj.slice() : extend({}, obj);
-  }
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  var union = restArguments(function(arrays) {
+    return uniq(flatten(arrays, true, true));
+  });
 
-  // Invokes interceptor with the obj, and then returns obj.
-  // The primary purpose of this method is to "tap into" a method chain, in
-  // order to perform operations on intermediate results within the chain.
-  function tap(obj, interceptor) {
-    interceptor(obj);
-    return obj;
-  }
-
-  // Returns whether an object has a given set of `key:value` pairs.
-  function isMatch(object, attrs) {
-    var _keys = keys(attrs), length = _keys.length;
-    if (object == null) return !length;
-    var obj = Object(object);
-    for (var i = 0; i < length; i++) {
-      var key = _keys[i];
-      if (attrs[key] !== obj[key] || !(key in obj)) return false;
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  function intersection(array) {
+    var result = [];
+    var argsLength = arguments.length;
+    for (var i = 0, length = getLength(array); i < length; i++) {
+      var item = array[i];
+      if (contains(result, item)) continue;
+      var j;
+      for (j = 1; j < argsLength; j++) {
+        if (!contains(arguments[j], item)) break;
+      }
+      if (j === argsLength) result.push(item);
     }
-    return true;
+    return result;
   }
 
+  // Complement of zip. Unzip accepts an array of arrays and groups
+  // each array's elements on shared indices.
+  function unzip(array) {
+    var length = array && max(array, getLength).length || 0;
+    var result = Array(length);
 
-  // Internal recursive comparison function for `isEqual`.
-  function eq(a, b, aStack, bStack) {
-    // Identical objects are equal. `0 === -0`, but they aren't identical.
-    // See the [Harmony `egal` proposal](https://wiki.ecmascript.org/doku.php?id=harmony:egal).
-    if (a === b) return a !== 0 || 1 / a === 1 / b;
-    // `null` or `undefined` only equal to itself (strict comparison).
-    if (a == null || b == null) return false;
-    // `NaN`s are equivalent, but non-reflexive.
-    if (a !== a) return b !== b;
-    // Exhaust primitive checks
-    var type = typeof a;
-    if (type !== 'function' && type !== 'object' && typeof b != 'object') return false;
-    return deepEq(a, b, aStack, bStack);
-  }
-
-  // Internal recursive comparison function for `isEqual`.
-  function deepEq(a, b, aStack, bStack) {
-    // Unwrap any wrapped objects.
-    if (a instanceof _) a = a._wrapped;
-    if (b instanceof _) b = b._wrapped;
-    // Compare `[[Class]]` names.
-    var className = toString.call(a);
-    if (className !== toString.call(b)) return false;
-    switch (className) {
-      // Strings, numbers, regular expressions, dates, and booleans are compared by value.
-      case '[object RegExp]':
-      // RegExps are coerced to strings for comparison (Note: '' + /a/i === '/a/i')
-      case '[object String]':
-        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
-        // equivalent to `new String("5")`.
-        return '' + a === '' + b;
-      case '[object Number]':
-        // `NaN`s are equivalent, but non-reflexive.
-        // Object(NaN) is equivalent to NaN.
-        if (+a !== +a) return +b !== +b;
-        // An `egal` comparison is performed for other numeric values.
-        return +a === 0 ? 1 / +a === 1 / b : +a === +b;
-      case '[object Date]':
-      case '[object Boolean]':
-        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
-        // millisecond representations. Note that invalid dates with millisecond representations
-        // of `NaN` are not equivalent.
-        return +a === +b;
-      case '[object Symbol]':
-        return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b);
+    for (var index = 0; index < length; index++) {
+      result[index] = pluck(array, index);
     }
+    return result;
+  }
 
-    var areArrays = className === '[object Array]';
-    if (!areArrays) {
-      if (typeof a != 'object' || typeof b != 'object') return false;
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  var zip = restArguments(unzip);
 
-      // Objects with different constructors are not equivalent, but `Object`s or `Array`s
-      // from different frames are.
-      var aCtor = a.constructor, bCtor = b.constructor;
-      if (aCtor !== bCtor && !(isFunction(aCtor) && aCtor instanceof aCtor &&
-                               isFunction(bCtor) && bCtor instanceof bCtor)
-                          && ('constructor' in a && 'constructor' in b)) {
-        return false;
+  // Converts lists into objects. Pass either a single array of `[key, value]`
+  // pairs, or two parallel arrays of the same length -- one of keys, and one of
+  // the corresponding values. Passing by pairs is the reverse of `_.pairs`.
+  function object(list, values) {
+    var result = {};
+    for (var i = 0, length = getLength(list); i < length; i++) {
+      if (values) {
+        result[list[i]] = values[i];
+      } else {
+        result[list[i][0]] = list[i][1];
       }
     }
-    // Assume equality for cyclic structures. The algorithm for detecting cyclic
-    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    return result;
+  }
 
-    // Initializing stack of traversed objects.
-    // It's done here since we only need them for objects and arrays comparison.
-    aStack = aStack || [];
-    bStack = bStack || [];
-    var length = aStack.length;
-    while (length--) {
-      // Linear search. Performance is inversely proportional to the number of
-      // unique nested structures.
-      if (aStack[length] === a) return bStack[length] === b;
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](https://docs.python.org/library/functions.html#range).
+  function range(start, stop, step) {
+    if (stop == null) {
+      stop = start || 0;
+      start = 0;
+    }
+    if (!step) {
+      step = stop < start ? -1 : 1;
     }
 
-    // Add the first object to the stack of traversed objects.
-    aStack.push(a);
-    bStack.push(b);
+    var length = Math.max(Math.ceil((stop - start) / step), 0);
+    var range = Array(length);
 
-    // Recursively compare objects and arrays.
-    if (areArrays) {
-      // Compare array lengths to determine if a deep comparison is necessary.
-      length = a.length;
-      if (length !== b.length) return false;
-      // Deep compare the contents, ignoring non-numeric properties.
-      while (length--) {
-        if (!eq(a[length], b[length], aStack, bStack)) return false;
-      }
-    } else {
-      // Deep compare objects.
-      var _keys = keys(a), key;
-      length = _keys.length;
-      // Ensure that both objects contain the same number of properties before comparing deep equality.
-      if (keys(b).length !== length) return false;
-      while (length--) {
-        // Deep compare each member
-        key = _keys[length];
-        if (!(_has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
-      }
-    }
-    // Remove the first object from the stack of traversed objects.
-    aStack.pop();
-    bStack.pop();
-    return true;
-  }
-
-  // Perform a deep comparison to check if two objects are equal.
-  function isEqual(a, b) {
-    return eq(a, b);
-  }
-
-  // Is a given array, string, or object empty?
-  // An "empty" object has no enumerable own-properties.
-  function isEmpty(obj) {
-    if (obj == null) return true;
-    if (isArrayLike(obj) && (isArray(obj) || isString(obj) || isArguments(obj))) return obj.length === 0;
-    return keys(obj).length === 0;
-  }
-
-  // Is a given value a DOM element?
-  function isElement(obj) {
-    return !!(obj && obj.nodeType === 1);
-  }
-
-  // Internal function for creating a toString-based type tester.
-  function tagTester(name) {
-    return function(obj) {
-      return toString.call(obj) === '[object ' + name + ']';
-    };
-  }
-
-  // Is a given value an array?
-  // Delegates to ECMA5's native Array.isArray
-  var isArray = nativeIsArray || tagTester('Array');
-
-  // Is a given variable an object?
-  function isObject(obj) {
-    var type = typeof obj;
-    return type === 'function' || type === 'object' && !!obj;
-  }
-
-  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError, isMap, isWeakMap, isSet, isWeakSet.
-  var isArguments = tagTester('Arguments');
-  var isFunction = tagTester('Function');
-  var isString = tagTester('String');
-  var isNumber = tagTester('Number');
-  var isDate = tagTester('Date');
-  var isRegExp = tagTester('RegExp');
-  var isError = tagTester('Error');
-  var isSymbol = tagTester('Symbol');
-  var isMap = tagTester('Map');
-  var isWeakMap = tagTester('WeakMap');
-  var isSet = tagTester('Set');
-  var isWeakSet = tagTester('WeakSet');
-
-  // Define a fallback version of the method in browsers (ahem, IE < 9), where
-  // there isn't any inspectable "Arguments" type.
-  (function() {
-    if (!isArguments(arguments)) {
-      isArguments = function(obj) {
-        return _has(obj, 'callee');
-      };
-    }
-  }());
-
-  // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
-  // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
-  var nodelist = root.document && root.document.childNodes;
-  if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
-    isFunction = function(obj) {
-      return typeof obj == 'function' || false;
-    };
-  }
-
-  // Is a given object a finite number?
-  function isFinite(obj) {
-    return !isSymbol(obj) && _isFinite(obj) && !_isNaN(parseFloat(obj));
-  }
-
-  // Is the given value `NaN`?
-  function isNaN(obj) {
-    return isNumber(obj) && _isNaN(obj);
-  }
-
-  // Is a given value a boolean?
-  function isBoolean(obj) {
-    return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
-  }
-
-  // Is a given value equal to null?
-  function isNull(obj) {
-    return obj === null;
-  }
-
-  // Is a given variable undefined?
-  function isUndefined(obj) {
-    return obj === void 0;
-  }
-
-  // Shortcut function for checking if an object has a given property directly
-  // on itself (in other words, not on a prototype).
-  function has(obj, path) {
-    if (!isArray(path)) {
-      return _has(obj, path);
-    }
-    var length = path.length;
-    for (var i = 0; i < length; i++) {
-      var key = path[i];
-      if (obj == null || !hasOwnProperty.call(obj, key)) {
-        return false;
-      }
-      obj = obj[key];
-    }
-    return !!length;
-  }
-
-  // Utility Functions
-  // -----------------
-
-  // Keep the identity function around for default iteratees.
-  function identity(value) {
-    return value;
-  }
-
-  // Predicate-generating functions. Often useful outside of Underscore.
-  function constant(value) {
-    return function() {
-      return value;
-    };
-  }
-
-  function noop(){}
-
-  // Creates a function that, when passed an object, will traverse that object’s
-  // properties down the given `path`, specified as an array of keys or indexes.
-  function property(path) {
-    if (!isArray(path)) {
-      return shallowProperty(path);
-    }
-    return function(obj) {
-      return deepGet(obj, path);
-    };
-  }
-
-  // Generates a function for a given object that returns a given property.
-  function propertyOf(obj) {
-    if (obj == null) {
-      return function(){};
-    }
-    return function(path) {
-      return !isArray(path) ? obj[path] : deepGet(obj, path);
-    };
-  }
-
-  // Returns a predicate for checking whether an object has a given set of
-  // `key:value` pairs.
-  function matcher(attrs) {
-    attrs = extendOwn({}, attrs);
-    return function(obj) {
-      return isMatch(obj, attrs);
-    };
-  }
-
-  // Run a function **n** times.
-  function times(n, iteratee, context) {
-    var accum = Array(Math.max(0, n));
-    iteratee = optimizeCb(iteratee, context, 1);
-    for (var i = 0; i < n; i++) accum[i] = iteratee(i);
-    return accum;
-  }
-
-  // Return a random integer between min and max (inclusive).
-  function random(min, max) {
-    if (max == null) {
-      max = min;
-      min = 0;
-    }
-    return min + Math.floor(Math.random() * (max - min + 1));
-  }
-
-  // A (possibly faster) way to get the current timestamp as an integer.
-  var now = Date.now || function() {
-    return new Date().getTime();
-  };
-
-  // List of HTML entities for escaping.
-  var escapeMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#x27;',
-    '`': '&#x60;'
-  };
-  var unescapeMap = invert(escapeMap);
-
-  // Functions for escaping and unescaping strings to/from HTML interpolation.
-  function createEscaper(map) {
-    var escaper = function(match) {
-      return map[match];
-    };
-    // Regexes for identifying a key that needs to be escaped.
-    var source = '(?:' + keys(map).join('|') + ')';
-    var testRegexp = RegExp(source);
-    var replaceRegexp = RegExp(source, 'g');
-    return function(string) {
-      string = string == null ? '' : '' + string;
-      return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
-    };
-  }
-  var escape = createEscaper(escapeMap);
-  var unescape = createEscaper(unescapeMap);
-
-  // Traverses the children of `obj` along `path`. If a child is a function, it
-  // is invoked with its parent as context. Returns the value of the final
-  // child, or `fallback` if any child is undefined.
-  function result(obj, path, fallback) {
-    if (!isArray(path)) path = [path];
-    var length = path.length;
-    if (!length) {
-      return isFunction(fallback) ? fallback.call(obj) : fallback;
-    }
-    for (var i = 0; i < length; i++) {
-      var prop = obj == null ? void 0 : obj[path[i]];
-      if (prop === void 0) {
-        prop = fallback;
-        i = length; // Ensure we don't continue iterating.
-      }
-      obj = isFunction(prop) ? prop.call(obj) : prop;
-    }
-    return obj;
-  }
-
-  // Generate a unique integer id (unique within the entire client session).
-  // Useful for temporary DOM ids.
-  var idCounter = 0;
-  function uniqueId(prefix) {
-    var id = ++idCounter + '';
-    return prefix ? prefix + id : id;
-  }
-
-  // By default, Underscore uses ERB-style template delimiters, change the
-  // following template settings to use alternative delimiters.
-  var templateSettings = _.templateSettings = {
-    evaluate: /<%([\s\S]+?)%>/g,
-    interpolate: /<%=([\s\S]+?)%>/g,
-    escape: /<%-([\s\S]+?)%>/g
-  };
-
-  // When customizing `templateSettings`, if you don't want to define an
-  // interpolation, evaluation or escaping regex, we need one that is
-  // guaranteed not to match.
-  var noMatch = /(.)^/;
-
-  // Certain characters need to be escaped so that they can be put into a
-  // string literal.
-  var escapes = {
-    "'": "'",
-    '\\': '\\',
-    '\r': 'r',
-    '\n': 'n',
-    '\u2028': 'u2028',
-    '\u2029': 'u2029'
-  };
-
-  var escapeRegExp = /\\|'|\r|\n|\u2028|\u2029/g;
-
-  var escapeChar = function(match) {
-    return '\\' + escapes[match];
-  };
-
-  // JavaScript micro-templating, similar to John Resig's implementation.
-  // Underscore templating handles arbitrary delimiters, preserves whitespace,
-  // and correctly escapes quotes within interpolated code.
-  // NB: `oldSettings` only exists for backwards compatibility.
-  function template(text, settings, oldSettings) {
-    if (!settings && oldSettings) settings = oldSettings;
-    settings = defaults({}, settings, _.templateSettings);
-
-    // Combine delimiters into one regular expression via alternation.
-    var matcher = RegExp([
-      (settings.escape || noMatch).source,
-      (settings.interpolate || noMatch).source,
-      (settings.evaluate || noMatch).source
-    ].join('|') + '|$', 'g');
-
-    // Compile the template source, escaping string literals appropriately.
-    var index = 0;
-    var source = "__p+='";
-    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
-      source += text.slice(index, offset).replace(escapeRegExp, escapeChar);
-      index = offset + match.length;
-
-      if (escape) {
-        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
-      } else if (interpolate) {
-        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
-      } else if (evaluate) {
-        source += "';\n" + evaluate + "\n__p+='";
-      }
-
-      // Adobe VMs need the match returned to produce the correct offset.
-      return match;
-    });
-    source += "';\n";
-
-    // If a variable is not specified, place data values in local scope.
-    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
-
-    source = "var __t,__p='',__j=Array.prototype.join," +
-      "print=function(){__p+=__j.call(arguments,'');};\n" +
-      source + 'return __p;\n';
-
-    var render;
-    try {
-      render = new Function(settings.variable || 'obj', '_', source);
-    } catch (e) {
-      e.source = source;
-      throw e;
+    for (var idx = 0; idx < length; idx++, start += step) {
+      range[idx] = start;
     }
 
-    var template = function(data) {
-      return render.call(this, data, _);
-    };
-
-    // Provide the compiled source as a convenience for precompilation.
-    var argument = settings.variable || 'obj';
-    template.source = 'function(' + argument + '){\n' + source + '}';
-
-    return template;
+    return range;
   }
 
-  // Add a "chain" function. Start chaining a wrapped Underscore object.
-  function chain(obj) {
-    var instance = _(obj);
-    instance._chain = true;
-    return instance;
+  // Chunk a single array into multiple arrays, each containing `count` or fewer
+  // items.
+  function chunk(array, count) {
+    if (count == null || count < 1) return [];
+    var result = [];
+    var i = 0, length = array.length;
+    while (i < length) {
+      result.push(slice.call(array, i, i += count));
+    }
+    return result;
   }
-
-  // OOP
-  // ---------------
-  // If Underscore is called as a function, it returns a wrapped object that
-  // can be used OO-style. This wrapper holds altered versions of all the
-  // underscore functions. Wrapped objects may be chained.
 
   // Helper function to continue chaining intermediate results.
   function chainResult(instance, obj) {
@@ -44406,43 +44379,120 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     return _;
   }
 
-  // Add all mutator Array functions to the wrapper.
+  // Add all mutator `Array` functions to the wrapper.
   each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
     var method = ArrayProto[name];
     _.prototype[name] = function() {
       var obj = this._wrapped;
-      method.apply(obj, arguments);
-      if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0];
+      if (obj != null) {
+        method.apply(obj, arguments);
+        if ((name === 'shift' || name === 'splice') && obj.length === 0) {
+          delete obj[0];
+        }
+      }
       return chainResult(this, obj);
     };
   });
 
-  // Add all accessor Array functions to the wrapper.
+  // Add all accessor `Array` functions to the wrapper.
   each(['concat', 'join', 'slice'], function(name) {
     var method = ArrayProto[name];
     _.prototype[name] = function() {
-      return chainResult(this, method.apply(this._wrapped, arguments));
+      var obj = this._wrapped;
+      if (obj != null) obj = method.apply(obj, arguments);
+      return chainResult(this, obj);
     };
   });
 
-  // Extracts the result from a wrapped and chained object.
-  _.prototype.value = function() {
-    return this._wrapped;
-  };
+  // Named Exports
 
-  // Provide unwrapping proxy for some methods used in engine operations
-  // such as arithmetic and JSON stringification.
-  _.prototype.valueOf = _.prototype.toJSON = _.prototype.value;
-
-  _.prototype.toString = function() {
-    return String(this._wrapped);
-  };
-
-  var allExports = ({
-    'default': _,
+  var allExports = {
+    __proto__: null,
     VERSION: VERSION,
-    iteratee: iteratee,
     restArguments: restArguments,
+    isObject: isObject,
+    isNull: isNull,
+    isUndefined: isUndefined,
+    isBoolean: isBoolean,
+    isElement: isElement,
+    isString: isString,
+    isNumber: isNumber,
+    isDate: isDate,
+    isRegExp: isRegExp,
+    isError: isError,
+    isSymbol: isSymbol,
+    isMap: isMap,
+    isWeakMap: isWeakMap,
+    isSet: isSet,
+    isWeakSet: isWeakSet,
+    isArrayBuffer: isArrayBuffer,
+    isDataView: isDataView,
+    isArray: isArray,
+    isFunction: isFunction$1,
+    isArguments: isArguments$1,
+    isFinite: isFinite$1,
+    isNaN: isNaN$1,
+    isTypedArray: isTypedArray$1,
+    isEmpty: isEmpty,
+    isMatch: isMatch,
+    isEqual: isEqual,
+    keys: keys,
+    allKeys: allKeys,
+    values: values,
+    pairs: pairs,
+    invert: invert,
+    functions: functions,
+    methods: functions,
+    extend: extend,
+    extendOwn: extendOwn,
+    assign: extendOwn,
+    defaults: defaults,
+    create: create,
+    clone: clone,
+    tap: tap,
+    has: has$1,
+    mapObject: mapObject,
+    identity: identity,
+    constant: constant,
+    noop: noop,
+    property: property,
+    propertyOf: propertyOf,
+    matcher: matcher,
+    matches: matcher,
+    times: times,
+    random: random,
+    now: now,
+    escape: _escape,
+    unescape: _unescape,
+    templateSettings: templateSettings,
+    template: template,
+    result: result,
+    uniqueId: uniqueId,
+    chain: chain,
+    iteratee: iteratee,
+    partial: partial,
+    bind: bind,
+    bindAll: bindAll,
+    memoize: memoize,
+    delay: delay,
+    defer: defer,
+    throttle: throttle,
+    debounce: debounce,
+    wrap: wrap,
+    negate: negate,
+    compose: compose,
+    after: after,
+    before: before,
+    once: once,
+    findKey: findKey,
+    findIndex: findIndex,
+    findLastIndex: findLastIndex,
+    sortedIndex: sortedIndex,
+    indexOf: indexOf,
+    lastIndexOf: lastIndexOf,
+    find: find,
+    detect: find,
+    findWhere: findWhere,
     each: each,
     forEach: each,
     map: map,
@@ -44452,8 +44502,6 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     inject: reduce,
     reduceRight: reduceRight,
     foldr: reduceRight,
-    find: find,
-    detect: find,
     filter: filter,
     select: filter,
     reject: reject,
@@ -44467,7 +44515,6 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     invoke: invoke,
     pluck: pluck,
     where: where,
-    findWhere: findWhere,
     max: max,
     min: min,
     shuffle: shuffle,
@@ -44476,9 +44523,11 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     groupBy: groupBy,
     indexBy: indexBy,
     countBy: countBy,
+    partition: partition,
     toArray: toArray,
     size: size,
-    partition: partition,
+    pick: pick,
+    omit: omit,
     first: first,
     head: first,
     take: first,
@@ -44488,7 +44537,7 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     tail: rest,
     drop: rest,
     compact: compact,
-    flatten: flatten,
+    flatten: flatten$1,
     without: without,
     uniq: uniq,
     unique: uniq,
@@ -44496,94 +44545,20 @@ function asyncFor(array, visitCallback, doneCallback, options) {
     intersection: intersection,
     difference: difference,
     unzip: unzip,
+    transpose: unzip,
     zip: zip,
     object: object,
-    findIndex: findIndex,
-    findLastIndex: findLastIndex,
-    sortedIndex: sortedIndex,
-    indexOf: indexOf,
-    lastIndexOf: lastIndexOf,
     range: range,
     chunk: chunk,
-    bind: bind,
-    partial: partial,
-    bindAll: bindAll,
-    memoize: memoize,
-    delay: delay,
-    defer: defer,
-    throttle: throttle,
-    debounce: debounce,
-    wrap: wrap,
-    negate: negate,
-    compose: compose,
-    after: after,
-    before: before,
-    once: once,
-    keys: keys,
-    allKeys: allKeys,
-    values: values,
-    mapObject: mapObject,
-    pairs: pairs,
-    invert: invert,
-    functions: functions,
-    methods: functions,
-    extend: extend,
-    extendOwn: extendOwn,
-    assign: extendOwn,
-    findKey: findKey,
-    pick: pick,
-    omit: omit,
-    defaults: defaults,
-    create: create,
-    clone: clone,
-    tap: tap,
-    isMatch: isMatch,
-    isEqual: isEqual,
-    isEmpty: isEmpty,
-    isElement: isElement,
-    isArray: isArray,
-    isObject: isObject,
-    isArguments: isArguments,
-    isFunction: isFunction,
-    isString: isString,
-    isNumber: isNumber,
-    isDate: isDate,
-    isRegExp: isRegExp,
-    isError: isError,
-    isSymbol: isSymbol,
-    isMap: isMap,
-    isWeakMap: isWeakMap,
-    isSet: isSet,
-    isWeakSet: isWeakSet,
-    isFinite: isFinite,
-    isNaN: isNaN,
-    isBoolean: isBoolean,
-    isNull: isNull,
-    isUndefined: isUndefined,
-    has: has,
-    identity: identity,
-    constant: constant,
-    noop: noop,
-    property: property,
-    propertyOf: propertyOf,
-    matcher: matcher,
-    matches: matcher,
-    times: times,
-    random: random,
-    now: now,
-    escape: escape,
-    unescape: unescape,
-    result: result,
-    uniqueId: uniqueId,
-    templateSettings: templateSettings,
-    template: template,
-    chain: chain,
-    mixin: mixin
-  });
+    mixin: mixin,
+    'default': _
+  };
+
+  // Default Export
 
   // Add all of the Underscore functions to the wrapper object.
   var _$1 = mixin(allExports);
-  // Legacy Node.js API
+  // Legacy Node.js API.
   _$1._ = _$1;
 
   return _$1;
@@ -52198,11 +52173,12 @@ function vec3ShadowHandler(shadowVec3TraversalFunc) {
 }
 module.exports = vec3ShadowHandler
 },{"../Serialization":34}],68:[function(require,module,exports){
-var css = "@import url(\"https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap\");\n.vapor-editor-button {\n  background-color: white;\n  height: 1em;\n  padding: 0.4em 1em 0.5em 1em;\n  font-size: 18px;\n  font-family: \"Roboto\", sans-serif;\n  transition: background-color 0.1s, opacity 0.1s;\n  pointer-events: auto;\n  cursor: pointer;\n}\n.vapor-editor-button:hover {\n  background-color: rgba(255,255,255,0.7);\n}\n.vapor-editor-disabled.vapor-editor-button,\n.vapor-editor-disabled *.vapor-editor-button {\n  cursor: default;\n  opacity: 0.5;\n  background-color: white;\n}\n.vapor-editor-overlay {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  background-color: rgba(255,255,255,0.5);\n  z-index: 2;\n  padding: 30px 30px 30px 30px;\n  box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -webkit-box-sizing: border-box;\n  pointer-events: none;\n}\n.vapor-editor-button-row {\n  display: flex;\n  align-items: flex-start;\n  flex-wrap: nowrap;\n  height: max-content;\n}\n.vapor-editor-button-row .vapor-editor-button {\n  margin: 0 1em 0 0;\n}\n.vapor-editor-button-row-stack {\n  display: flex;\n  flex-direction: column;\n}\n.vapor-editor-button-row-stack .vapor-editor-button-row {\n  margin-bottom: 1em;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\EditorViewer.css" }, { "insertAt": "bottom" })); module.exports = css;
+var css = "@import url(\"https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap\");\n.vapor-editor-button {\n  background-color: white;\n  height: 1em;\n  padding: 0.4em 1em 0.5em 1em;\n  font-size: 18px;\n  font-family: \"Roboto\", sans-serif;\n  transition: background-color 0.1s, opacity 0.1s;\n  pointer-events: auto;\n  cursor: pointer;\n}\n.vapor-editor-button:hover {\n  background-color: rgba(255,255,255,0.7);\n}\n.vapor-editor-disabled.vapor-editor-button,\n.vapor-editor-disabled *.vapor-editor-button {\n  cursor: default;\n  opacity: 0.5;\n  background-color: white;\n}\n.vapor-editor-overlay {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  background-color: rgba(255,255,255,0.5);\n  z-index: 2;\n  padding: 30px 30px 30px 30px;\n  box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -webkit-box-sizing: border-box;\n  pointer-events: none;\n}\n.vapor-editor-button-row {\n  display: flex;\n  align-items: flex-start;\n  flex-wrap: nowrap;\n  height: max-content;\n  max-width: 100%;\n  pointer-events: auto;\n  overflow-x: scroll;\n  -ms-overflow-style: none;\n  /* IE and Edge */\n  scrollbar-width: none;\n  /* Firefox */\n}\n/* Hide scrollbar for Chrome, Safari, Opera */\n.vapor-editor-button-row::-webkit-scrollbar {\n  display: none;\n}\n.vapor-editor-button-row .vapor-editor-button {\n  margin: 0 1em 0 0;\n}\n.vapor-editor-button-row-stack {\n  display: flex;\n  flex-direction: column;\n  max-width: 100%;\n}\n.vapor-editor-button-row-stack .vapor-editor-button-row {\n  margin-bottom: 1em;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\EditorViewer.css" }, { "insertAt": "bottom" })); module.exports = css;
 },{"browserify-css":2}],69:[function(require,module,exports){
 var Viewer = require("./Viewer")
 var THREE = require("three")
 var gsap = require("gsap")
+var Serializable = require("../SerializationLib/Serializable")
 
 var EditorViewerCss = require("./EditorViewer.css")
 
@@ -52219,7 +52195,18 @@ class EditorViewer extends Viewer {
         this.UIContainer.classList.add("vapor-editor-overlay")
         this.containerElement.appendChild(this.UIContainer)
         var ar = new ButtonRow([new Button(()=>{ar.parent.add(br); ar.disabled=true},"Add"), new Button(undefined,"Select"), new Button(undefined,"Select from list"), new Button(undefined,"Settings")])
-        var br = new ButtonRow([new Button(()=>{ar.disabled = false; br.parent.remove(br)}, "Option")])
+        var scm = Serializable.getSerializableClassesManager()
+        var buttonList = []
+        Object.keys(scm.classList).forEach(className=>{
+            if (scm.classList[className].prototype instanceof scm.classList["BaseObject"]) {
+                buttonList.push(new Button(()=>{
+                    ar.disabled = false
+                    br.parent.remove(br)
+                }, className))
+            }
+        })
+        var br = new ButtonRow(buttonList)
+        // var br = new ButtonRow([new Button(()=>{ar.disabled = false; br.parent.remove(br)}, "Option")])
         var ab = new ButtonRowStack([ar])
         this.UIContainer.appendChild(ab.domElement)
     }
@@ -52323,8 +52310,8 @@ class ButtonRowStack {
         var ogHeight = buttonRow.domElement.clientHeight // Todo: try method that doesnt use clientHeight, instead, transition using em sizes.
         if (ogHeight!==0) {
             buttonRow.domElement.style.maxHeight = "0px"
-            buttonRow.domElement.style.overflow = "hidden" //
-            gsap.TweenLite.to(buttonRow.domElement, {maxHeight: ogHeight.toString()+"px"}) // Todo: Cancel animation if new animation happens
+            buttonRow.domElement.style.overflowY = "hidden" //
+            gsap.TweenLite.fromTo(buttonRow.domElement, {maxHeight: "0px"}, {maxHeight: ogHeight.toString()+"px", duration:0.5}) // Todo: Cancel animation if new animation happens
         }
         
         buttonRow.parent = this
@@ -52339,7 +52326,7 @@ class ButtonRowStack {
 }
 
 module.exports = EditorViewer
-},{"./EditorViewer.css":68,"./Viewer":70,"gsap":5,"three":7}],70:[function(require,module,exports){
+},{"../SerializationLib/Serializable":36,"./EditorViewer.css":68,"./Viewer":70,"gsap":5,"three":7}],70:[function(require,module,exports){
 var THREE = require("three")
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var ThreeLoader = require('@pnext/three-loader')
