@@ -91,7 +91,10 @@ class ObjectArray extends Serializable.createConstructor(
                 returnObj = object
             }
         })
-        return returnObj
+        if (returnObj!==undefined) {
+            return returnObj
+        }
+        throw new Error("no matching uuid found")
     }
     forEach(func) {
         this.args.objects.forEach(func)

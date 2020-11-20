@@ -103,6 +103,9 @@ function(scope){
     get modifiers() {
         return this.args.modifiers
     }
+    get uuid() {
+        return this.args.uuid
+    }
 
 }
 BaseObject.registerConstructor()

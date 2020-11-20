@@ -431,8 +431,8 @@ class Viewer {
         this.onContainerElementResize()
     }
 
-    resolveUUID(uuid) {
-        // this.deserializationContainer
+    lookupUUID(uuid) {
+        return this.objects.lookupUUID(uuid)
     }
 
     // Todo:

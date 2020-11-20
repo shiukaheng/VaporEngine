@@ -46004,6 +46004,9 @@ function(scope){
     get modifiers() {
         return this.args.modifiers
     }
+    get uuid() {
+        return this.args.uuid
+    }
 
 }
 BaseObject.registerConstructor()
@@ -47281,7 +47284,10 @@ class ObjectArray extends Serializable.createConstructor(
                 returnObj = object
             }
         })
-        return returnObj
+        if (returnObj!==undefined) {
+            return returnObj
+        }
+        throw new Error("no matching uuid found")
     }
     forEach(func) {
         this.args.objects.forEach(func)
@@ -52218,7 +52224,9 @@ class EditorViewer extends Viewer {
         getObjectClassNames().forEach(className=>{
             classCreationMenuButtons.push(new Button(()=>{
                 var newObjectInit = createObject(className)
-                uiRowStack.add(new ObjectEditor(newObjectInit, (newArgs)=>{
+                this.add(newObjectInit)
+                console.log(newObjectInit.uuid, this.objects.args.objects)
+                uiRowStack.add(new ObjectEditor(this, newObjectInit.uuid, ()=>{
 
                 }))
             }, className))
@@ -52571,16 +52579,17 @@ class Label {
 }
 
 class ObjectEditor {
-    constructor(object, onDone=(newArgs)=>{}, initAsDefault=true) {
-        if (object.viewer===undefined) {
+    constructor(viewer, uuid, onDone=()=>{}, initAsDefault=true) {
+        this.viewer = viewer
+        this.object = this.viewer.lookupUUID(uuid)
+        if (this.object.viewer===undefined) { // Should not happen as if UUID is visible, it should be in objectContaienr
             throw new Error("object has to be added into viewer")
         }
-        this.object = object
         this.onDone = onDone
         this.valid = false
         this.checkForms = this.checkForms.bind(this)
         this.done = this.done.bind(this)
-        var className = object.args.className
+        var className = this.object.args.className
         // Todo: check if is valid Object class
         if (getObjectClassNames().indexOf(className) < 0) {
             throw new Error("invalid className")
@@ -52594,17 +52603,17 @@ class ObjectEditor {
             if (["uuid", "className", "serialize"].indexOf(key)<0) {
                 if (typeof keyMeta.defaultValue === "boolean") {
                     this.keysToEditDict[key] = {
-                        "element": new CheckBox(object.args[key])
+                        "element": new CheckBox(this.object.args[key])
                     }
                 }
                 if ((typeof keyMeta.defaultValue === "number")||keyMeta.defaultValue instanceof Number) {
                     this.keysToEditDict[key] = {
-                        "element": new InputCell("float", object.args[key].toString(), keyMeta.predicate, this.checkForms)
+                        "element": new InputCell("float", this.object.args[key].toString(), keyMeta.predicate, this.checkForms)
                     }
                 }
                 if (typeof keyMeta.defaultValue === "string") {
                     this.keysToEditDict[key] = {
-                        "element": new InputCell("string", object.args[key].toString(), keyMeta.predicate, this.checkForms)
+                        "element": new InputCell("string", this.object.args[key].toString(), keyMeta.predicate, this.checkForms)
                     }
                 }
             }
@@ -52671,20 +52680,26 @@ class ObjectEditor {
         var modified_args = Object.assign(original_args, delta_args)
         try {
             // Try assigning new properties without reloading
-            Object.assign(this.object.args, delta_args)
+            this.viewer.pauseRender()
+            Object.keys(delta_args).forEach(key=>{
+                this.object.args = delta_args[key]
+            })
+            this.viewer.startRender()
             return
         } catch(e) {
             if (e===Serializable.readOnlyError) {
+                this.viewer.pauseRender()
                 // If read-only error arises
-                var viewer = this.object.viewer
-                viewer.remove(this.object)
-                var newObject = createObject(object.args.className, modified_args)
-                viewer.add(newObject)
+                // var viewer = this.object.viewer
+                // viewer.remove(this.object)
+                // var newObject = createObject(this.object.args.className, modified_args)
+                // viewer.add(newObject)
+                this.viewer.startRender()
             } else {
                 throw e
             }
         }
-        this.onDone(modified_args)
+        this.onDone()
     }
 }
 
@@ -53123,8 +53138,8 @@ class Viewer {
         this.onContainerElementResize()
     }
 
-    resolveUUID(uuid) {
-        // this.deserializationContainer
+    lookupUUID(uuid) {
+        return this.objects.lookupUUID(uuid)
     }
 
     // Todo:
