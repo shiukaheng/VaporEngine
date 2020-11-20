@@ -431,6 +431,10 @@ class Viewer {
         this.onContainerElementResize()
     }
 
+    resolveUUID(uuid) {
+        // this.deserializationContainer
+    }
+
     // Todo:
 
     // URGENT: Demo

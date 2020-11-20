@@ -20,8 +20,7 @@ class SerializableClassesManager {
                     "defaultValue": defaultInstance._args[key],
                     "predicate": x => {
                         try {
-                            var testInstance = new (newClass)()
-                            testInstance.args[key] = x
+                            var testInstance = new (newClass)({key: x})
                         }
                         catch(e) {
                             return false
@@ -284,19 +283,14 @@ class Serializable {
             }
         }
     }
-    static readOnlyHandler(error) { // You only write once! That is, when the Serializable is initialized with its inital arguments.
+    static readOnlyHandler() { // You only write once! That is, when the Serializable is initialized with its inital arguments.
         return {
             "set": function(scope, val, argName) {
                 if (scope._argWritten===undefined) {
                     scope._argWritten={}
                 }
                 if (scope._argWritten[argName]===true) {
-                    if (error===undefined) {
-                        throw Error(argName+" is a read only argument")
-                    } else {
-                        throw error
-                    }
-                    
+                    throw Serializable.readOnlyError
                 } else {
                     scope._args[argName] = val
                     scope._argWritten[argName] = true
@@ -318,6 +312,7 @@ class Serializable {
             }
         }
     }
+    static readOnlyError = new Error("attempted to modify read only property")
 }
 
 Serializable.registerConstructor()
