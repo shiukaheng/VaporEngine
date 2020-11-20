@@ -60,6 +60,7 @@ function(scope){
         this.viewer = undefined
     }
     update(dt) {
+        // console.log(this)
         if (!this.isLoaded) {
             throw new Error("attempt to update "+this.constructor.name+" before loaded")
         }

@@ -8,7 +8,9 @@ class TestObject extends Serializable.createConstructor(
     },
     function(scope) {
     },  
-    undefined,
+    {
+        "color": Serializable.readOnlyHandler()
+    },
     function(scope) {
         var geom = new THREE.BoxGeometry()
         var mat = new THREE.MeshBasicMaterial({color: scope.args.color, wireframe: true})

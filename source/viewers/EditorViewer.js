@@ -47,10 +47,12 @@ class EditorViewer extends Viewer {
             classCreationMenuButtons.push(new Button(()=>{
                 var newObjectInit = createObject(className)
                 this.add(newObjectInit)
-                console.log(newObjectInit.uuid, this.objects.args.objects)
-                uiRowStack.add(new ObjectEditor(this, newObjectInit.uuid, ()=>{
-
-                }))
+                // console.log(newObjectInit.uuid, this.objects.args.objects)
+                var objectEditor = new ObjectEditor(this, newObjectInit.uuid, ()=>{
+                    uiRowStack.remove(objectEditor)
+                    uiRowStack.remove(classCreationMenu)
+                })
+                uiRowStack.add(objectEditor)
             }, className))
         })
         var classCreationMenu = new Row(classCreationMenuButtons)
@@ -440,7 +442,7 @@ class ObjectEditor {
                 }
             }
         })
-        console.log(this.keysToEditDict)
+        // console.log(this.keysToEditDict)
         this.domElement = document.createElement("div")
         this.domElement.classList.add("vapor-editor-object-editor")
         this.domElement.appendChild(new Label(className+" properties", undefined, "24px").domElement)
@@ -488,7 +490,7 @@ class ObjectEditor {
             this.valid = false
         }
     }
-    done() {
+    apply() {
         if (!this.valid) {
             throw Error("cannot apply invalid arguments")
         }
@@ -503,24 +505,25 @@ class ObjectEditor {
         try {
             // Try assigning new properties without reloading
             this.viewer.pauseRender()
-            Object.keys(delta_args).forEach(key=>{
-                this.object.args = delta_args[key]
-            })
+            Object.assign(this.object.args, delta_args)
             this.viewer.startRender()
             return
         } catch(e) {
             if (e===Serializable.readOnlyError) {
                 this.viewer.pauseRender()
                 // If read-only error arises
-                // var viewer = this.object.viewer
-                // viewer.remove(this.object)
-                // var newObject = createObject(this.object.args.className, modified_args)
-                // viewer.add(newObject)
+                var viewer = this.object.viewer
+                viewer.remove(this.object)
+                var newObject = createObject(this.object.args.className, modified_args)
+                viewer.add(newObject)
                 this.viewer.startRender()
             } else {
                 throw e
             }
         }
+    }
+    done() {
+        this.apply()
         this.onDone()
     }
 }

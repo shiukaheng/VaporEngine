@@ -194,6 +194,7 @@ class Serializable {
             },
             set(target, prop, value) {
                 throw new Error("Read only property. Modify the direct children of the args object!")
+                return true
             },
             apply(target, thisArg, argumentsList) {
                 throw new Error("Read only property. Modify the direct children of the args object!")
@@ -226,6 +227,7 @@ class Serializable {
                     throw error
                 }
                 scope._args[argName] = val
+                return true
             },
             "get":function(scope, argName) {
                 if (!(Object(scope._args[argName])===scope._args[argName])||scope._args[argName]===undefined) {
@@ -270,6 +272,7 @@ class Serializable {
                     throw TypeError(argName+" must be below or equal to "+(max).toString())
                 }
                 scope._args[argName] = val
+                return true
             }
         }
     }
@@ -280,6 +283,7 @@ class Serializable {
                     throw TypeError(argName+" must be a boolean")
                 }
                 scope._args[argName] = val
+                return true
             }
         }
     }
@@ -295,6 +299,7 @@ class Serializable {
                     scope._args[argName] = val
                     scope._argWritten[argName] = true
                 }
+                return true
             }
         }
     }
