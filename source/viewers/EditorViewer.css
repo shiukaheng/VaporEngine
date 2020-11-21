@@ -45,7 +45,6 @@
 
 .vapor-editor-button-row {
     display: flex;
-    align-items: flex-start;
     flex-wrap: nowrap;
     height: max-content;
     max-width: 100%;
@@ -85,6 +84,7 @@
   outline-offset: -2px;
   padding: 0.4em 0.5em 0.5em 0.5em;
   pointer-events: auto;
+  width: 100%;
 }
 
 .vapor-editor-input:focus {
@@ -108,11 +108,13 @@
 
 .vapor-editor-object-editor-form {
     border-collapse: collapse;
+    width: 100%
 }
 
 .vapor-editor-label {
     font-family: "Roboto", sans-serif;
     font-size: 18px;
+    margin: auto;
 }
 
 .vapor-editor-object-editor-submit-button {
@@ -120,4 +122,21 @@
     margin-left: auto;
     margin-right: 0;
     margin-top: 10px;
+}
+
+.vapor-editor-grouped-cells-row {
+    display: flex;
+    flex-direction: column;
+}
+
+.vapor-editor-grouped-cells-row {
+    margin-bottom: 0 !important;
+}
+
+.vapor-editor-grouped-cells-row .vapor-editor-input {
+    margin-left: 1em;
+}
+
+.vapor-editor-grouped-cells-row .vapor-editor-button-row {
+    margin-bottom: 10px;
 }

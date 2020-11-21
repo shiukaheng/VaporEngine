@@ -71,7 +71,7 @@ class EditorViewer extends Viewer {
         })
         var classCreationMenu = new Row(classCreationMenuButtons)
     }
-    editTransformUUID(uuid) {
+    editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode.
         this.allowUserControl = false
         this.allowPointerLock = false
         this.transformControls.attach(this.lookupUUID(uuid).container)
@@ -81,7 +81,7 @@ class EditorViewer extends Viewer {
         this.allowUserControl = true
         this.allowPointerLock = true
     }
-    // Modify render loop; setCamera function also create cameraHelpers for each non-active camera
+    // Todo: Modify render loop; setCamera function also create cameraHelpers for each non-active camera
 }
 
 class Button {
@@ -191,10 +191,10 @@ class RowStack {
                 row.disabled = true
             })
         }
-        var ogHeight = row.domElement.clientHeight // Todo: try method that doesnt use clientHeight, instead, transition using em sizes.
+        var ogHeight = row.domElement.clientHeight
         if (ogHeight!==0) {
             row.domElement.style.maxHeight = "0px"
-            row.domElement.style.overflowY = "hidden" //
+            row.domElement.style.overflowY = "hidden"
             gsap.TweenLite.fromTo(row.domElement, {maxHeight: "0px"}, {maxHeight: ogHeight.toString()+"px", duration:0.1}) // Todo: Cancel animation if new animation happens
         }
         
@@ -243,6 +243,7 @@ class InputCell {
         this.onFocus = this.onFocus.bind(this)
         this.onBlur = this.onBlur.bind(this)
         this.onBlurCB = onBlur
+        this._focus = false
 
         this.interpType = interpType
         this._valCheck = valCheck
@@ -300,7 +301,7 @@ class InputCell {
     _invalidInput() {
         this._inputValue = null
         this._valid = false
-        // Todo: Update element style to have red outline
+        // Update element style to have red outline
         this.domElement.classList.add("vapor-editor-input-invalid")
         this.domElement.classList.remove("vapor-editor-input-default")
     }
@@ -316,7 +317,7 @@ class InputCell {
     clearInput() {
         this._inputValue = null
         this._valid = true
-        // Todo: Update element content to greyed text of defaultVar
+        // Update element content to greyed text of defaultVar
         this.domElement.classList.add("vapor-editor-input-default")
         this.domElement.classList.remove("vapor-editor-input-invalid")
         this.domElement.value = this._defaultValue
@@ -367,7 +368,11 @@ class InputCell {
     get empty() {
         return (this._inputValue===null && this._valid===true)
     }
+    get focus() {
+        return this._focus
+    }
     onFocus(e) {
+        this._focus = true
         this.domElement.classList.remove("vapor-editor-input-invalid")
         this.domElement.classList.remove("vapor-editor-input-default")
         if (this.empty) {
@@ -375,6 +380,7 @@ class InputCell {
         }
     }
     onBlur(e) {
+        this._focus = false
         if (this.domElement.value === "") {
             this.clearInput()
         } else {
@@ -428,8 +434,181 @@ class Label {
 }
 
 class PositionCells {
-    constructor() {
+    constructor(defaultVal, onBlur=()=>{}) {
+        this.checkBlur = this.checkBlur.bind(this)
+        this.onFocus = this.onFocus.bind(this)
+        this.onBlur = this.onBlur.bind(this)
+        this.onBlurCB = onBlur
+        this._focus = false
+
+        this._defaultVal = defaultVal
+
+        this.xLabel = new Label("x")
+        this.yLabel = new Label("y")
+        this.zLabel = new Label("z")
         
+        this.xInput = new InputCell("float", this.defaultVal.x, undefined, this.checkBlur)
+        this.yInput = new InputCell("float", this.defaultVal.y, undefined, this.checkBlur)
+        this.zInput = new InputCell("float", this.defaultVal.z, undefined, this.checkBlur)
+
+        this.containerRow = new Row([new Row([this.xLabel, this.xInput]), new Row([this.yLabel, this.yInput]), new Row([this.zLabel, this.zInput])])
+        this.containerRow.domElement.classList.add("vapor-editor-grouped-cells-row")
+
+        this.domElement = this.containerRow.domElement
+    }
+    checkBlur() {
+        this._focus = (this.xInput.focus || this.yInput.focus || this.zInput.focus)
+        if (this.focus) {
+            this.onFocus()
+        } else {
+            this.onBlur()
+        }
+    }
+    onFocus() {
+    }
+    onBlur() {
+        this.onBlurCB()
+    }
+    get defaultVal(){
+        return this._defaultVal
+    }
+    get focus() {
+        return this._focus
+    }
+    get valid() {
+        return (this.xInput.valid && this.yInput.valid && this.zInput.valid)
+    }
+    get value() {
+        if (this.valid) {
+            return {
+                "x": this.xInput.value,
+                "y": this.yInput.value,
+                "z": this.zInput.value
+            }
+        } else {
+            return null
+        }
+    }
+}
+
+class ScaleCells {
+    constructor(defaultVal, onBlur=()=>{}) {
+        this.checkBlur = this.checkBlur.bind(this)
+        this.onFocus = this.onFocus.bind(this)
+        this.onBlur = this.onBlur.bind(this)
+        this.onBlurCB = onBlur
+        this._focus = false
+
+        this._defaultVal = defaultVal
+
+        this.xLabel = new Label("x")
+        this.yLabel = new Label("y")
+        this.zLabel = new Label("z")
+        
+        this.xInput = new InputCell("float", this.defaultVal.x, undefined, this.checkBlur)
+        this.yInput = new InputCell("float", this.defaultVal.y, undefined, this.checkBlur)
+        this.zInput = new InputCell("float", this.defaultVal.z, undefined, this.checkBlur)
+
+        this.containerRow = new Row([new Row([this.xLabel, this.xInput]), new Row([this.yLabel, this.yInput]), new Row([this.zLabel, this.zInput])])
+        this.containerRow.domElement.classList.add("vapor-editor-grouped-cells-row")
+
+        this.domElement = this.containerRow.domElement
+    }
+    checkBlur() {
+        this._focus = (this.xInput.focus || this.yInput.focus || this.zInput.focus)
+        if (this.focus) {
+            this.onFocus()
+        } else {
+            this.onBlur()
+        }
+    }
+    onFocus() {
+    }
+    onBlur() {
+        this.onBlurCB()
+    }
+    get defaultVal(){
+        return this._defaultVal
+    }
+    get focus() {
+        return this._focus
+    }
+    get valid() {
+        return (this.xInput.valid && this.yInput.valid && this.zInput.valid)
+    }
+    get value() {
+        if (this.valid) {
+            return {
+                "x": this.xInput.value,
+                "y": this.yInput.value,
+                "z": this.zInput.value
+            }
+        } else {
+            return null
+        }
+    }
+}
+
+class RotationCells {
+    constructor(defaultVal, onBlur=()=>{}) {
+        this.checkBlur = this.checkBlur.bind(this)
+        this.onFocus = this.onFocus.bind(this)
+        this.onBlur = this.onBlur.bind(this)
+        this.onBlurCB = onBlur
+        this._focus = false
+
+        this._defaultVal = defaultVal
+
+        this.xLabel = new Label("x")
+        this.yLabel = new Label("y")
+        this.zLabel = new Label("z")
+        this.orderLabel = new Label("order")
+        
+        this.xInput = new InputCell("float", this.defaultVal.x, undefined, this.checkBlur)
+        this.yInput = new InputCell("float", this.defaultVal.y, undefined, this.checkBlur)
+        this.zInput = new InputCell("float", this.defaultVal.z, undefined, this.checkBlur)
+        this.orderInput = new InputCell("string", this.defaultVal.order, (order)=>{
+            return (["XYZ", "YXZ", "ZXY", "XZY", "YZX", "ZYX"].indexOf(order.toUpperCase())>=0)
+        }, this.checkBlur)
+
+        this.containerRow = new Row([new Row([this.xLabel, this.xInput]), new Row([this.yLabel, this.yInput]), new Row([this.zLabel, this.zInput]), new Row([this.orderLabel, this.orderInput])])
+        this.containerRow.domElement.classList.add("vapor-editor-grouped-cells-row")
+
+        this.domElement = this.containerRow.domElement
+    }
+    checkBlur() {
+        this._focus = (this.xInput.focus || this.yInput.focus || this.zInput.focus || this.orderInput.focus)
+        if (this.focus) {
+            this.onFocus()
+        } else {
+            this.onBlur()
+        }
+    }
+    onFocus() {
+    }
+    onBlur() {
+        this.onBlurCB()
+    }
+    get defaultVal(){
+        return this._defaultVal
+    }
+    get focus() {
+        return this._focus
+    }
+    get valid() {
+        return (this.xInput.valid && this.yInput.valid && this.zInput.valid && this.orderInput.valid)
+    }
+    get value() {
+        if (this.valid) {
+            return {
+                "x": this.xInput.value,
+                "y": this.yInput.value,
+                "z": this.zInput.value,
+                "order": this.orderInput.value
+            }
+        } else {
+            return null
+        }
     }
 }
 
@@ -447,7 +626,7 @@ class ObjectEditor {
         this.checkForms = this.checkForms.bind(this)
         this.done = this.done.bind(this)
         var className = this.object.args.className
-        // Todo: check if is valid Object class
+        // check if is valid Object class
         if (getObjectClassNames().indexOf(className) < 0) {
             throw new Error("invalid className")
         }
@@ -473,17 +652,27 @@ class ObjectEditor {
                         "element": new InputCell("string", this.viewer.lookupUUID(uuid).args[key].toString(), keyMeta.predicate, this.checkForms)
                     }
                 }
-                // if (key === "position") {
-                //     this.keysToEditDict[key] = {
-                //         "element": 
-                //     }
-                // }
+                if (key === "position") {
+                    this.keysToEditDict[key] = {
+                        "element": new PositionCells(this.viewer.lookupUUID(uuid).args.position, this.checkForms)
+                    }
+                }
+                if (key === "rotation") {
+                    this.keysToEditDict[key] = {
+                        "element": new RotationCells(this.viewer.lookupUUID(uuid).args.rotation, this.checkForms)
+                    }
+                }
+                if (key === "scale") {
+                    this.keysToEditDict[key] = {
+                        "element": new ScaleCells(this.viewer.lookupUUID(uuid).args.scale, this.checkForms)
+                    }
+                }
             }
         })
         // console.log(this.keysToEditDict)
         this.domElement = document.createElement("div")
         this.domElement.classList.add("vapor-editor-object-editor")
-        this.domElement.appendChild(new Label(`${className} Properties <${uuid}>`, undefined, "24px").domElement)
+        this.domElement.appendChild(new Label(`${className} <${uuid}>`, undefined, "24px").domElement)
         this.form = document.createElement("table")
         this.form.style.marginTop = "20px"
         this.form.classList.add("vapor-editor-object-editor-form")
@@ -514,7 +703,7 @@ class ObjectEditor {
         var err = 0
         Object.keys(this.keysToEditDict).forEach(key => {
             var field = this.keysToEditDict[key].element
-            if (field instanceof InputCell) {
+            if (field instanceof InputCell || field instanceof PositionCells) {
                 if (!field.valid) {
                     err += 1
                 }
