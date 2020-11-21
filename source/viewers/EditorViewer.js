@@ -45,6 +45,8 @@ class EditorViewer extends Viewer {
         this.UIContainer.classList.add("vapor-editor-overlay")
         this.containerElement.appendChild(this.UIContainer)
 
+        this.objectEditors = new Set()
+
         // Container
         var uiRowStack = new RowStack([], true)
         this.UIContainer.appendChild(uiRowStack.domElement)
@@ -58,11 +60,17 @@ class EditorViewer extends Viewer {
                 var newObjectInit = createObject(className)
                 this.add(newObjectInit)
                 this.editTransformUUID(newObjectInit.uuid)
+                this.transformControls.addEventListener("objectChange", ()=>{
+                    this.objectEditors.forEach(oe => {
+                        oe.updateTransform()
+                    })
+                })
                 // console.log(newObjectInit.uuid, this.objects.args.objects)
                 var objectEditor = new ObjectEditor(this, newObjectInit.uuid, ()=>{
                     uiRowStack.remove(objectEditor)
                     uiRowStack.remove(classCreationMenu)
                     this.exitEditTransform()
+                    objectEditor.close()
                 }, ()=>{
                     this.editTransformUUID(newObjectInit.uuid)
                 })
@@ -451,7 +459,7 @@ class PositionCells {
         this.yInput = new InputCell("float", this.defaultVal.y, undefined, this.checkBlur)
         this.zInput = new InputCell("float", this.defaultVal.z, undefined, this.checkBlur)
 
-        this.containerRow = new Row([new Row([this.xLabel, this.xInput]), new Row([this.yLabel, this.yInput]), new Row([this.zLabel, this.zInput])])
+        this.containerRow = new Row([this.xLabel, this.xInput, this.yLabel, this.yInput, this.zLabel, this.zInput])
         this.containerRow.domElement.classList.add("vapor-editor-grouped-cells-row")
 
         this.domElement = this.containerRow.domElement
@@ -488,6 +496,11 @@ class PositionCells {
         } else {
             return null
         }
+    }
+    set value(object) {
+        this.xInput.value = object.x
+        this.yInput.value = object.y
+        this.zInput.value = object.z
     }
 }
 
@@ -509,7 +522,7 @@ class ScaleCells {
         this.yInput = new InputCell("float", this.defaultVal.y, undefined, this.checkBlur)
         this.zInput = new InputCell("float", this.defaultVal.z, undefined, this.checkBlur)
 
-        this.containerRow = new Row([new Row([this.xLabel, this.xInput]), new Row([this.yLabel, this.yInput]), new Row([this.zLabel, this.zInput])])
+        this.containerRow = new Row([this.xLabel, this.xInput, this.yLabel, this.yInput, this.zLabel, this.zInput])
         this.containerRow.domElement.classList.add("vapor-editor-grouped-cells-row")
 
         this.domElement = this.containerRow.domElement
@@ -546,6 +559,11 @@ class ScaleCells {
         } else {
             return null
         }
+    }
+    set value(object) {
+        this.xInput = object.x
+        this.yInput = object.y
+        this.zInput = object.z
     }
 }
 
@@ -571,9 +589,8 @@ class RotationCells {
             return (["XYZ", "YXZ", "ZXY", "XZY", "YZX", "ZYX"].indexOf(order.toUpperCase())>=0)
         }, this.checkBlur)
 
-        this.containerRow = new Row([new Row([this.xLabel, this.xInput]), new Row([this.yLabel, this.yInput]), new Row([this.zLabel, this.zInput]), new Row([this.orderLabel, this.orderInput])])
+        this.containerRow = new Row([this.xLabel, this.xInput, this.yLabel, this.yInput, this.zLabel, this.zInput, this.orderLabel, this.orderInput])
         this.containerRow.domElement.classList.add("vapor-editor-grouped-cells-row")
-
         this.domElement = this.containerRow.domElement
     }
     checkBlur() {
@@ -610,11 +627,17 @@ class RotationCells {
             return null
         }
     }
+    set value(object) {
+        this.xInput.value = object.x
+        this.yInput.value = object.y
+    }
 }
 
 class ObjectEditor {
-    constructor(viewer, uuid, onDone=()=>{}, onApply=()=>{}, initAsDefault=true) {
-        this.viewer = viewer
+    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, initAsDefault=true) {
+        this.viewer = editorViewer
+        this.viewer.objectEditors.add(this)
+        this.close = this.close.bind(this)
         this.uuid = uuid
         this.object = this.viewer.lookupUUID(uuid)
         if (this.object.viewer===undefined) { // Should not happen as if UUID is visible, it should be in objectContaienr
@@ -703,7 +726,7 @@ class ObjectEditor {
         var err = 0
         Object.keys(this.keysToEditDict).forEach(key => {
             var field = this.keysToEditDict[key].element
-            if (field instanceof InputCell || field instanceof PositionCells) {
+            if (field instanceof InputCell || field instanceof PositionCells || field instanceof RotationCells || field instanceof ScaleCells) {
                 if (!field.valid) {
                     err += 1
                 }
@@ -757,6 +780,12 @@ class ObjectEditor {
     }
     update() {
         return
+    }
+    close() {
+        this.viewer.objectEditors.delete(this)
+    }
+    updateTransform() {
+        console.log(this.keysToEditDict["position"]["element"].value)
     }
 }
 

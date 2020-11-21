@@ -103,7 +103,7 @@
     background-color: rgba(0,0,0,0.5);
     padding: 20px 20px 20px 20px;
     pointer-events: auto;
-    width: fit-content;
+    width: 50%;
 }
 
 .vapor-editor-object-editor-form {
@@ -125,8 +125,8 @@
 }
 
 .vapor-editor-grouped-cells-row {
-    display: flex;
-    flex-direction: column;
+    /* display: flex; */
+    /* flex-direction: column; */
 }
 
 .vapor-editor-grouped-cells-row {
@@ -134,7 +134,11 @@
 }
 
 .vapor-editor-grouped-cells-row .vapor-editor-input {
-    margin-left: 1em;
+    margin-left: 10px;
+}
+
+.vapor-editor-grouped-cells-row .vapor-editor-input+.vapor-editor-label  {
+    margin-left: 10px;
 }
 
 .vapor-editor-grouped-cells-row .vapor-editor-button-row {
