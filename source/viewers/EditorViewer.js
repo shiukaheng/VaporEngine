@@ -427,6 +427,12 @@ class Label {
     }
 }
 
+class PositionCells {
+    constructor() {
+        
+    }
+}
+
 class ObjectEditor {
     constructor(viewer, uuid, onDone=()=>{}, onApply=()=>{}, initAsDefault=true) {
         this.viewer = viewer
@@ -467,6 +473,11 @@ class ObjectEditor {
                         "element": new InputCell("string", this.viewer.lookupUUID(uuid).args[key].toString(), keyMeta.predicate, this.checkForms)
                     }
                 }
+                // if (key === "position") {
+                //     this.keysToEditDict[key] = {
+                //         "element": 
+                //     }
+                // }
             }
         })
         // console.log(this.keysToEditDict)

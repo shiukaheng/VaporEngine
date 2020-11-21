@@ -11,6 +11,10 @@ class ObjectArray extends Serializable.createConstructor(
         "objects": Serializable.readOnlyHandler(new Error("objects argument needs to be modified with object interface"))
     },
     function(scope) {
+        scope.uuidDict = {}
+        scope.args.objects.forEach(object => {
+            scope.uuidDict[object.uuid] = object
+        })
     },
     Serializable    
 ) {
@@ -53,11 +57,13 @@ class ObjectArray extends Serializable.createConstructor(
     }
     add(object) {
         this._args.objects.push(object)
+        this.uuidDict[object.uuid] = object
         if (this.isLoaded) { // If ObjectArray is already loaded, will need to load this object on an individual basis
             this._queueLoadObject(object)
         }
     }
     remove(object) {
+        this.uuidDict[object.uuid] = undefined
         this._args.objects.splice(this._args.objects.indexOf(object), 1)
         if (this.isLoaded) {
             this._unloadObject(object)
@@ -85,12 +91,7 @@ class ObjectArray extends Serializable.createConstructor(
         })
     }
     lookupUUID(uuid) {
-        var returnObj
-        this.args.objects.forEach(object => {
-            if (object.args.uuid === uuid) {
-                returnObj = object
-            }
-        })
+        var returnObj = this.uuidDict[uuid]
         if (returnObj!==undefined) {
             return returnObj
         }
