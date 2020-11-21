@@ -57,16 +57,31 @@ class EditorViewer extends Viewer {
             classCreationMenuButtons.push(new Button(()=>{
                 var newObjectInit = createObject(className)
                 this.add(newObjectInit)
+                this.editTransformUUID(newObjectInit.uuid)
                 // console.log(newObjectInit.uuid, this.objects.args.objects)
                 var objectEditor = new ObjectEditor(this, newObjectInit.uuid, ()=>{
                     uiRowStack.remove(objectEditor)
                     uiRowStack.remove(classCreationMenu)
+                    this.exitEditTransform()
+                }, ()=>{
+                    this.editTransformUUID(newObjectInit.uuid)
                 })
                 uiRowStack.add(objectEditor)
             }, className))
         })
         var classCreationMenu = new Row(classCreationMenuButtons)
     }
+    editTransformUUID(uuid) {
+        this.allowUserControl = false
+        this.allowPointerLock = false
+        this.transformControls.attach(this.lookupUUID(uuid).container)
+    }
+    exitEditTransform() {
+        this.transformControls.detach()
+        this.allowUserControl = true
+        this.allowPointerLock = true
+    }
+    // Modify render loop; setCamera function also create cameraHelpers for each non-active camera
 }
 
 class Button {
@@ -413,13 +428,15 @@ class Label {
 }
 
 class ObjectEditor {
-    constructor(viewer, uuid, onDone=()=>{}, initAsDefault=true) {
+    constructor(viewer, uuid, onDone=()=>{}, onApply=()=>{}, initAsDefault=true) {
         this.viewer = viewer
+        this.uuid = uuid
         this.object = this.viewer.lookupUUID(uuid)
         if (this.object.viewer===undefined) { // Should not happen as if UUID is visible, it should be in objectContaienr
             throw new Error("object has to be added into viewer")
         }
         this.onDone = onDone
+        this.onApply = onApply
         this.valid = false
         this.checkForms = this.checkForms.bind(this)
         this.done = this.done.bind(this)
@@ -437,17 +454,17 @@ class ObjectEditor {
             if (["uuid", "className", "serialize"].indexOf(key)<0) {
                 if (typeof keyMeta.defaultValue === "boolean") {
                     this.keysToEditDict[key] = {
-                        "element": new CheckBox(this.object.args[key])
+                        "element": new CheckBox(this.viewer.lookupUUID(uuid).args[key])
                     }
                 }
                 if ((typeof keyMeta.defaultValue === "number")||keyMeta.defaultValue instanceof Number) {
                     this.keysToEditDict[key] = {
-                        "element": new InputCell("float", this.object.args[key].toString(), keyMeta.predicate, this.checkForms)
+                        "element": new InputCell("float", this.viewer.lookupUUID(uuid).args[key].toString(), keyMeta.predicate, this.checkForms)
                     }
                 }
                 if (typeof keyMeta.defaultValue === "string") {
                     this.keysToEditDict[key] = {
-                        "element": new InputCell("string", this.object.args[key].toString(), keyMeta.predicate, this.checkForms)
+                        "element": new InputCell("string", this.viewer.lookupUUID(uuid).args[key].toString(), keyMeta.predicate, this.checkForms)
                     }
                 }
             }
@@ -495,6 +512,7 @@ class ObjectEditor {
         if (err===0) {
             this.submitButton.disabled = false
             this.valid = true
+            this.apply()
         } else {
             this.submitButton.disabled = true
             this.valid = false
@@ -510,31 +528,35 @@ class ObjectEditor {
                 delta_args[key] = this.keysToEditDict[key].element.value
             }
         })
-        var original_args = Object.assign({}, this.object._args)
+        var original_args = Object.assign({}, this.viewer.lookupUUID(this.uuid).args)
         var modified_args = Object.assign(original_args, delta_args)
         try {
             // Try assigning new properties without reloading
             this.viewer.pauseRender()
-            Object.assign(this.object.args, delta_args)
+            Object.assign(this.viewer.lookupUUID(this.uuid).args, delta_args)
             this.viewer.startRender()
-            return
         } catch(e) {
             if (e===Serializable.readOnlyError) {
                 this.viewer.pauseRender()
                 // If read-only error arises
-                var viewer = this.object.viewer
-                viewer.remove(this.object)
-                var newObject = createObject(this.object.args.className, modified_args)
+                var viewer = this.viewer.lookupUUID(this.uuid).viewer
+                var oldObject = this.viewer.lookupUUID(this.uuid)
+                viewer.remove(this.viewer.lookupUUID(this.uuid))
+                var newObject = createObject(oldObject.args.className, modified_args)
                 viewer.add(newObject)
                 this.viewer.startRender()
             } else {
                 throw e
             }
         }
+        this.onApply()
     }
     done() {
         this.apply()
         this.onDone()
+    }
+    update() {
+        return
     }
 }
 

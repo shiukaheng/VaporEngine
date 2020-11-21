@@ -59,6 +59,14 @@ class DeserializationObjectContainer{
             })
         }
     }
+    overwriteSerializableInstance(serializable) {
+        this.serializableInstances[serializable.args.uuid] = serializable
+        if (this.unfulfilledDependencies[serializable.args.uuid]!==undefined) {
+            this.unfulfilledDependencies[serializable.args.uuid].forEach(callback => {
+                callback(serializable)
+            })
+        }
+    }
     deserializeSerializable(serializable) {
         if(serializable["serialize"]===false) {
             return null

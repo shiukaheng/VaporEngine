@@ -97,6 +97,8 @@ class Viewer {
         this.skippedRender = false
         this.containerElement = containerElement
 
+        document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+
         // Initialize renderer
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.domElement.className += "vaporViewer"
@@ -167,7 +169,9 @@ class Viewer {
         this.pointerlock = false
         var scope = this
         this.renderer.domElement.addEventListener("click", ()=>{
-            scope.renderer.domElement.requestPointerLock()
+            if (scope.allowPointerLock === true) {
+                scope.renderer.domElement.requestPointerLock()
+            }
         })
 
         document.addEventListener('pointerlockerror', (event) => {
@@ -220,6 +224,7 @@ class Viewer {
         // Some extra flags
         this._allowUserControl = true
         this._updatePlayerOnly = false
+        this._allowPointerLock = true
         this.deserializationContainer = new DeserializationObjectContainer()
 
         // Enable XR
@@ -316,6 +321,19 @@ class Viewer {
 
     get updatePlayerOnly() {
         return this._updatePlayerOnly
+    }
+
+    set allowPointerLock(bool) {
+        if (bool===true) {
+            this._allowPointerLock = true
+        } else {
+            document.exitPointerLock()
+            this._allowPointerLock = false
+        }
+    }
+
+    get allowPointerLock() {
+        return this._allowPointerLock
     }
 
     // External functions
