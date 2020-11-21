@@ -4,6 +4,7 @@ var {Serializable} = require("../Serialization")
 var vec3sh = require("../utils/vec3ShadowHandler")
 var eush = require("../utils/eulerShadowHandler")
 var Viewer = require("../viewers/viewer")
+var { TransformControls, TransformControlsGizmo, TransformControlsPlane } = require("../helpers/TransformControls");
 
 var enc = Serializable.encodeTraversal
 

@@ -9,6 +9,7 @@
     transition: background-color 0.1s, opacity 0.1s;
     pointer-events: auto;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .vapor-editor-button-selected {
@@ -50,8 +51,8 @@
     max-width: 100%;
     pointer-events: auto;
     overflow-x: scroll;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    /* -ms-overflow-style: none; 
+    /* scrollbar-width: none;  Firefox */
 }
 
 /* Hide scrollbar for Chrome, Safari, Opera */
@@ -59,7 +60,7 @@
     display: none;
 }
 
-.vapor-editor-button-row .vapor-editor-button {
+.vapor-editor-button-row>.vapor-editor-button {
     margin: 0 1em 0 0;
 }
 
@@ -69,7 +70,7 @@
     max-width: 100%;
 }
 
-.vapor-editor-button-row-stack .vapor-editor-button-row {
+.vapor-editor-button-row-stack>.vapor-editor-button-row {
     margin-bottom: 1em;
 }
 
@@ -103,7 +104,6 @@
     background-color: rgba(0,0,0,0.5);
     padding: 20px 20px 20px 20px;
     pointer-events: auto;
-    width: 50%;
 }
 
 .vapor-editor-object-editor-form {
@@ -115,6 +115,7 @@
     font-family: "Roboto", sans-serif;
     font-size: 18px;
     margin: auto;
+    white-space: nowrap;
 }
 
 .vapor-editor-object-editor-submit-button {
@@ -130,7 +131,7 @@
 }
 
 .vapor-editor-grouped-cells-row {
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
 }
 
 .vapor-editor-grouped-cells-row .vapor-editor-input {
@@ -143,4 +144,8 @@
 
 .vapor-editor-grouped-cells-row .vapor-editor-button-row {
     margin-bottom: 10px;
+}
+
+.vapor-editor-object-editor-title {
+    /* width: fit-content; */
 }

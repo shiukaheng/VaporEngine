@@ -23,10 +23,13 @@ function createObject(className, args={}) {
 }
 
 // Todo: Override playerObject / camera selection process
+//       Make object editor expandable !important
+//       Make back buttons !important
 //       Add Transform mode
 //       Add transformation controls in object editor
 //       Click to select (outline pass: https://stackoverflow.com/questions/26341396/outline-a-3d-object-in-three-js)
 //       List to select / search to select?
+//       Move transformControls to be handled by objects instead of viewer
 
 
 class EditorViewer extends Viewer {
@@ -199,13 +202,6 @@ class RowStack {
                 row.disabled = true
             })
         }
-        var ogHeight = row.domElement.clientHeight
-        if (ogHeight!==0) {
-            row.domElement.style.maxHeight = "0px"
-            row.domElement.style.overflowY = "hidden"
-            gsap.TweenLite.fromTo(row.domElement, {maxHeight: "0px"}, {maxHeight: ogHeight.toString()+"px", duration:0.1}) // Todo: Cancel animation if new animation happens
-        }
-        
         row.parent = this
     }
     remove(row) {
@@ -561,9 +557,9 @@ class ScaleCells {
         }
     }
     set value(object) {
-        this.xInput = object.x
-        this.yInput = object.y
-        this.zInput = object.z
+        this.xInput.value = object.x
+        this.yInput.value = object.y
+        this.zInput.value = object.z
     }
 }
 
@@ -630,6 +626,8 @@ class RotationCells {
     set value(object) {
         this.xInput.value = object.x
         this.yInput.value = object.y
+        this.zInput.value = object.z
+        this.orderInput.value = object.order
     }
 }
 
@@ -695,7 +693,9 @@ class ObjectEditor {
         // console.log(this.keysToEditDict)
         this.domElement = document.createElement("div")
         this.domElement.classList.add("vapor-editor-object-editor")
-        this.domElement.appendChild(new Label(`${className} <${uuid}>`, undefined, "24px").domElement)
+        this.titleElem = new Label(`${className} \<${uuid}\>`, undefined, "24px")
+        this.titleElem.domElement.classList.add("vapor-editor-object-editor-title")
+        this.domElement.appendChild(this.titleElem.domElement)
         this.form = document.createElement("table")
         this.form.style.marginTop = "20px"
         this.form.classList.add("vapor-editor-object-editor-form")
@@ -785,7 +785,9 @@ class ObjectEditor {
         this.viewer.objectEditors.delete(this)
     }
     updateTransform() {
-        console.log(this.keysToEditDict["position"]["element"].value)
+        this.keysToEditDict["position"]["element"].value = {...this.viewer.lookupUUID(this.uuid).args.position}
+        this.keysToEditDict["rotation"]["element"].value = {...this.viewer.lookupUUID(this.uuid).args.rotation}
+        this.keysToEditDict["scale"]["element"].value = {...this.viewer.lookupUUID(this.uuid).args.scale}
     }
 }
 
