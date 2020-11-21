@@ -48,15 +48,15 @@ class CollisionCloudObject extends Serializable.createConstructor(
 
         viewer.collisionList.push(this)
     }
-    unload(viewer) {
-        super.unload(viewer)
+    unload() {
+        this.viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
         if (this.args.visible===true) {
             this.container.remove(this.cloud)
         }
-        viewer.collisionList.splice(viewer.collisionList.indexOf(this), 1)
+        super.unload(viewer)
     }
     searchNormals(vec3, r) {
-        if (this.viewer) {
+        if ((this.viewer!==undefined)&&(this.args.pcdPath!=="")) {
             this.inverseTransform.getInverse(this.container.matrixWorld);
             this.searchLocalVec4.set(vec3.x, vec3.y, vec3.z, 1)
             this.searchLocalVec4.applyMatrix4(this.inverseTransform)

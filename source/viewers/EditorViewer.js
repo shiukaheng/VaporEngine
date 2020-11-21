@@ -2,7 +2,7 @@ var Viewer = require("./Viewer")
 var THREE = require("three")
 var gsap = require("gsap")
 var Serializable = require("../SerializationLib/Serializable")
-var PlayerObject = require("../Objects/PlayerObject")
+var { TransformControls, TransformControlsGizmo, TransformControlsPlane } = require("../helpers/TransformControls");
 
 var EditorViewerCss = require("./EditorViewer.css")
 
@@ -22,6 +22,13 @@ function createObject(className, args={}) {
     return new scm.classList[className](args)
 }
 
+// Todo: Override playerObject / camera selection process
+//       Add Transform mode
+//       Add transformation controls in object editor
+//       Click to select (outline pass: https://stackoverflow.com/questions/26341396/outline-a-3d-object-in-three-js)
+//       List to select / search to select?
+
+
 class EditorViewer extends Viewer {
     constructor(containerElement) {
         super(containerElement, false)
@@ -30,6 +37,9 @@ class EditorViewer extends Viewer {
         this.floor = new THREE.Mesh(this.floorGeom, this.floorMat)
         this.floor.rotation.x = Math.PI/2
         this.scene.add(this.floor)
+
+        this.transformControls = new TransformControls(this.rendererCamera, this.renderer.domElement);
+        this.scene.add(this.transformControls)
 
         this.UIContainer = document.createElement("div")
         this.UIContainer.classList.add("vapor-editor-overlay")
@@ -445,7 +455,7 @@ class ObjectEditor {
         // console.log(this.keysToEditDict)
         this.domElement = document.createElement("div")
         this.domElement.classList.add("vapor-editor-object-editor")
-        this.domElement.appendChild(new Label(className+" properties", undefined, "24px").domElement)
+        this.domElement.appendChild(new Label(`${className} Properties <${uuid}>`, undefined, "24px").domElement)
         this.form = document.createElement("table")
         this.form.style.marginTop = "20px"
         this.form.classList.add("vapor-editor-object-editor-form")
