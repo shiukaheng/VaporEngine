@@ -4,16 +4,18 @@ var THREE = require("three")
 
 class TestObject extends Serializable.createConstructor(
     {
-        "color": "red"
+        "color": "red",
+        "wireframe": true
     },
     function(scope) {
     },  
     {
-        "color": Serializable.readOnlyHandler()
+        "color": Serializable.readOnlyHandler(),
+        "wireframe": Serializable.readOnlyHandler()
     },
     function(scope) {
         var geom = new THREE.BoxGeometry()
-        var mat = new THREE.MeshBasicMaterial({color: scope.args.color, wireframe: true})
+        var mat = new THREE.MeshBasicMaterial({color: scope.args.color, wireframe: scope.args.wireframe})
         scope.obj = new THREE.Mesh(geom, mat)
         if (scope.constructor.name===TestObject.name) {
             scope.declareAssetsLoaded()

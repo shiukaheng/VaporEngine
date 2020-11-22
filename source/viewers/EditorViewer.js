@@ -56,11 +56,14 @@ class EditorViewer extends Viewer {
         // Main menu
         var mainMenu = new Row([new Button(()=>{uiRowStack.add(classCreationMenu)},"Add"), new Button(undefined,"Select"), new Button(undefined,"Select from list"), new Button(undefined,"Settings")])
         uiRowStack.add(mainMenu)
-        // Main menu -> Add
-        var classCreationMenuButtons = []
+        // Main menu -> Add | Todo: Spawn new item at player position
+        var closeButton = new Button(()=>{classCreationMenu.parent.remove(classCreationMenu)}, "⨉")
+        closeButton.domElement.classList.add("vapor-editor-close-button")
+        var classCreationMenuButtons = [closeButton]
         getObjectClassNames().forEach(className=>{
             classCreationMenuButtons.push(new Button(()=>{
                 var newObjectInit = createObject(className)
+                var uuid = newObjectInit.uuid
                 this.add(newObjectInit)
                 this.editTransformUUID(newObjectInit.uuid)
                 this.transformControls.addEventListener("objectChange", ()=>{
@@ -76,13 +79,20 @@ class EditorViewer extends Viewer {
                     objectEditor.close()
                 }, ()=>{
                     this.editTransformUUID(newObjectInit.uuid)
+                }, ()=>{
+                    uiRowStack.remove(objectEditor)
+                    uiRowStack.remove(classCreationMenu)
+                    this.exitEditTransform()
+                    objectEditor.close()
+                    this.remove(this.lookupUUID(uuid))
                 })
                 uiRowStack.add(objectEditor)
             }, className))
         })
         var classCreationMenu = new Row(classCreationMenuButtons)
+        // Todo: Main menu -> Select from list 
     }
-    editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode.
+    editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode. Also, add rotation and scaling functionality.
         this.allowUserControl = false
         this.allowPointerLock = false
         this.transformControls.attach(this.lookupUUID(uuid).container)
@@ -395,11 +405,13 @@ class InputCell {
 }
 
 class CheckBox {
-    constructor(defaultVal) {
+    constructor(defaultVal, onChange=()=>{}) {
+        this.onChange = onChange
         this.domElement = document.createElement("input")
         this.domElement.type = "checkbox"
         this.domElement.checked = defaultVal
         this.domElement.classList.add("vapor-editor-checkbox")
+        this.domElement.addEventListener("change", (e)=>{this.onChange()})
     }
     get value() {
         return this.domElement.checked
@@ -413,7 +425,7 @@ class Label {
     constructor(text, fontColor="#FFFFFF", fontSize="18px") {
         this.domElement = document.createElement("div")
         this.domElement.classList.add("vapor-editor-label")
-        this.domElement.innerHTML = text
+        this.domElement.textContent = text
         this.domElement.style.color = fontColor
         this.domElement.style.fontSize = fontSize
     }
@@ -632,7 +644,7 @@ class RotationCells {
 }
 
 class ObjectEditor {
-    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, initAsDefault=true) {
+    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, onCancel=()=>{}, initAsDefault=true) {
         this.viewer = editorViewer
         this.viewer.objectEditors.add(this)
         this.close = this.close.bind(this)
@@ -643,6 +655,7 @@ class ObjectEditor {
         }
         this.onDone = onDone
         this.onApply = onApply
+        this.onCancel = onCancel
         this.valid = false
         this.checkForms = this.checkForms.bind(this)
         this.done = this.done.bind(this)
@@ -660,7 +673,7 @@ class ObjectEditor {
             if (["uuid", "className", "serialize"].indexOf(key)<0) {
                 if (typeof keyMeta.defaultValue === "boolean") {
                     this.keysToEditDict[key] = {
-                        "element": new CheckBox(this.viewer.lookupUUID(uuid).args[key])
+                        "element": new CheckBox(this.viewer.lookupUUID(uuid).args[key], this.checkForms)
                     }
                 }
                 if ((typeof keyMeta.defaultValue === "number")||keyMeta.defaultValue instanceof Number) {
@@ -695,7 +708,22 @@ class ObjectEditor {
         this.domElement.classList.add("vapor-editor-object-editor")
         this.titleElem = new Label(`${className} \<${uuid}\>`, undefined, "24px")
         this.titleElem.domElement.classList.add("vapor-editor-object-editor-title")
-        this.domElement.appendChild(this.titleElem.domElement)
+        this.titleCollapse = new Button(()=>{
+            if (this.titleCollapse.text === "Expand") {
+                this.titleCollapse.text = "Collapse"
+                this.form.style.display = ""
+                this.postFormRow.domElement.style.display = ""
+            } else {
+                this.titleCollapse.text = "Expand"
+                this.form.style.display = "none"
+                this.postFormRow.domElement.style.display = "none"
+            }
+        }, "Collapse")
+        this.titleRow = new Row([this.titleElem, this.titleCollapse])
+        this.titleRow.domElement.classList.add("vapor-editor-object-editor-title-row")
+        this.domElement.appendChild(this.titleRow.domElement)
+
+
         this.form = document.createElement("table")
         this.form.style.marginTop = "20px"
         this.form.classList.add("vapor-editor-object-editor-form")
@@ -716,10 +744,16 @@ class ObjectEditor {
             this.form.appendChild(v_spacing)
         })
         this.domElement.appendChild(this.form)
+
+        this.cancelButton = new Button(()=>{this.onCancel()}, "Cancel")
+        this.cancelButton.domElement.classList.add("vapor-editor-close-button")
+
         this.submitButton = new Button(()=>{this.done()}, "Done")
         this.submitButton.disabled = true
-        this.submitButton.domElement.classList.add("vapor-editor-object-editor-submit-button")
-        this.domElement.appendChild(this.submitButton.domElement)
+
+        this.postFormRow = new Row([this.cancelButton, this.submitButton])
+        this.postFormRow.domElement.classList.add("vapor-editor-post-form-row")
+        this.domElement.appendChild(this.postFormRow.domElement)
         this.checkForms()
     }
     checkForms() {

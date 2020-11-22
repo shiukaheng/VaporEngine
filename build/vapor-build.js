@@ -53442,16 +53442,18 @@ var THREE = require("three")
 
 class TestObject extends Serializable.createConstructor(
     {
-        "color": "red"
+        "color": "red",
+        "wireframe": true
     },
     function(scope) {
     },  
     {
-        "color": Serializable.readOnlyHandler()
+        "color": Serializable.readOnlyHandler(),
+        "wireframe": Serializable.readOnlyHandler()
     },
     function(scope) {
         var geom = new THREE.BoxGeometry()
-        var mat = new THREE.MeshBasicMaterial({color: scope.args.color, wireframe: true})
+        var mat = new THREE.MeshBasicMaterial({color: scope.args.color, wireframe: scope.args.wireframe})
         scope.obj = new THREE.Mesh(geom, mat)
         if (scope.constructor.name===TestObject.name) {
             scope.declareAssetsLoaded()
@@ -53769,7 +53771,7 @@ function vec3ShadowHandler(shadowVec3TraversalFunc) {
 }
 module.exports = vec3ShadowHandler
 },{"../Serialization":34}],69:[function(require,module,exports){
-var css = "@import url(\"https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap\");\n.vapor-editor-button {\n  background-color: white;\n  height: 1em;\n  padding: 0.4em 1em 0.5em 1em;\n  font-size: 18px;\n  font-family: \"Roboto\", sans-serif;\n  transition: background-color 0.1s, opacity 0.1s;\n  pointer-events: auto;\n  cursor: pointer;\n  white-space: nowrap;\n}\n.vapor-editor-button-selected {\n  outline-style: solid;\n  outline-width: 4px;\n  outline-color: #fcba03;\n  outline-offset: -4px;\n}\n.vapor-editor-button:hover {\n  background-color: rgba(255,255,255,0.7);\n}\n.vapor-editor-disabled.vapor-editor-button,\n.vapor-editor-disabled *.vapor-editor-button {\n  cursor: default;\n  opacity: 0.5;\n  background-color: white;\n}\n.vapor-editor-overlay {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  /* background-color: rgba(255,255,255,0.5); */\n  z-index: 2;\n  padding: 30px 30px 30px 30px;\n  box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -webkit-box-sizing: border-box;\n  pointer-events: none;\n}\n.vapor-editor-button-row {\n  display: flex;\n  flex-wrap: nowrap;\n  height: max-content;\n  max-width: 100%;\n  pointer-events: auto;\n  overflow-x: scroll;\n  /* -ms-overflow-style: none; \r\n    /* scrollbar-width: none;  Firefox */\n}\n/* Hide scrollbar for Chrome, Safari, Opera */\n.vapor-editor-button-row::-webkit-scrollbar {\n  display: none;\n}\n.vapor-editor-button-row>.vapor-editor-button {\n  margin: 0 1em 0 0;\n}\n.vapor-editor-button-row-stack {\n  display: flex;\n  flex-direction: column;\n  max-width: 100%;\n}\n.vapor-editor-button-row-stack>.vapor-editor-button-row {\n  margin-bottom: 1em;\n}\n.vapor-editor-input {\n  font-family: \"Roboto\", sans-serif;\n  font-size: 18px;\n  /* border-color: red; */\n  border: 0;\n  outline-style: solid;\n  outline-color: #BBB;\n  outline-width: 2px;\n  outline-offset: -2px;\n  padding: 0.4em 0.5em 0.5em 0.5em;\n  pointer-events: auto;\n  width: 100%;\n}\n.vapor-editor-input:focus {\n  outline-color: #fcba03;\n}\n.vapor-editor-input-default {\n  color: #BBB;\n}\n.vapor-editor-input-invalid {\n  outline-color: red;\n}\n.vapor-editor-object-editor {\n  background-color: rgba(0,0,0,0.5);\n  padding: 20px 20px 20px 20px;\n  pointer-events: auto;\n}\n.vapor-editor-object-editor-form {\n  border-collapse: collapse;\n  width: 100%;\n}\n.vapor-editor-label {\n  font-family: \"Roboto\", sans-serif;\n  font-size: 18px;\n  margin: auto;\n  white-space: nowrap;\n}\n.vapor-editor-object-editor-submit-button {\n  width: fit-content;\n  margin-left: auto;\n  margin-right: 0;\n  margin-top: 10px;\n}\n.vapor-editor-grouped-cells-row {\n  /* display: flex; */\n  /* flex-direction: column; */\n}\n.vapor-editor-grouped-cells-row {\n  margin-bottom: 0;\n}\n.vapor-editor-grouped-cells-row .vapor-editor-input {\n  margin-left: 10px;\n}\n.vapor-editor-grouped-cells-row .vapor-editor-input+.vapor-editor-label {\n  margin-left: 10px;\n}\n.vapor-editor-grouped-cells-row .vapor-editor-button-row {\n  margin-bottom: 10px;\n}\n.vapor-editor-object-editor-title {\n  /* width: fit-content; */\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\EditorViewer.css" }, { "insertAt": "bottom" })); module.exports = css;
+var css = "@import url(\"https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap\");\n.vapor-editor-button {\n  background-color: white;\n  height: 1em;\n  padding: 0.4em 1em 0.5em 1em;\n  font-size: 18px;\n  font-family: \"Roboto\", sans-serif;\n  transition: background-color 0.1s, opacity 0.1s;\n  pointer-events: auto;\n  cursor: pointer;\n  white-space: nowrap;\n  user-select: none;\n}\n.vapor-editor-button-selected {\n  outline-style: solid;\n  outline-width: 4px;\n  outline-color: white;\n  outline-offset: -4px;\n}\n.vapor-editor-button:hover {\n  background-color: rgba(255,255,255,0.7);\n}\n.vapor-editor-disabled.vapor-editor-button,\n.vapor-editor-disabled *.vapor-editor-button {\n  cursor: default;\n  opacity: 0.5;\n  background-color: white;\n}\n.vapor-editor-overlay {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  /* background-color: rgba(255,255,255,0.5); */\n  z-index: 2;\n  padding: 30px 30px 30px 30px;\n  box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -webkit-box-sizing: border-box;\n  pointer-events: none;\n}\n.vapor-editor-button-row {\n  display: flex;\n  flex-wrap: nowrap;\n  height: max-content;\n  max-width: 100%;\n  pointer-events: auto;\n  overflow-x: scroll;\n  /* -ms-overflow-style: none; \r\n    /* scrollbar-width: none;  Firefox */\n}\n/* Hide scrollbar for Chrome, Safari, Opera */\n.vapor-editor-button-row::-webkit-scrollbar {\n  display: none;\n}\n.vapor-editor-button-row>.vapor-editor-button {\n  margin: 0 1em 0 0;\n}\n.vapor-editor-button-row-stack {\n  display: flex;\n  flex-direction: column;\n  max-width: 100%;\n}\n.vapor-editor-button-row-stack>.vapor-editor-button-row {\n  margin-bottom: 1em;\n}\n.vapor-editor-object-editor-title-row>.vapor-editor-button {\n  margin: auto;\n}\n.vapor-editor-input {\n  font-family: \"Roboto\", sans-serif;\n  font-size: 18px;\n  /* border-color: red; */\n  border: 0;\n  outline-style: solid;\n  outline-color: #BBB;\n  outline-width: 2px;\n  outline-offset: -2px;\n  padding: 0.4em 0.5em 0.5em 0.5em;\n  pointer-events: auto;\n  width: 100%;\n}\n.vapor-editor-input:focus {\n  outline-color: white;\n}\n.vapor-editor-input-default {\n  color: #BBB;\n}\n.vapor-editor-input-invalid {\n  outline-color: #9e3b3b;\n}\n.vapor-editor-object-editor {\n  background-color: rgba(0,0,0,0.5);\n  padding: 20px 20px 20px 20px;\n  pointer-events: auto;\n}\n.vapor-editor-object-editor-form {\n  border-collapse: collapse;\n  width: 100%;\n}\n.vapor-editor-label {\n  font-family: \"Roboto\", sans-serif;\n  font-size: 18px;\n  margin: auto;\n  white-space: nowrap;\n}\n.vapor-editor-grouped-cells-row {\n  /* display: flex; */\n  /* flex-direction: column; */\n}\n.vapor-editor-grouped-cells-row {\n  margin-bottom: 0;\n}\n.vapor-editor-grouped-cells-row *+* {\n  margin-left: 10px;\n}\n.vapor-editor-grouped-cells-row .vapor-editor-button-row {\n  margin-bottom: 10px;\n}\n.vapor-editor-object-editor-title {\n  /* width: fit-content; */\n}\n.vapor-editor-object-editor-title-row {\n  display: inline-flex;\n}\n.vapor-editor-object-editor-title-row *+* {\n  margin-left: 10px !important;\n}\n.vapor-editor-post-form-row {\n  margin-top: 10px;\n  display: flex;\n  justify-content: flex-end;\n}\n.vapor-editor-post-form-row * {\n  margin: 0 !important;\n}\n.vapor-editor-post-form-row *~* {\n  margin: 0 0 0 1em !important;\n}\n.vapor-editor-close-button {\n  color: white;\n  background-color: #9e3b3b;\n}\n.vapor-editor-close-button:hover {\n  color: white;\n  background-color: #9e3b3b7e;\n}\n.vapor-editor-disabled.vapor-editor-close-button,\n.vapor-editor-disabled *.vapor-editor-close-button {\n  cursor: default;\n  opacity: 0.5;\n  background-color: #9e3b3b;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\EditorViewer.css" }, { "insertAt": "bottom" })); module.exports = css;
 },{"browserify-css":2}],70:[function(require,module,exports){
 var Viewer = require("./Viewer")
 var THREE = require("three")
@@ -53829,11 +53831,14 @@ class EditorViewer extends Viewer {
         // Main menu
         var mainMenu = new Row([new Button(()=>{uiRowStack.add(classCreationMenu)},"Add"), new Button(undefined,"Select"), new Button(undefined,"Select from list"), new Button(undefined,"Settings")])
         uiRowStack.add(mainMenu)
-        // Main menu -> Add
-        var classCreationMenuButtons = []
+        // Main menu -> Add | Todo: Spawn new item at player position
+        var closeButton = new Button(()=>{classCreationMenu.parent.remove(classCreationMenu)}, "⨉")
+        closeButton.domElement.classList.add("vapor-editor-close-button")
+        var classCreationMenuButtons = [closeButton]
         getObjectClassNames().forEach(className=>{
             classCreationMenuButtons.push(new Button(()=>{
                 var newObjectInit = createObject(className)
+                var uuid = newObjectInit.uuid
                 this.add(newObjectInit)
                 this.editTransformUUID(newObjectInit.uuid)
                 this.transformControls.addEventListener("objectChange", ()=>{
@@ -53849,13 +53854,20 @@ class EditorViewer extends Viewer {
                     objectEditor.close()
                 }, ()=>{
                     this.editTransformUUID(newObjectInit.uuid)
+                }, ()=>{
+                    uiRowStack.remove(objectEditor)
+                    uiRowStack.remove(classCreationMenu)
+                    this.exitEditTransform()
+                    objectEditor.close()
+                    this.remove(this.lookupUUID(uuid))
                 })
                 uiRowStack.add(objectEditor)
             }, className))
         })
         var classCreationMenu = new Row(classCreationMenuButtons)
+        // Todo: Main menu -> Select from list 
     }
-    editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode.
+    editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode. Also, add rotation and scaling functionality.
         this.allowUserControl = false
         this.allowPointerLock = false
         this.transformControls.attach(this.lookupUUID(uuid).container)
@@ -54168,11 +54180,13 @@ class InputCell {
 }
 
 class CheckBox {
-    constructor(defaultVal) {
+    constructor(defaultVal, onChange=()=>{}) {
+        this.onChange = onChange
         this.domElement = document.createElement("input")
         this.domElement.type = "checkbox"
         this.domElement.checked = defaultVal
         this.domElement.classList.add("vapor-editor-checkbox")
+        this.domElement.addEventListener("change", (e)=>{this.onChange()})
     }
     get value() {
         return this.domElement.checked
@@ -54186,7 +54200,7 @@ class Label {
     constructor(text, fontColor="#FFFFFF", fontSize="18px") {
         this.domElement = document.createElement("div")
         this.domElement.classList.add("vapor-editor-label")
-        this.domElement.innerHTML = text
+        this.domElement.textContent = text
         this.domElement.style.color = fontColor
         this.domElement.style.fontSize = fontSize
     }
@@ -54405,7 +54419,7 @@ class RotationCells {
 }
 
 class ObjectEditor {
-    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, initAsDefault=true) {
+    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, onCancel=()=>{}, initAsDefault=true) {
         this.viewer = editorViewer
         this.viewer.objectEditors.add(this)
         this.close = this.close.bind(this)
@@ -54416,6 +54430,7 @@ class ObjectEditor {
         }
         this.onDone = onDone
         this.onApply = onApply
+        this.onCancel = onCancel
         this.valid = false
         this.checkForms = this.checkForms.bind(this)
         this.done = this.done.bind(this)
@@ -54433,7 +54448,7 @@ class ObjectEditor {
             if (["uuid", "className", "serialize"].indexOf(key)<0) {
                 if (typeof keyMeta.defaultValue === "boolean") {
                     this.keysToEditDict[key] = {
-                        "element": new CheckBox(this.viewer.lookupUUID(uuid).args[key])
+                        "element": new CheckBox(this.viewer.lookupUUID(uuid).args[key], this.checkForms)
                     }
                 }
                 if ((typeof keyMeta.defaultValue === "number")||keyMeta.defaultValue instanceof Number) {
@@ -54468,7 +54483,22 @@ class ObjectEditor {
         this.domElement.classList.add("vapor-editor-object-editor")
         this.titleElem = new Label(`${className} \<${uuid}\>`, undefined, "24px")
         this.titleElem.domElement.classList.add("vapor-editor-object-editor-title")
-        this.domElement.appendChild(this.titleElem.domElement)
+        this.titleCollapse = new Button(()=>{
+            if (this.titleCollapse.text === "Expand") {
+                this.titleCollapse.text = "Collapse"
+                this.form.style.display = ""
+                this.postFormRow.domElement.style.display = ""
+            } else {
+                this.titleCollapse.text = "Expand"
+                this.form.style.display = "none"
+                this.postFormRow.domElement.style.display = "none"
+            }
+        }, "Collapse")
+        this.titleRow = new Row([this.titleElem, this.titleCollapse])
+        this.titleRow.domElement.classList.add("vapor-editor-object-editor-title-row")
+        this.domElement.appendChild(this.titleRow.domElement)
+
+
         this.form = document.createElement("table")
         this.form.style.marginTop = "20px"
         this.form.classList.add("vapor-editor-object-editor-form")
@@ -54489,10 +54519,16 @@ class ObjectEditor {
             this.form.appendChild(v_spacing)
         })
         this.domElement.appendChild(this.form)
+
+        this.cancelButton = new Button(()=>{this.onCancel()}, "Cancel")
+        this.cancelButton.domElement.classList.add("vapor-editor-close-button")
+
         this.submitButton = new Button(()=>{this.done()}, "Done")
         this.submitButton.disabled = true
-        this.submitButton.domElement.classList.add("vapor-editor-object-editor-submit-button")
-        this.domElement.appendChild(this.submitButton.domElement)
+
+        this.postFormRow = new Row([this.cancelButton, this.submitButton])
+        this.postFormRow.domElement.classList.add("vapor-editor-post-form-row")
+        this.domElement.appendChild(this.postFormRow.domElement)
         this.checkForms()
     }
     checkForms() {

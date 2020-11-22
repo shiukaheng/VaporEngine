@@ -10,12 +10,13 @@
     pointer-events: auto;
     cursor: pointer;
     white-space: nowrap;
+    user-select: none;
 }
 
 .vapor-editor-button-selected {
     outline-style: solid;
     outline-width: 4px;
-    outline-color: #fcba03;
+    outline-color: white;
     outline-offset: -4px;
 }
 
@@ -74,6 +75,9 @@
     margin-bottom: 1em;
 }
 
+.vapor-editor-object-editor-title-row>.vapor-editor-button {
+    margin: auto;
+}
 .vapor-editor-input {
   font-family: "Roboto", sans-serif;
   font-size: 18px;
@@ -89,7 +93,7 @@
 }
 
 .vapor-editor-input:focus {
-  outline-color: #fcba03;
+  outline-color: white;
 }
 
 .vapor-editor-input-default {
@@ -97,7 +101,7 @@
 }
 
 .vapor-editor-input-invalid {
-  outline-color: red;
+  outline-color: #9e3b3b;
 }
 
 .vapor-editor-object-editor {
@@ -118,13 +122,6 @@
     white-space: nowrap;
 }
 
-.vapor-editor-object-editor-submit-button {
-    width: fit-content;
-    margin-left: auto;
-    margin-right: 0;
-    margin-top: 10px;
-}
-
 .vapor-editor-grouped-cells-row {
     /* display: flex; */
     /* flex-direction: column; */
@@ -134,11 +131,7 @@
     margin-bottom: 0;
 }
 
-.vapor-editor-grouped-cells-row .vapor-editor-input {
-    margin-left: 10px;
-}
-
-.vapor-editor-grouped-cells-row .vapor-editor-input+.vapor-editor-label  {
+.vapor-editor-grouped-cells-row *+*  {
     margin-left: 10px;
 }
 
@@ -148,4 +141,43 @@
 
 .vapor-editor-object-editor-title {
     /* width: fit-content; */
+}
+
+.vapor-editor-object-editor-title-row {
+    display: inline-flex;
+}
+
+.vapor-editor-object-editor-title-row *+* {
+    margin-left: 10px !important;
+}
+
+.vapor-editor-post-form-row {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.vapor-editor-post-form-row * {
+    margin: 0 !important;
+}
+
+.vapor-editor-post-form-row *~* {
+    margin: 0 0 0 1em !important;
+}
+
+.vapor-editor-close-button {
+    color: white;
+    background-color: #9e3b3b;
+}
+
+.vapor-editor-close-button:hover {
+    color: white;
+    background-color: #9e3b3b7e;
+}
+
+.vapor-editor-disabled.vapor-editor-close-button,
+.vapor-editor-disabled *.vapor-editor-close-button {
+    cursor: default;
+    opacity: 0.5;
+    background-color:#9e3b3b;
 }
