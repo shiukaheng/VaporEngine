@@ -53866,6 +53866,7 @@ class EditorViewer extends Viewer {
         })
         var classCreationMenu = new Row(classCreationMenuButtons)
         // Todo: Main menu -> Select from list 
+        
     }
     editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode. Also, add rotation and scaling functionality.
         this.allowUserControl = false
@@ -54704,7 +54705,7 @@ class Viewer {
         document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
 
         // Initialize renderer
-        this.renderer = new THREE.WebGLRenderer({antialias: true});
+        this.renderer = new THREE.WebGL1Renderer({antialias: true});
         this.renderer.domElement.className += "vaporViewer"
         this.containerElement.appendChild(this.renderer.domElement)
         this.renderer.setSize(this.containerElement.scrollWidth, this.containerElement.scrollHeight)

@@ -91,6 +91,7 @@ class EditorViewer extends Viewer {
         })
         var classCreationMenu = new Row(classCreationMenuButtons)
         // Todo: Main menu -> Select from list 
+
     }
     editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode. Also, add rotation and scaling functionality.
         this.allowUserControl = false
@@ -103,6 +104,55 @@ class EditorViewer extends Viewer {
         this.allowPointerLock = true
     }
     // Todo: Modify render loop; setCamera function also create cameraHelpers for each non-active camera
+}
+
+class UIElement {
+    constructor() {
+        this._disabled = false
+        this.parent = null
+        this._domElement = this.createDOMElement()
+    }
+    createDOMElement() {
+        return document.createElement("div")
+    }
+    addTo(elem) {
+        if (!(elem instanceof containerUIElement)) {
+            throw new Error("invalid element")
+        }
+        elem.domElement.appendChild(this.domElement)
+    }
+    removeFromParent() {
+        if (this.parent === null) {
+            throw new Error("element has no parent")
+        }
+        this.parent.domElement.removeChild(this.domElement)
+    }
+    get disabled() {
+        return this._disabled
+    }
+    set disabled(bool) {
+        this._disabled = bool
+    }
+    get domElement() {
+        return this._domElement
+    }
+}
+
+class containerUIElement extends UIElement {
+    constructor(elements=[]) {
+        elements.forEach(element => {
+            this.add(element)
+        })
+    }
+    add(elem) {
+        elem.addTo(this)
+    }
+    remove(elem) {
+        if (!(elem.parent === this)) {
+            throw new Error("element not child")
+        }
+        elem.removeFromParent()
+    }
 }
 
 class Button {
