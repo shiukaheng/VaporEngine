@@ -53778,6 +53778,7 @@ var THREE = require("three")
 var gsap = require("gsap")
 var Serializable = require("../SerializationLib/Serializable")
 var { TransformControls, TransformControlsGizmo, TransformControlsPlane } = require("../helpers/TransformControls");
+var PlayerObject = require("../Objects/PlayerObject")
 
 var EditorViewerCss = require("./EditorViewer.css")
 
@@ -53809,6 +53810,11 @@ function createObject(className, args={}) {
 class EditorViewer extends Viewer {
     constructor(containerElement) {
         super(containerElement, false)
+
+        this._editorPlayerView = true
+        this.editorPlayer = new PlayerObject()
+        this.add(this.editorPlayer)
+
         this.floorMat = new THREE.MeshBasicMaterial({wireframe:true, color:"grey"})
         this.floorGeom = new THREE.PlaneGeometry(200,200,100,100)
         this.floor = new THREE.Mesh(this.floorGeom, this.floorMat)
@@ -53878,6 +53884,58 @@ class EditorViewer extends Viewer {
         this.allowPointerLock = true
     }
     // Todo: Modify render loop; setCamera function also create cameraHelpers for each non-active camera
+
+    /** Render loop */
+    renderLoop() {
+        if (this.editorPlayerView) {
+            var dt = this.renderClock.getDelta()
+            this.objects.update(dt, this._updatePlayerOnly)
+            if (this.editorPlayer.playerModifier.camera) {
+                if (this.skippedRender) {
+                    this.onContainerElementResize()
+                }
+                // Copy source camera to renderer camera, this is so that the rendering camera never actually changes.
+                this.rendererCamera.copy(this.editorPlayer.playerModifier.camera)
+                this.rendererCamera.position.setFromMatrixPosition(this.editorPlayer.playerModifier.camera.matrixWorld)
+                this.rendererCamera.rotation.setFromRotationMatrix(this.editorPlayer.playerModifier.camera.matrixWorld)
+                this.rendererCamera.fov = this.editorPlayer.playerModifier.camera.fov
+    
+                // Point culling for Potree clouds
+                if (this.renderer.xr.isPresenting) {
+                    this.potree.updatePointClouds(this.potreePointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer) // This works but this.renderer.getCamera is undocumented. Maybe there's a better away?
+                } else {
+                    this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+                }
+    
+                // Render stuff
+                if (this.renderer.xr.isPresenting) {
+                    this.renderer.render(this.scene, this.editorPlayer.playerModifier.camera)
+                } else {
+                    this.renderer.render(this.scene, this.rendererCamera) // Somehow, the XR camera doesnt follow the rendererCamera..
+                }
+                
+    
+                // Update flags
+                this.skippedRender = false
+            } else {
+                if (!this.skippedRender) {
+                    // console.log("No camera set. Skipping render.")
+                    this.skippedRender = true
+                }
+            }
+        } else {
+            super.renderLoop()
+        }
+    }
+    
+    set editorPlayerView(val) {
+        if (typeof val === "boolean") {
+            this._editorPlayerView = val
+        }
+    }
+    get editorPlayerView() {
+        return this._editorPlayerView
+    }
 }
 
 class UIElement {
@@ -53928,6 +53986,10 @@ class containerUIElement extends UIElement {
         elem.removeFromParent()
     }
 }
+
+// class objectListSelector extends containerUIElement {
+//     constructor(object=)
+// }
 
 class Button {
     constructor(buttonFunc=()=>{}, text="Button", fontSize="18px", disabled=false) {
@@ -54669,7 +54731,7 @@ class ObjectEditor {
 }
 
 module.exports = EditorViewer
-},{"../SerializationLib/Serializable":36,"../helpers/TransformControls":44,"./EditorViewer.css":69,"./Viewer":71,"gsap":5,"three":7}],71:[function(require,module,exports){
+},{"../Objects/PlayerObject":33,"../SerializationLib/Serializable":36,"../helpers/TransformControls":44,"./EditorViewer.css":69,"./Viewer":71,"gsap":5,"three":7}],71:[function(require,module,exports){
 var THREE = require("three")
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var ThreeLoader = require('@pnext/three-loader')
