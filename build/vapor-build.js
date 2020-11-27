@@ -53806,7 +53806,6 @@ function createObject(className, args={}) {
 //       List to select / search to select?
 //       Move transformControls to be handled by objects instead of viewer
 
-
 class EditorViewer extends Viewer {
     constructor(containerElement) {
         super(containerElement, false)
@@ -53865,8 +53864,8 @@ class EditorViewer extends Viewer {
             }, className))
         })
         var classCreationMenu = new Row(classCreationMenuButtons)
-        // Todo: Main menu -> Select from list 
-        
+        // Todo: Main menu -> Select from list
+
     }
     editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode. Also, add rotation and scaling functionality.
         this.allowUserControl = false
@@ -53879,6 +53878,55 @@ class EditorViewer extends Viewer {
         this.allowPointerLock = true
     }
     // Todo: Modify render loop; setCamera function also create cameraHelpers for each non-active camera
+}
+
+class UIElement {
+    constructor() {
+        this._disabled = false
+        this.parent = null
+        this._domElement = this.createDOMElement()
+    }
+    createDOMElement() {
+        return document.createElement("div")
+    }
+    addTo(elem) {
+        if (!(elem instanceof containerUIElement)) {
+            throw new Error("invalid element")
+        }
+        elem.domElement.appendChild(this.domElement)
+    }
+    removeFromParent() {
+        if (this.parent === null) {
+            throw new Error("element has no parent")
+        }
+        this.parent.domElement.removeChild(this.domElement)
+    }
+    get disabled() {
+        return this._disabled
+    }
+    set disabled(bool) {
+        this._disabled = bool
+    }
+    get domElement() {
+        return this._domElement
+    }
+}
+
+class containerUIElement extends UIElement {
+    constructor(elements=[]) {
+        elements.forEach(element => {
+            this.add(element)
+        })
+    }
+    add(elem) {
+        elem.addTo(this)
+    }
+    remove(elem) {
+        if (!(elem.parent === this)) {
+            throw new Error("element not child")
+        }
+        elem.removeFromParent()
+    }
 }
 
 class Button {
@@ -54024,7 +54072,7 @@ function isInt(val) {
     var intVal = parseInt(val, 10);
     return parseFloat(val) == intVal && !isNaN(intVal);
 }
-
+ 
 class InputCell {
     constructor(interpType="string", defaultStr, valCheck=()=>{return true}, onBlur=()=>{}) {
         if (!(this.supportedInterpTypes.indexOf(interpType) >= 0)) {
@@ -54420,7 +54468,7 @@ class RotationCells {
 }
 
 class ObjectEditor {
-    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, onCancel=()=>{}, initAsDefault=true) {
+    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, onCancel=()=>{}, collapse=false, initAsDefault=true) {
         this.viewer = editorViewer
         this.viewer.objectEditors.add(this)
         this.close = this.close.bind(this)
@@ -54435,6 +54483,8 @@ class ObjectEditor {
         this.valid = false
         this.checkForms = this.checkForms.bind(this)
         this.done = this.done.bind(this)
+        this._collapse = false
+        this.collapse = collapse
         var className = this.object.args.className
         // check if is valid Object class
         if (getObjectClassNames().indexOf(className) < 0) {
@@ -54486,13 +54536,9 @@ class ObjectEditor {
         this.titleElem.domElement.classList.add("vapor-editor-object-editor-title")
         this.titleCollapse = new Button(()=>{
             if (this.titleCollapse.text === "Expand") {
-                this.titleCollapse.text = "Collapse"
-                this.form.style.display = ""
-                this.postFormRow.domElement.style.display = ""
+                this.collapse = false
             } else {
-                this.titleCollapse.text = "Expand"
-                this.form.style.display = "none"
-                this.postFormRow.domElement.style.display = "none"
+                this.collapse = true
             }
         }, "Collapse")
         this.titleRow = new Row([this.titleElem, this.titleCollapse])
@@ -54598,6 +54644,27 @@ class ObjectEditor {
         this.keysToEditDict["position"]["element"].value = {...this.viewer.lookupUUID(this.uuid).args.position}
         this.keysToEditDict["rotation"]["element"].value = {...this.viewer.lookupUUID(this.uuid).args.rotation}
         this.keysToEditDict["scale"]["element"].value = {...this.viewer.lookupUUID(this.uuid).args.scale}
+    }
+    get collapse() {
+        return this._collapse
+    }
+    set collapse(val) {
+        if (val!==this.collapse) {
+            if (val===true) {
+                this.titleCollapse.text = "Expand"
+                this.form.style.display = "none"
+                this.postFormRow.domElement.style.display = "none"
+                this._collapse = val
+                return
+            } else if (val===false) {
+                this.titleCollapse.text = "Collapse"
+                this.form.style.display = ""
+                this.postFormRow.domElement.style.display = ""
+                this._collapse = val
+                return
+            }
+            throw "invalid value"
+        }
     }
 }
 
