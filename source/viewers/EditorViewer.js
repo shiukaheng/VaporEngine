@@ -38,6 +38,8 @@ class EditorViewer extends Viewer {
 
         this._editorPlayerView = true
         this.editorPlayer = new PlayerObject()
+        this.editorPlayer.position.y = 1.8
+        this.editorPlayer.position.z = 4
         this.add(this.editorPlayer)
 
         this.floorMat = new THREE.MeshBasicMaterial({wireframe:true, color:"grey"})
@@ -59,43 +61,59 @@ class EditorViewer extends Viewer {
         var uiRowStack = new RowStack([], true)
         this.UIContainer.appendChild(uiRowStack.domElement)
         // Main menu
-        var mainMenu = new Row([new Button(()=>{uiRowStack.add(classCreationMenu)},"Add"), new Button(undefined,"Select"), new Button(undefined,"Select from list"), new Button(undefined,"Settings")])
+        var mainMenu = new Row([new Button(()=>{uiRowStack.add(classCreationMenu)},"Add"), new Button(undefined,"Select"), new Button(()=>{uiRowStack.add(createListSelect())},"Select from list"), new Button(undefined,"Settings")])
         uiRowStack.add(mainMenu)
         // Main menu -> Add | Todo: Spawn new item at player position
-        var closeButton = new Button(()=>{classCreationMenu.parent.remove(classCreationMenu)}, "⨉")
-        closeButton.domElement.classList.add("vapor-editor-close-button")
-        var classCreationMenuButtons = [closeButton]
-        getObjectClassNames().forEach(className=>{
-            classCreationMenuButtons.push(new Button(()=>{
-                var newObjectInit = createObject(className)
-                var uuid = newObjectInit.uuid
-                this.add(newObjectInit)
-                this.editTransformUUID(newObjectInit.uuid)
-                this.transformControls.addEventListener("objectChange", ()=>{
-                    this.objectEditors.forEach(oe => {
-                        oe.updateTransform()
+        var classesCreateData = []
+        getObjectClassNames().forEach((className) => {
+            classesCreateData.push({
+                "text": className,
+                "onclick": ()=>{
+                    var newObjectInit = createObject(className)
+                    var uuid = newObjectInit.uuid
+                    this.add(newObjectInit)
+                    
+                    this.transformControls.addEventListener("objectChange", ()=>{
+                        this.objectEditors.forEach(oe => {
+                            oe.updateTransform()
+                        })
                     })
-                })
-                // console.log(newObjectInit.uuid, this.objects.args.objects)
-                var objectEditor = new ObjectEditor(this, newObjectInit.uuid, ()=>{
-                    uiRowStack.remove(objectEditor)
+                    var objectEditor = new ObjectEditor(this, newObjectInit.uuid, ()=>{
+                        uiRowStack.remove(objectEditor)
+                    }, ()=>{
+
+                    }, ()=>{
+                        uiRowStack.remove(objectEditor)
+                        this.exitEditTransform()
+                        this.remove(this.lookupUUID(uuid))
+                    })
                     uiRowStack.remove(classCreationMenu)
-                    this.exitEditTransform()
-                    objectEditor.close()
-                }, ()=>{
-                    this.editTransformUUID(newObjectInit.uuid)
-                }, ()=>{
-                    uiRowStack.remove(objectEditor)
-                    uiRowStack.remove(classCreationMenu)
-                    this.exitEditTransform()
-                    objectEditor.close()
-                    this.remove(this.lookupUUID(uuid))
-                })
-                uiRowStack.add(objectEditor)
-            }, className))
+                    uiRowStack.add(objectEditor)
+                }
+            })
         })
-        var classCreationMenu = new Row(classCreationMenuButtons)
-        // Todo: Main menu -> Select from list
+        var classCreationMenu = new SearchableList(classesCreateData, ()=>{uiRowStack.remove(classCreationMenu)})
+        // Main menu -> Select from list
+        var createListSelect = () => {
+            var objectList = []
+            this.objects.forEach(object => {
+                if (object !== this.editorPlayer) {
+                    objectList.push({
+                        "text": `${object.args.name} [${object.args.className}] <${object.args.uuid}>`,
+                        "onclick": ()=>{
+                            uiRowStack.remove(elem)
+                            var objectEditor = new ObjectEditor(this, object.args.uuid, ()=>{uiRowStack.remove(objectEditor)}, undefined, ()=>{uiRowStack.remove(objectEditor)}, true)
+                            uiRowStack.add(objectEditor)
+                        },
+                        "onmouseover": ()=>{"highlight / outline object"},
+                        "onmouseout": ()=>{"un-highlight / un-outline object"},
+                        "distance": 0 // get distance of activecamera to object, later sort list using this key, in increasing order
+                    })
+                }
+            })
+            var elem = new SearchableList(objectList, ()=>{uiRowStack.remove(elem)})
+            return elem
+        }
 
     }
     editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode. Also, add rotation and scaling functionality.
@@ -211,10 +229,6 @@ class containerUIElement extends UIElement {
         elem.removeFromParent()
     }
 }
-
-// class objectListSelector extends containerUIElement {
-//     constructor(object=)
-// }
 
 class Button {
     constructor(buttonFunc=()=>{}, text="Button", fontSize="18px", disabled=false) {
@@ -361,14 +375,17 @@ function isInt(val) {
 }
  
 class InputCell {
-    constructor(interpType="string", defaultStr, valCheck=()=>{return true}, onBlur=()=>{}) {
+    constructor(interpType="string", defaultStr, valCheck=()=>{return true}, onNewInput=(value)=>{}, updateMode="blur"||"input") { // updateMode could be blur or input
         if (!(this.supportedInterpTypes.indexOf(interpType) >= 0)) {
             throw new Error("invalid interpType")
         }
         this.onFocus = this.onFocus.bind(this)
         this.onBlur = this.onBlur.bind(this)
-        this.onBlurCB = onBlur
+        this.onInput = this.onInput.bind(this)
+        this.update = this.update.bind(this)
+        this.onNewInputCallback = onNewInput
         this._focus = false
+        this.updateMode = updateMode
 
         this.interpType = interpType
         this._valCheck = valCheck
@@ -387,6 +404,7 @@ class InputCell {
 
         this.domElement.addEventListener("focus", this.onFocus)
         this.domElement.addEventListener("blur", this.onBlur)
+        this.domElement.addEventListener("input", this.onInput)
 
         this.clearInput()
     }
@@ -496,6 +514,15 @@ class InputCell {
     get focus() {
         return this._focus
     }
+    get updateMode() {
+        return this._updateMode
+    }
+    set updateMode(val) {
+        if (!((val==="blur")||(val==="input"))) {
+            throw "invalid value for updateMode"
+        }
+        this._updateMode = val
+    }
     onFocus(e) {
         this._focus = true
         this.domElement.classList.remove("vapor-editor-input-invalid")
@@ -508,10 +535,21 @@ class InputCell {
         this._focus = false
         if (this.domElement.value === "") {
             this.clearInput()
+            this.onNewInputCallback(this.value)
         } else {
-            this.inputString(this.domElement.value)
+            if (this.updateMode==="blur") {
+                this.update()
+            }
         }
-        this.onBlurCB()
+    }
+    onInput(e) {
+        if (this.updateMode==="input") {
+            this.update()
+        }
+    }
+    update() {
+        this.inputString(this.domElement.value)
+        this.onNewInputCallback(this.value)
     }
 }
 
@@ -754,10 +792,18 @@ class RotationCells {
     }
 }
 
+class CloseButton extends Button {
+    constructor(callback = ()=>{}, fontSize=undefined, disabled=false) {
+        super(callback, "⨉", fontSize, disabled)
+        this.domElement.classList.add("vapor-editor-close-button")
+    }
+}
+
 class ObjectEditor {
     constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, onCancel=()=>{}, collapse=false, initAsDefault=true) {
         this.viewer = editorViewer
         this.viewer.objectEditors.add(this)
+        this.viewer.editTransformUUID(uuid)
         this.close = this.close.bind(this)
         this.uuid = uuid
         this.object = this.viewer.lookupUUID(uuid)
@@ -771,7 +817,6 @@ class ObjectEditor {
         this.checkForms = this.checkForms.bind(this)
         this.done = this.done.bind(this)
         this._collapse = false
-        this.collapse = collapse
         var className = this.object.args.className
         // check if is valid Object class
         if (getObjectClassNames().indexOf(className) < 0) {
@@ -828,7 +873,13 @@ class ObjectEditor {
                 this.collapse = true
             }
         }, "Collapse")
-        this.titleRow = new Row([this.titleElem, this.titleCollapse])
+        this.cancelButton = new Button(()=>{this.cancel()}, "⨉")
+        this.cancelButton.domElement.classList.add("vapor-editor-close-button")
+
+        this.submitButton = new Button(()=>{this.done()}, "Done")
+        this.submitButton.disabled = true
+
+        this.titleRow = new Row([this.cancelButton, this.titleElem, this.titleCollapse, this.submitButton])
         this.titleRow.domElement.classList.add("vapor-editor-object-editor-title-row")
         this.domElement.appendChild(this.titleRow.domElement)
 
@@ -849,21 +900,12 @@ class ObjectEditor {
             inputCell.appendChild(this.keysToEditDict[key].element.domElement)
             this.form.appendChild(tr)
             var v_spacing = document.createElement("tr")
-            v_spacing.style.height = "10px"
+            v_spacing.style.height = "1em"
             this.form.appendChild(v_spacing)
         })
         this.domElement.appendChild(this.form)
-
-        this.cancelButton = new Button(()=>{this.onCancel()}, "Cancel")
-        this.cancelButton.domElement.classList.add("vapor-editor-close-button")
-
-        this.submitButton = new Button(()=>{this.done()}, "Done")
-        this.submitButton.disabled = true
-
-        this.postFormRow = new Row([this.cancelButton, this.submitButton])
-        this.postFormRow.domElement.classList.add("vapor-editor-post-form-row")
-        this.domElement.appendChild(this.postFormRow.domElement)
         this.checkForms()
+        this.collapse = collapse
     }
     checkForms() {
         var err = 0
@@ -910,6 +952,7 @@ class ObjectEditor {
                 viewer.remove(this.viewer.lookupUUID(this.uuid))
                 var newObject = createObject(oldObject.args.className, modified_args)
                 viewer.add(newObject)
+                this.viewer.editTransformUUID(this.uuid)
                 this.viewer.startRender()
             } else {
                 throw e
@@ -920,11 +963,17 @@ class ObjectEditor {
     done() {
         this.apply()
         this.onDone()
+        this.close()
+    }
+    cancel() {
+        this.onCancel()
+        this.close()
     }
     update() {
         return
     }
     close() {
+        this.viewer.exitEditTransform()
         this.viewer.objectEditors.delete(this)
     }
     updateTransform() {
@@ -940,18 +989,50 @@ class ObjectEditor {
             if (val===true) {
                 this.titleCollapse.text = "Expand"
                 this.form.style.display = "none"
-                this.postFormRow.domElement.style.display = "none"
                 this._collapse = val
                 return
             } else if (val===false) {
                 this.titleCollapse.text = "Collapse"
                 this.form.style.display = ""
-                this.postFormRow.domElement.style.display = ""
                 this._collapse = val
                 return
             }
             throw "invalid value"
         }
+    }
+}
+
+class SearchableList {
+    constructor(listOfEntries=[], onClose=()=>{}) { // Entries should be of dicts that have key "text", "onclick", "onmouseover", and "onmouseout"
+        this.domElement = document.createElement("div")
+        this.domElement.classList.add("vapor-editor-searchable-list")
+        this.searchBox = new InputCell("string", "", undefined, (string)=>{
+            this.updateFilter(string)
+        }, "input")
+        this.closeButton = new CloseButton(onClose)
+        this.titleRow = new Row([this.closeButton, this.searchBox])
+        this.domElement.appendChild(this.titleRow.domElement)
+        this.entryListElement = document.createElement("div")
+        this.entryListElement.classList.add("vapor-editor-searchable-list-entry-list")
+        this.domElement.appendChild(this.entryListElement)
+        listOfEntries.forEach(elemData => {
+            var elem = document.createElement("div")
+            elem.classList.add("vapor-editor-searchable-list-entry")
+            elem.innerText = elemData.text
+            elem.onclick = elemData.onclick
+            elem.onmouseover = elemData.onmouseover
+            elem.onmouseout = elemData.onmouseout
+            this.entryListElement.appendChild(elem)
+        })
+    }
+    updateFilter(string) {
+        this.entryListElement.childNodes.forEach(childNode => {
+            if (childNode.innerText.toLowerCase().includes(string.toLowerCase())) {
+                childNode.style.display = ""
+            } else {
+                childNode.style.display = "none"
+            }
+        })
     }
 }
 

@@ -10,6 +10,7 @@ var enc = Serializable.encodeTraversal
 
 class BaseObject extends Serializable.createConstructor(
 {
+    "name": "Untitled object",
     "position": {
         "x": 0,
         "y": 0,

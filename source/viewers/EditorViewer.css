@@ -181,3 +181,38 @@
     opacity: 0.5;
     background-color:#9e3b3b;
 }
+
+.vapor-editor-searchable-list-entry-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.vapor-editor-searchable-list-entry {
+    background-color: white;
+    height: 1em;
+    padding: 0.4em 1em 0.5em 1em;
+    font-size: 18px;
+    font-family: "Roboto", sans-serif;
+    pointer-events: auto;
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+    transition: background-color 0.1s, opacity 0.1s;
+}
+
+.vapor-editor-searchable-list-entry:hover {
+    background-color: rgba(255,255,255,0.7);
+}
+
+.vapor-editor-searchable-list .vapor-editor-input {
+    padding: 0 0.5em 0 0.5em;
+}
+
+.vapor-editor-searchable-list>*+* {
+    padding-top: 1em;
+}
+
+.vapor-editor-searchable-list-entry-list>* {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
