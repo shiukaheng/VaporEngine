@@ -28,11 +28,18 @@ class SettingsInterface{
         return "1.0"
     }
     get activeCameraUUID() {
-        return this._viewer.sourceCamera.args.uuid
+        console.log(this._viewer.sourceCamera)
+        if (this._viewer.sourceCamera!==undefined) {
+            return this._viewer.sourceCamera.args.uuid
+        } else {
+            return undefined
+        }
+        
     }
     set activeCameraUUID(uuid) {
-        this._viewer.changeCamera(this._viewer.lookupUUID(uuid))
-        
+        if (uuid!==undefined) {
+            this._viewer.changeCamera(this._viewer.lookupUUID(uuid))
+        }
     }
     get potreePointBudget() {
         return this._viewer.potree.pointBudget
@@ -407,7 +414,7 @@ class Viewer {
     }
 
     /** Imports save */
-    import(save) {
+    import(save, applySettings=true) {
         if (save.settings.version !== this.settings.version) {
             throw "Save file version not compatible."
         }
@@ -420,16 +427,21 @@ class Viewer {
         this.deserializationContainer = new DeserializationObjectContainer()
         var rawSave = this.deserializationContainer.deserializeWithDependencies(JSON.parse(atob(save)))
         this.objects = rawSave.objects
+        if (applySettings===true) {
+            this.settings.import(rawSave.settings)
+        }
         this.objects.load(this)
     }
 
     /** Exports serialized JSON of object array of viewer */
     exportJSON() {
+        console.warn("exportJSON is deprecated, use export instead")
         return btoa(JSON.stringify(this.objects.serializeWithDependencies()))
     }
 
     /** Clears viewer, then imports serialized JSON of object array of viewer */
     importNewJSON(json, onSuccess=()=>{}, onFailure=()=>{}) {
+        console.warn("importNewJSON is deprecated, use import instead")
         this.objects.unload()
         try {
             var object = JSON.parse(atob(json))
@@ -441,6 +453,14 @@ class Viewer {
         this.objects = this.deserializationContainer.deserializeWithDependencies(object)
         this.objects.load(this)
         onSuccess()
+    }
+
+    changePlayerObjectUUID(uuid) {
+        var target = this.lookupUUID(uuid)
+        if (target.args.className!=="PlayerObject") {
+            throw "matched uuid not instance of PlayerObject"
+        }
+        target.setAsActive()
     }
 
     /** Sets active camera to camera specified */

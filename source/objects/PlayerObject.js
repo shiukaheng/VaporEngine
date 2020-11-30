@@ -115,6 +115,9 @@ class PlayerObject extends Serializable.createConstructor(
         this._demoLookTo = undefined
         this.allowUserControl = true
     }
+    setAsActive() {
+        this.playerModifier.setAsActive()
+    }
     get pan() {
         return -this.playerModifier.controlObject.rotation.y
     }

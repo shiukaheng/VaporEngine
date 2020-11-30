@@ -1,9 +1,9 @@
 var Viewer = require("./Viewer")
 var THREE = require("three")
-var gsap = require("gsap")
 var Serializable = require("../SerializationLib/Serializable")
 var { TransformControls, TransformControlsGizmo, TransformControlsPlane } = require("../helpers/TransformControls");
 var PlayerObject = require("../Objects/PlayerObject")
+var c2c = require("copy-to-clipboard")
 
 var EditorViewerCss = require("./EditorViewer.css")
 
@@ -23,14 +23,9 @@ function createObject(className, args={}) {
     return new scm.classList[className](args)
 }
 
-// Todo: Override playerObject / camera selection process
-//       Make object editor expandable !important
-//       Make back buttons !important
 //       Add Transform mode
-//       Add transformation controls in object editor
 //       Click to select (outline pass: https://stackoverflow.com/questions/26341396/outline-a-3d-object-in-three-js)
 //       List to select / search to select?
-//       Move transformControls to be handled by objects instead of viewer
 
 class EditorViewer extends Viewer {
     constructor(containerElement) {
@@ -39,7 +34,7 @@ class EditorViewer extends Viewer {
         this._editorPlayerView = true
         this.editorPlayer = new PlayerObject()
         this.editorPlayer.position.y = 1.8
-        this.editorPlayer.position.z = 4
+        // this.editorPlayer.position.z = 4
         this.add(this.editorPlayer)
 
         this.floorMat = new THREE.MeshBasicMaterial({wireframe:true, color:"grey"})
@@ -61,15 +56,16 @@ class EditorViewer extends Viewer {
         var uiRowStack = new RowStack([], true)
         this.UIContainer.appendChild(uiRowStack.domElement)
         // Main menu
-        var mainMenu = new Row([new Button(()=>{uiRowStack.add(classCreationMenu)},"Add"), new Button(undefined,"Select"), new Button(()=>{uiRowStack.add(createListSelect())},"Select from list"), new Button(undefined,"Settings")])
+        var mainMenu = new Row([new Button(()=>{uiRowStack.add(classCreationMenu)},"Add"), new Button(()=>{uiRowStack.add(createListSelect())},"Select"), new Button(()=>{c2c(this.export())}, "Save to clipboard")])
         uiRowStack.add(mainMenu)
-        // Main menu -> Add | Todo: Spawn new item at player position
+        // Main menu -> Add
         var classesCreateData = []
         getObjectClassNames().forEach((className) => {
             classesCreateData.push({
                 "text": className,
                 "onclick": ()=>{
                     var newObjectInit = createObject(className)
+                    newObjectInit.position.copy(this.editorPlayer.position)
                     var uuid = newObjectInit.uuid
                     this.add(newObjectInit)
                     
@@ -80,20 +76,22 @@ class EditorViewer extends Viewer {
                     })
                     var objectEditor = new ObjectEditor(this, newObjectInit.uuid, ()=>{
                         uiRowStack.remove(objectEditor)
-                    }, ()=>{
-
-                    }, ()=>{
+                    }, undefined,
+                    ()=>{
                         uiRowStack.remove(objectEditor)
                         this.exitEditTransform()
                         this.remove(this.lookupUUID(uuid))
-                    })
+                    },
+                    ()=>{
+                        uiRowStack.remove(objectEditor)
+                    }, undefined, undefined)
                     uiRowStack.remove(classCreationMenu)
                     uiRowStack.add(objectEditor)
                 }
             })
         })
         var classCreationMenu = new SearchableList(classesCreateData, ()=>{uiRowStack.remove(classCreationMenu)})
-        // Main menu -> Select from list
+        // Main menu -> Select
         var createListSelect = () => {
             var objectList = []
             this.objects.forEach(object => {
@@ -102,7 +100,7 @@ class EditorViewer extends Viewer {
                         "text": `${object.args.name} [${object.args.className}] <${object.args.uuid}>`,
                         "onclick": ()=>{
                             uiRowStack.remove(elem)
-                            var objectEditor = new ObjectEditor(this, object.args.uuid, ()=>{uiRowStack.remove(objectEditor)}, undefined, ()=>{uiRowStack.remove(objectEditor)}, true)
+                            var objectEditor = new ObjectEditor(this, object.args.uuid, ()=>{uiRowStack.remove(objectEditor)}, undefined, ()=>{uiRowStack.remove(objectEditor)}, ()=>{uiRowStack.remove(objectEditor)}, true)
                             uiRowStack.add(objectEditor)
                         },
                         "onmouseover": ()=>{"highlight / outline object"},
@@ -800,7 +798,7 @@ class CloseButton extends Button {
 }
 
 class ObjectEditor {
-    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, onCancel=()=>{}, collapse=false, initAsDefault=true) {
+    constructor(editorViewer, uuid, onDone=()=>{}, onApply=()=>{}, onCancel=()=>{}, onDelete=()=>{}, collapse=false, initAsDefault=true, allowDelete=true) {
         this.viewer = editorViewer
         this.viewer.objectEditors.add(this)
         this.viewer.editTransformUUID(uuid)
@@ -813,9 +811,11 @@ class ObjectEditor {
         this.onDone = onDone
         this.onApply = onApply
         this.onCancel = onCancel
+        this.onDelete = onDelete
         this.valid = false
         this.checkForms = this.checkForms.bind(this)
         this.done = this.done.bind(this)
+        this.delete = this.delete.bind(this)
         this._collapse = false
         var className = this.object.args.className
         // check if is valid Object class
@@ -873,13 +873,14 @@ class ObjectEditor {
                 this.collapse = true
             }
         }, "Collapse")
+        this.deleteButton = new Button(this.delete, "Delete")
         this.cancelButton = new Button(()=>{this.cancel()}, "⨉")
         this.cancelButton.domElement.classList.add("vapor-editor-close-button")
 
         this.submitButton = new Button(()=>{this.done()}, "Done")
         this.submitButton.disabled = true
 
-        this.titleRow = new Row([this.cancelButton, this.titleElem, this.titleCollapse, this.submitButton])
+        this.titleRow = new Row([this.cancelButton, this.titleElem, this.titleCollapse, this.deleteButton, this.submitButton])
         this.titleRow.domElement.classList.add("vapor-editor-object-editor-title-row")
         this.domElement.appendChild(this.titleRow.domElement)
 
@@ -906,6 +907,7 @@ class ObjectEditor {
         this.domElement.appendChild(this.form)
         this.checkForms()
         this.collapse = collapse
+        this.allowDelete = allowDelete
     }
     checkForms() {
         var err = 0
@@ -969,6 +971,11 @@ class ObjectEditor {
         this.onCancel()
         this.close()
     }
+    delete() {
+        this.viewer.remove(this.viewer.lookupUUID(this.uuid))
+        this.onDelete()
+        this.close()
+    }
     update() {
         return
     }
@@ -998,6 +1005,24 @@ class ObjectEditor {
                 return
             }
             throw "invalid value"
+        }
+    }
+    get allowDelete() {
+        if (this.deleteButton.domElement.style.display==="none") {
+            return false
+        } else {
+            return true
+        }
+    }
+    set allowDelete(val) {
+        if (typeof val === "boolean") {
+            if (val===true) {
+                this.deleteButton.domElement.style.display = ""
+            } else {
+                this.deleteButton.domElement.style.display = "none"
+            }
+        } else {
+            throw "allowDelete must be boolean"
         }
     }
 }
