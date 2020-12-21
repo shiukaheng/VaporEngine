@@ -1,4 +1,3 @@
-var THREE = require("three")
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var ThreeLoader = require('@pnext/three-loader')
 var ObjectArray = require("../arrays/ObjectArray")

@@ -1,6 +1,5 @@
 BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
-var THREE = require("three")
 
 class TestObject extends Serializable.createConstructor(
     {

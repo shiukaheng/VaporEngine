@@ -1,7 +1,6 @@
 var BaseObject = require("./BaseObject")
 var {Serializable} = require("../Serialization")
 var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
-var THREE = require("three")
 
 class BasePhysicalObject extends Serializable.createConstructor(
     // Default arguments

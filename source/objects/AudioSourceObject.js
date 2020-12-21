@@ -1,7 +1,5 @@
 var BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
-var THREE = require("three")
-
 
 /**
  * Convenience function to handle setters of AudioSourceObject class properties

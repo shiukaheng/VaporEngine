@@ -1,5 +1,4 @@
 var Viewer = require("./Viewer")
-var THREE = require("three")
 var Serializable = require("../SerializationLib/Serializable")
 var { TransformControls, TransformControlsGizmo, TransformControlsPlane } = require("../helpers/TransformControls");
 var PlayerObject = require("../Objects/PlayerObject")

@@ -6,8 +6,6 @@
  * Description: A THREE loader for PCD ascii and binary files.
  */
 
-var THREE = require("three")
-
 var PCDLoader = function ( manager ) {
 
 	THREE.Loader.call( this, manager );

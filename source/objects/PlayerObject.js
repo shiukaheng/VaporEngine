@@ -2,7 +2,6 @@ var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
 var argsProc = require("../utils/argumentProcessor")
-var THREE = require("three")
 var {Serializable} = require("../Serialization")
 
 function peek(x) {

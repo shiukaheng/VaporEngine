@@ -1,5 +1,4 @@
 var _depthkit2
-var THREE = require("three")
 
 var SceneUtils = {
 

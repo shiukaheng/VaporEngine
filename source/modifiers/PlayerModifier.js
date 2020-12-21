@@ -1,7 +1,6 @@
 var { Serializable } = require("../Serialization");
 var BaseModifier = require("./BaseModifier")
 var BasePhysicalObject = require("../objects/BasePhysicalObject")
-var THREE = require("three")
 
 function event_based_modifier_method(target, name, descriptor) {
     const original = descriptor.value;

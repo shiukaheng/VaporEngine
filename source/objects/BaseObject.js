@@ -1,4 +1,3 @@
-var THREE = require("three")
 var ModifierArray = require("../arrays/ModifierArray")
 var {Serializable} = require("../Serialization")
 var vec3sh = require("../utils/vec3ShadowHandler")

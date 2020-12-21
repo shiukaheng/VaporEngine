@@ -2,7 +2,6 @@ var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
 var Depthkit = require("../depthkit")
-var THREE = require("three")
 
 class DepthkitObject extends Serializable.createConstructor(
     {

@@ -1,5 +1,4 @@
 var BaseModifier = require("./BaseModifier")
-var THREE = require("three")
 var Serialization = require("../Serialization")
 var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
 

@@ -19,7 +19,7 @@ var {
 	SphereBufferGeometry,
 	TorusBufferGeometry,
 	Vector3
-} = require("three");
+} = require("@shiukaheng/three");
 
 var TransformControls = function ( camera, domElement ) {
 
