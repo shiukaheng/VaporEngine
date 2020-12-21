@@ -1,5 +1,5 @@
 
-const THREE = require("@shiukaheng/three")
+THREE = require("@shiukaheng/three")
 module.exports = {
     Arrays: require("./Arrays"),
     Modifiers: require("./Modifiers"),
