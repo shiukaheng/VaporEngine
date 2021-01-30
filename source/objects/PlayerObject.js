@@ -74,6 +74,7 @@ class PlayerObject extends Serializable.createConstructor(
             })
         }
         this._direction = this.__direction.copy(this.playerModifier.camera.position).addScaledVector(this._lastCam.position, -1).normalize()
+        // console.log(this.playerModifier.camera)
         this._lastCam.copy(this.playerModifier.camera) 
     }
     lookAt(pos) {

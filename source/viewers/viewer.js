@@ -15,10 +15,13 @@ class SettingsInterface{
         return {
             version: this.version,
             activeCameraUUID: this.activeCameraUUID,
-            potreePointBudget: this.potreePointBudget
+            potreePointBudget: this.potreePointBudget,
+            controlMode: this.controlMode, // TODO
+            vrButton: this.vrButton // TODO
         }
     }
     _importSettings(settingDict) {
+        // console.log(settingDict)
         this.activeCameraUUID = this.activeCameraUUID
         this.potreePointBudget = this.potreePointBudget
     }
@@ -27,7 +30,7 @@ class SettingsInterface{
         return "1.0"
     }
     get activeCameraUUID() {
-        console.log(this._viewer.sourceCamera)
+        // console.log(this._viewer.sourceCamera)
         if (this._viewer.sourceCamera!==undefined) {
             return this._viewer.sourceCamera.args.uuid
         } else {
@@ -414,7 +417,9 @@ class Viewer {
 
     /** Imports save */
     import(save, applySettings=true) {
-        if (save.settings.version !== this.settings.version) {
+        var container = new DeserializationObjectContainer()
+        var rawSave = container.deserializeWithDependencies(JSON.parse(atob(save)))
+        if (rawSave.settings.version !== this.settings.version) {
             throw "Save file version not compatible."
         }
         this.objects.unload()
@@ -423,11 +428,10 @@ class Viewer {
         } catch (e) {
             throw "Error reading save"
         }
-        this.deserializationContainer = new DeserializationObjectContainer()
-        var rawSave = this.deserializationContainer.deserializeWithDependencies(JSON.parse(atob(save)))
+        this.deserializationContainer = container
         this.objects = rawSave.objects
         if (applySettings===true) {
-            this.settings.import(rawSave.settings)
+            this.settings._importSettings(rawSave.settings)
         }
         this.objects.load(this)
     }

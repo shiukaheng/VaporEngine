@@ -141,8 +141,9 @@ class DeserializationObjectContainer{
                 if (!(actualTarget===undefined)) {
                     return actualTarget[prop]
                 } else {
-                    console.warn("Getting properties of uninstantiated object. Serializable objects should not access other Serializable objects during construction!")
-                    
+                    if (!(prop==="uuid")) {
+                        console.warn("Getting properties of uninstantiated object. Serializable objects should not access other Serializable objects during construction other than UUID!")
+                    }
                     return scope.bufferedVirtualInstances[uuid][prop]
                 }
             },

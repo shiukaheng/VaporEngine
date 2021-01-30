@@ -72,8 +72,7 @@ class PlayerModifier extends BaseModifier{
         this.camera = new THREE.PerspectiveCamera(90)
         // this.camera.rotation.y = Math.PI
         this.object.container.add(this.camera)
-
-        this.setAsActive()
+        // this.setAsActive()
     }
     unload() {
         this.object.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)

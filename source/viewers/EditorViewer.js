@@ -1,7 +1,9 @@
 var Viewer = require("./Viewer")
+var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var Serializable = require("../SerializationLib/Serializable")
 var { TransformControls, TransformControlsGizmo, TransformControlsPlane } = require("../helpers/TransformControls");
 var PlayerObject = require("../Objects/PlayerObject")
+var ObjectArray = require("../arrays/ObjectArray")
 var c2c = require("copy-to-clipboard")
 
 var EditorViewerCss = require("./EditorViewer.css")
@@ -22,19 +24,55 @@ function createObject(className, args={}) {
     return new scm.classList[className](args)
 }
 
+function saveContent(fileContents, fileName)
+{
+    var link = document.createElement('a');
+    link.download = fileName;
+    link.href = 'data:,' + fileContents;
+    link.click();
+}
+
+function openContent(callback) {
+
+    var input = document.createElement("input")
+    input.type = "file"
+    input.click()
+
+    var reader = new FileReader()
+    reader.onload = (ev) => {
+        callback(ev.target.result)
+    }
+
+    input.onchange = e => {
+        reader.readAsText(e.target.files[0])
+    }
+}
+
 //       Add Transform mode
 //       Click to select (outline pass: https://stackoverflow.com/questions/26341396/outline-a-3d-object-in-three-js)
 //       List to select / search to select?
+
+class HistoryState{
+    constructor(json, description) {
+        this.json = json
+        this.description = description
+    }
+}
 
 class EditorViewer extends Viewer {
     constructor(containerElement) {
         super(containerElement, false)
 
+        this.editorObjects = new ObjectArray()
+        this.editorObjects.load(this)
+
         this._editorPlayerView = true
         this.editorPlayer = new PlayerObject()
         this.editorPlayer.position.y = 1.8
         // this.editorPlayer.position.z = 4
-        this.add(this.editorPlayer)
+        this.editorObjects.add(this.editorPlayer)
+        // this.add(this.editorPlayer)
+
 
         this.floorMat = new THREE.MeshBasicMaterial({wireframe:true, color:"grey"})
         this.floorGeom = new THREE.PlaneGeometry(200,200,100,100)
@@ -49,13 +87,31 @@ class EditorViewer extends Viewer {
         this.UIContainer.classList.add("vapor-editor-overlay")
         this.containerElement.appendChild(this.UIContainer)
 
+        this.historyList = []
+        this.currentHistoryIndex = undefined
+
         this.objectEditors = new Set()
 
         // Container
         var uiRowStack = new RowStack([], true)
         this.UIContainer.appendChild(uiRowStack.domElement)
         // Main menu
-        var mainMenu = new Row([new Button(()=>{uiRowStack.add(classCreationMenu)},"Add"), new Button(()=>{uiRowStack.add(createListSelect())},"Select"), new Button(()=>{c2c(this.export())}, "Save to clipboard")])
+        var mainMenu = new Row(
+            [
+                new Button(()=>{uiRowStack.add(classCreationMenu)},"Add"), 
+                new Button(()=>{uiRowStack.add(createListSelect())},"Select"), 
+                new Button(()=>{this.stepHistory(-1)}, "Undo"), 
+                new Button(()=>{this.stepHistory(1)}, "Redo"), 
+                new Button(()=>{
+                    saveContent(this.export(), `${window.prompt("File name", "Untitled")}.vapor`) // TODO: Hacky, make it better..
+                }, "Save"), 
+                new Button(()=>{
+                    openContent((data)=>{
+                        this.import(data)
+                    })
+                }, "Open")]
+                
+                )
         uiRowStack.add(mainMenu)
         // Main menu -> Add
         var classesCreateData = []
@@ -75,11 +131,11 @@ class EditorViewer extends Viewer {
                     })
                     var objectEditor = new ObjectEditor(this, newObjectInit.uuid, ()=>{
                         uiRowStack.remove(objectEditor)
+                        this.saveHistory(`Added ${this.lookupUUID(uuid).args.name} [${this.lookupUUID(uuid).args.className}] <${uuid}>`)
                     }, undefined,
                     ()=>{
                         uiRowStack.remove(objectEditor)
                         this.exitEditTransform()
-                        this.remove(this.lookupUUID(uuid))
                     },
                     ()=>{
                         uiRowStack.remove(objectEditor)
@@ -99,7 +155,23 @@ class EditorViewer extends Viewer {
                         "text": `${object.args.name} [${object.args.className}] <${object.args.uuid}>`,
                         "onclick": ()=>{
                             uiRowStack.remove(elem)
-                            var objectEditor = new ObjectEditor(this, object.args.uuid, ()=>{uiRowStack.remove(objectEditor)}, undefined, ()=>{uiRowStack.remove(objectEditor)}, ()=>{uiRowStack.remove(objectEditor)}, true)
+                            var uuid = object.args.uuid
+                            var objectEditor = new ObjectEditor(
+                                this, 
+                                uuid,
+                                // onDone 
+                                ()=>{
+                                    uiRowStack.remove(objectEditor)
+                                    this.saveHistory(`Modified ${this.lookupUUID(uuid).args.name} [${this.lookupUUID(uuid).args.className}] <${uuid}>`)
+                                }, 
+                                // onApply - forgot what it does..
+                                undefined, 
+                                // onCancel
+                                ()=>{
+                                    uiRowStack.remove(objectEditor)
+                                }, 
+                                ()=>{uiRowStack.remove(objectEditor)}, 
+                                true)
                             uiRowStack.add(objectEditor)
                         },
                         "onmouseover": ()=>{"highlight / outline object"},
@@ -111,8 +183,50 @@ class EditorViewer extends Viewer {
             var elem = new SearchableList(objectList, ()=>{uiRowStack.remove(elem)})
             return elem
         }
-
+        this.onContainerElementResizeEditor = this.onContainerElementResizeEditor.bind(this)
+        this.containerElementResizeListener = new ResizeSensor(containerElement, this.onContainerElementResizeEditor)
+        this.saveHistory("Initial state")
     }
+    saveHistory(description) {
+        if (this.currentHistoryIndex === undefined) {
+            this.historyList.push(new HistoryState(this.export(), description))
+            this.currentHistoryIndex = 0
+        } else {
+            if (this.currentHistoryIndex === this.historyList.length-1) {
+                // If no redo steps, add new history and incrememnt currentHistoryIndex
+                this.historyList.push(new HistoryState(this.export(), description))
+                this.currentHistoryIndex += 1
+            } else {
+                // If has redo steps, remove all of them.
+                this.historyList = this.historyList.slice(0, this.currentHistoryIndex)
+                this.historyList.push(new HistoryState(this.export(), description))
+                this.currentHistoryIndex = this.historyList.length-1
+            }
+        }
+        console.log(`Saved history state: ${description}`)
+    }
+    loadCurrentHistoryState() {
+        if (this.currentHistoryIndex===undefined) {
+            console.warn("No saved history states")
+        } else {
+            this.import(this.historyList[this.currentHistoryIndex].json, false)
+        }
+    }
+    stepHistory(steps=-1) {
+        var newIndex = this.currentHistoryIndex+steps
+        if ((newIndex>=0) && (newIndex<=(this.historyList.length-1))) {
+            this.currentHistoryIndex = newIndex
+            this.loadCurrentHistoryState()
+        } else {
+            if (steps>0) {
+                console.warn("To little history states to redo")
+            }
+            if (steps<0) {
+                console.warn("To little history states to undo")
+            }
+        }
+    }
+
     editTransformUUID(uuid) { // Todo: Create different modes,  first person OR mouse; also, add crosshair during first person mode. Also, add rotation and scaling functionality.
         this.allowUserControl = false
         this.allowPointerLock = false
@@ -130,11 +244,13 @@ class EditorViewer extends Viewer {
         if (this.editorPlayerView) {
             var dt = this.renderClock.getDelta()
             this.objects.update(dt, this._updatePlayerOnly)
+            this.editorObjects.update(dt, this._updatePlayerOnly)
+            // this.editorObjectArray.update(dt, this._updatePlayerOnly)
             if (this.editorPlayer.playerModifier.camera) {
                 if (this.skippedRender) {
                     this.onContainerElementResize()
                 }
-                // Copy source camera to renderer camera, this is so that the rendering camera never actually changes.
+                // Copy source camera to renderer camera, this is so that the rendering camera never actually changes. Easier for post-processing.
                 this.rendererCamera.copy(this.editorPlayer.playerModifier.camera)
                 this.rendererCamera.position.setFromMatrixPosition(this.editorPlayer.playerModifier.camera.matrixWorld)
                 this.rendererCamera.rotation.setFromRotationMatrix(this.editorPlayer.playerModifier.camera.matrixWorld)
@@ -165,6 +281,28 @@ class EditorViewer extends Viewer {
             }
         } else {
             super.renderLoop()
+        }
+    }
+
+    onContainerElementResizeEditor() {
+        var width = this.containerElement.clientWidth
+        var height = this.containerElement.clientHeight
+
+        this.editorPlayer.playerModifier.camera.aspect = width/height
+        this.editorPlayer.playerModifier.camera.updateProjectionMatrix()
+    }
+
+    import(json, saveHistory=true) {
+        super.import(json)
+        if (saveHistory===true) {
+            this.saveHistory("Imported json")
+        }
+    }
+
+    append(json, saveHistory=true) {
+        super.append(json)
+        if (saveHistory===true) {
+            this.saveHistory("Appended json")
         }
     }
     
@@ -967,6 +1105,7 @@ class ObjectEditor {
         this.close()
     }
     cancel() {
+        this.viewer.loadCurrentHistoryState()
         this.onCancel()
         this.close()
     }
