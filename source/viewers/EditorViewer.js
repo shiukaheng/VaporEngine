@@ -1010,6 +1010,19 @@ class ObjectEditor {
                 this.collapse = true
             }
         }, "Collapse")
+        this.transformModeButton = new Button(()=>{
+            switch(editorViewer.transformControls.mode) {
+                case "translate":
+                    editorViewer.transformControls.mode = "rotate"
+                    break
+                case "rotate":
+                    editorViewer.transformControls.mode = "scale"
+                    break
+                case "scale":
+                    editorViewer.transformControls.mode = "translate"
+                    break
+            }
+        }, "Transform Mode")
         this.deleteButton = new Button(this.delete, "Delete")
         this.cancelButton = new Button(()=>{this.cancel()}, "⨉")
         this.cancelButton.domElement.classList.add("vapor-editor-close-button")
@@ -1017,7 +1030,7 @@ class ObjectEditor {
         this.submitButton = new Button(()=>{this.done()}, "Done")
         this.submitButton.disabled = true
 
-        this.titleRow = new Row([this.cancelButton, this.titleElem, this.titleCollapse, this.deleteButton, this.submitButton])
+        this.titleRow = new Row([this.cancelButton, this.titleElem, this.titleCollapse, this.transformModeButton, this.deleteButton, this.submitButton])
         this.titleRow.domElement.classList.add("vapor-editor-object-editor-title-row")
         this.domElement.appendChild(this.titleRow.domElement)
 

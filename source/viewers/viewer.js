@@ -17,7 +17,10 @@ class SettingsInterface{
             activeCameraUUID: this.activeCameraUUID,
             potreePointBudget: this.potreePointBudget,
             controlMode: this.controlMode, // TODO
-            vrButton: this.vrButton // TODO
+            vrButton: this.vrButton, // TODO
+            bloom: this.bloom, // TODO
+            vignette: this.vignette, // TODO
+            reverb: this.reverb // TODO
         }
     }
     _importSettings(settingDict) {
@@ -474,6 +477,22 @@ class Viewer {
 
     lookupUUID(uuid) {
         return this.objects.lookupUUID(uuid)
+    }
+
+    changeViewMode(mode) {
+        switch(mode) {
+            case "fps":
+                break
+            case "editor":
+                break
+            case "vr":
+                break
+            case "ar":
+                break
+            case "none":
+                break
+        }
+        console.warn("Not implemented.")
     }
 
     // Todo:

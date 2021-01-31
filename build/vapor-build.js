@@ -105737,6 +105737,19 @@ class ObjectEditor {
                 this.collapse = true
             }
         }, "Collapse")
+        this.transformModeButton = new Button(()=>{
+            switch(editorViewer.transformControls.mode) {
+                case "translate":
+                    editorViewer.transformControls.mode = "rotate"
+                    break
+                case "rotate":
+                    editorViewer.transformControls.mode = "scale"
+                    break
+                case "scale":
+                    editorViewer.transformControls.mode = "translate"
+                    break
+            }
+        }, "Transform Mode")
         this.deleteButton = new Button(this.delete, "Delete")
         this.cancelButton = new Button(()=>{this.cancel()}, "⨉")
         this.cancelButton.domElement.classList.add("vapor-editor-close-button")
@@ -105744,7 +105757,7 @@ class ObjectEditor {
         this.submitButton = new Button(()=>{this.done()}, "Done")
         this.submitButton.disabled = true
 
-        this.titleRow = new Row([this.cancelButton, this.titleElem, this.titleCollapse, this.deleteButton, this.submitButton])
+        this.titleRow = new Row([this.cancelButton, this.titleElem, this.titleCollapse, this.transformModeButton, this.deleteButton, this.submitButton])
         this.titleRow.domElement.classList.add("vapor-editor-object-editor-title-row")
         this.domElement.appendChild(this.titleRow.domElement)
 
@@ -105947,7 +105960,10 @@ class SettingsInterface{
             activeCameraUUID: this.activeCameraUUID,
             potreePointBudget: this.potreePointBudget,
             controlMode: this.controlMode, // TODO
-            vrButton: this.vrButton // TODO
+            vrButton: this.vrButton, // TODO
+            bloom: this.bloom, // TODO
+            vignette: this.vignette, // TODO
+            reverb: this.reverb // TODO
         }
     }
     _importSettings(settingDict) {
@@ -106404,6 +106420,22 @@ class Viewer {
 
     lookupUUID(uuid) {
         return this.objects.lookupUUID(uuid)
+    }
+
+    changeViewMode(mode) {
+        switch(mode) {
+            case "fps":
+                break
+            case "editor":
+                break
+            case "vr":
+                break
+            case "ar":
+                break
+            case "none":
+                break
+        }
+        console.warn("Not implemented.")
     }
 
     // Todo:
