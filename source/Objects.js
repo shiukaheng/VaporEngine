@@ -7,5 +7,6 @@ module.exports = {
     AudioSourceObject: require("./objects/AudioSourceObject"),
     PlayerObject: require("./objects/PlayerObject"),
     NexusObject: require("./objects/NexusObject"),
-    DepthkitObject: require("./objects/DepthkitObject")
+    DepthkitObject: require("./objects/DepthkitObject"),
+    PotreeFXObject: require("./objects/PotreeFXObject")
 }

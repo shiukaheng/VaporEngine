@@ -4,6 +4,8 @@ var ObjectArray = require("../arrays/ObjectArray")
 var Subscription = require("../utils/Subscription")
 var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 var VRButton = require("../utils/VRButton")
+var {BloomEffect, EffectComposer, EffectPass, RenderPass, VignetteEffect, SMAAEffect, LUTEffect, BlendFunction} = require("postprocessing")
+// var postprocessing = require("postprocessing")
 
 require("./viewer.css")
 
@@ -16,21 +18,24 @@ class SettingsInterface{
             version: this.version,
             activeCameraUUID: this.activeCameraUUID,
             potreePointBudget: this.potreePointBudget,
+            potreeFXPointBudget: this.potreeFXPointBudget,
             controlMode: this.controlMode, // TODO
             vrButton: this.vrButton, // TODO
-            bloom: this.bloom, // TODO
-            vignette: this.vignette, // TODO
+            bloom: this.bloom,
+            vignette: this.vignette,
+            smaa: this.smaa,
+            lut: this.lut, // TODO
             reverb: this.reverb // TODO
         }
     }
     _importSettings(settingDict) {
-        // console.log(settingDict)
-        this.activeCameraUUID = this.activeCameraUUID
-        this.potreePointBudget = this.potreePointBudget
+        Object.assign(this, settingDict)
     }
 
     get version() {
         return "1.0"
+    }
+    set version(dummy) {
     }
     get activeCameraUUID() {
         // console.log(this._viewer.sourceCamera)
@@ -52,6 +57,31 @@ class SettingsInterface{
     set potreePointBudget(pointBudget) {
         this._viewer.potree.pointBudget = pointBudget
     }
+    get potreeFXPointBudget() {
+        return this._viewer.potreeFX.pointBudget
+    }
+    set potreeFXPointBudget(pointBudget) {
+        this._viewer.potreeFX.pointBudget = pointBudget
+    }
+    get bloom() {
+        return this._viewer.bloom
+    }
+    set bloom(intensity) {
+        this._viewer.bloom = intensity
+    }
+    get vignette() {
+        return this._viewer.vignette
+    }
+    set vignette(bool) {
+        this._viewer.vignette = bool
+    }
+    get smaa() {
+        return this._viewer.smaa
+    }
+    set smaa(bool) {
+        this._viewer.smaa = bool
+    }
+
 }
 
 class ViewerSaveContainer {
@@ -97,7 +127,43 @@ class ViewerSaveContainer {
     }
 }
 
+// Source: https://github.com/vanruesc/postprocessing/wiki/Antialiasing#smaa-lookup-tables
+class GlobalAssetsLoader {
+    constructor() {
+        this.loaded = false
+        this.areaImageLoaded = false
+        this.searchImageLoaded = false
+
+        this.queueLoadedList = []
+
+        this.areaImage = new Image();
+        this.areaImage.addEventListener("load", ()=>{this.areaImageLoaded = true; if (this.searchImageLoaded===true) {this.onload()}});
+        this.areaImage.src = SMAAEffect.areaImageDataURL;
+      
+        this.searchImage = new Image();
+        this.searchImage.addEventListener("load", ()=>{this.searchImageLoaded = true; if (this.areaImageLoaded===true) {this.onload()}});
+        this.searchImage.src = SMAAEffect.searchImageDataURL;
+    }
+    onload() {
+        this.loaded = true
+        var index = 0
+        this.queueLoadedList.forEach(cb => {
+            cb()
+            this.queueLoadedList.splice(index, 1)
+            index++
+        })
+    }
+    queueLoaded(callback) {
+        if (this.loaded) {
+            callback()
+        } else {
+            this.queueLoadedList.push(callback)
+        }
+    }
+}
+
 /** Viewer class that binds to a container element */
+
 class Viewer {
     /**
      * Used to construct a viewer
@@ -105,6 +171,7 @@ class Viewer {
      */
     constructor(containerElement, createVRButtonFlag=true) {
         // Set default variables for renderer
+        this.assets = new GlobalAssetsLoader()
         this.pauseRenderFlag = false
         this.skippedRender = false
         this.containerElement = containerElement
@@ -112,7 +179,7 @@ class Viewer {
         document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
 
         // Initialize renderer
-        this.renderer = new THREE.WebGL1Renderer({antialias: true});
+        this.renderer = new THREE.WebGL1Renderer({powerPreference: "high-performance", antialias: false});
         this.renderer.domElement.className += "vaporViewer"
         this.containerElement.appendChild(this.renderer.domElement)
         this.renderer.setSize(this.containerElement.scrollWidth, this.containerElement.scrollHeight)
@@ -143,6 +210,9 @@ class Viewer {
         // Initialize Potree (used to cull point clouds)
         this.potree = new ThreeLoader.Potree()
         this.potreePointClouds = []
+
+        this.potreeFX = new ThreeLoader.Potree()
+        this.potreeFXPointClouds = []
 
         // this.PCDLoader = new PCDLoader()
 
@@ -239,12 +309,26 @@ class Viewer {
         this._allowPointerLock = true
         this.deserializationContainer = new DeserializationObjectContainer()
 
+        // Post-processing
+        this._bloom = 0 // 0 (None) - 6 (Huge)
+        this._vignette = false
+        this._smaa = true
+        this._lut = null
+
+        this.composer = new EffectComposer(this.renderer)
+        this.renderPass = new RenderPass(this.scene, this.rendererCamera)
+        this.composer.addPass(this.renderPass)
+        this.updateEffectPass()
+
         // Enable XR
         this.renderer.xr.enabled = true
         if (createVRButtonFlag===true) {
             document.body.appendChild(VRButton.createButton(this.renderer))
         }        
+        
     }
+
+
 
     // Internal functions
 
@@ -265,15 +349,18 @@ class Viewer {
             // Point culling for Potree clouds
             if (this.renderer.xr.isPresenting) {
                 this.potree.updatePointClouds(this.potreePointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer) // This works but this.renderer.getCamera is undocumented. Maybe there's a better away?
+                this.potreeFX.updatePointClouds(this.potreeFXPointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer)
             } else {
                 this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+                this.potreeFX.updatePointClouds(this.potreeFXPointClouds, this.rendererCamera, this.renderer)
             }
 
             // Render stuff
             if (this.renderer.xr.isPresenting) {
-                this.renderer.render(this.scene, this.sourceCamera)
+                this.renderer.render(this.scene, this.sourceCamera) // Somehow, the XR camera doesnt follow the rendererCamera..
             } else {
-                this.renderer.render(this.scene, this.rendererCamera) // Somehow, the XR camera doesnt follow the rendererCamera..
+                // this.renderer.render(this.scene, this.rendererCamera) 
+                this.composer.render(dt)
             }
             
 
@@ -291,9 +378,12 @@ class Viewer {
     onContainerElementResize() {
         var width = this.containerElement.clientWidth
         var height = this.containerElement.clientHeight
+
+        this.composer.setSize(width, height)
         
         try {
             this.renderer.setSize(width, height)
+
             this.sourceCamera.aspect = width/height
             this.sourceCamera.updateProjectionMatrix()
         }
@@ -348,7 +438,82 @@ class Viewer {
         return this._allowPointerLock
     }
 
+    set bloom(intensity) {
+        this._bloom = intensity
+        this.updateEffectPass()
+    }
+
+    get bloom() {
+        return this._bloom
+    }
+
+    set vignette(bool) {
+        this._vignette = bool
+        this.updateEffectPass()
+    }
+
+    get vignette() {
+        return this._vignette
+    }
+
+    set smaa(bool) {
+        this._smaa = bool
+        this.updateEffectPass()
+    }
+
+    get smaa() {
+        return this._smaa
+    }
+
+    get lut() {
+        return this._lut
+    }
+
+    set lut(url) {
+        this._lut = url
+        this.updateEffectsPass
+    }
+
     // External functions
+
+    queueReady(callback) {
+        var SMAAAssetsReady = false
+        var ObjectsReady = false
+        this.assets.queueLoaded(()=>{
+            SMAAAssetsReady = true
+            if (ObjectsReady) {
+                callback()
+            }
+        })
+        this.objects.queueAllAssetsLoaded(()=>{
+            ObjectsReady = true
+            if (SMAAAssetsReady) {
+                callback()
+            }
+        })
+    }
+
+    updateEffectPass() {
+        if (this.effectPass !==undefined) {
+            this.composer.removePass(this.effectPass)
+        }
+        var effectChain = []
+        if (this._bloom !== 0) {
+            effectChain.push(new BloomEffect({"kernelSize":Math.max(Math.min(this._bloom-1, 5),0), "luminanceThreshold":0.8}))
+        }
+        if (this._vignette === true) {
+            effectChain.push(new VignetteEffect())
+        }
+        if (this._smaa === true) {
+            effectChain.push(new SMAAEffect(this.assets.searchImage, this.assets.areaImage))
+            // console.log(SMAAEffect.areaImageDataURL)
+        }
+        if (this._lut !== null) {
+            effectChain.push(new LUTEffect({}))
+        }
+        this.effectPass = new EffectPass(this.rendererCamera, ...effectChain)
+        this.composer.addPass(this.effectPass)
+    }
 
     /** Starts rendering loop with requestAnimationFrame, calls renderLoop method */
     startRender() {

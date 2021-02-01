@@ -259,15 +259,18 @@ class EditorViewer extends Viewer {
                 // Point culling for Potree clouds
                 if (this.renderer.xr.isPresenting) {
                     this.potree.updatePointClouds(this.potreePointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer) // This works but this.renderer.getCamera is undocumented. Maybe there's a better away?
+                    this.potreeFX.updatePointClouds(this.potreeFXPointClouds, this.renderer.xr.getCamera(this.rendererCamera), this.renderer)
                 } else {
                     this.potree.updatePointClouds(this.potreePointClouds, this.rendererCamera, this.renderer)
+                    this.potreeFX.updatePointClouds(this.potreeFXPointClouds, this.rendererCamera, this.renderer)
                 }
     
                 // Render stuff
                 if (this.renderer.xr.isPresenting) {
-                    this.renderer.render(this.scene, this.editorPlayer.playerModifier.camera)
+                    this.renderer.render(this.scene, this.editorPlayer.playerModifier.camera) // Somehow, the XR camera doesnt follow the rendererCamera..
                 } else {
-                    this.renderer.render(this.scene, this.rendererCamera) // Somehow, the XR camera doesnt follow the rendererCamera..
+                    // this.renderer.render(this.scene, this.rendererCamera) 
+                    this.composer.render(dt)
                 }
                 
     
