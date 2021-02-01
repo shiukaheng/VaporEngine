@@ -4,7 +4,7 @@ var ObjectArray = require("../arrays/ObjectArray")
 var Subscription = require("../utils/Subscription")
 var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 var VRButton = require("../utils/VRButton")
-var {BloomEffect, EffectComposer, EffectPass, RenderPass, VignetteEffect, SMAAEffect, LUTEffect, BlendFunction} = require("postprocessing")
+var {BloomEffect, EffectComposer, EffectPass, RenderPass, VignetteEffect, SMAAEffect, LUTEffect, LUT3dlLoader, BlendFunction} = require("postprocessing")
 // var postprocessing = require("postprocessing")
 
 require("./viewer.css")
@@ -19,13 +19,15 @@ class SettingsInterface{
             activeCameraUUID: this.activeCameraUUID,
             potreePointBudget: this.potreePointBudget,
             potreeFXPointBudget: this.potreeFXPointBudget,
-            controlMode: this.controlMode, // TODO
-            vrButton: this.vrButton, // TODO
+            // controlMode: this.controlMode, // TODO
+            // vrButton: this.vrButton, // TODO
             bloom: this.bloom,
             vignette: this.vignette,
             smaa: this.smaa,
-            lut: this.lut, // TODO
-            reverb: this.reverb // TODO
+            // lut: this.lut, // TODO
+            // reverb: this.reverb, // TODO
+            fogDensity: this.fogDensity
+
         }
     }
     _importSettings(settingDict) {
@@ -80,6 +82,12 @@ class SettingsInterface{
     }
     set smaa(bool) {
         this._viewer.smaa = bool
+    }
+    get fogDensity() {
+        return this._viewer.fogDensity
+    }
+    set fogDensity(density) {
+        this._viewer.fogDensity = density
     }
 
 }
@@ -179,7 +187,7 @@ class Viewer {
         document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
 
         // Initialize renderer
-        this.renderer = new THREE.WebGL1Renderer({powerPreference: "high-performance", antialias: false});
+        this.renderer = new THREE.WebGLRenderer({powerPreference: "high-performance", antialias: false});
         this.renderer.domElement.className += "vaporViewer"
         this.containerElement.appendChild(this.renderer.domElement)
         this.renderer.setSize(this.containerElement.scrollWidth, this.containerElement.scrollHeight)
@@ -215,6 +223,12 @@ class Viewer {
         this.potreeFXPointClouds = []
 
         // this.PCDLoader = new PCDLoader()
+
+        // Fog
+        this.fog = new THREE.FogExp2("black", 1.5)
+
+        // LUT
+        this.lutloader3dl = new LUT3dlLoader()
 
         // Keyboard input initialization
         this.keyPressed = {}
@@ -308,6 +322,8 @@ class Viewer {
         this._updatePlayerOnly = false
         this._allowPointerLock = true
         this.deserializationContainer = new DeserializationObjectContainer()
+
+        this._fogDensity = 0
 
         // Post-processing
         this._bloom = 0 // 0 (None) - 6 (Huge)
@@ -474,6 +490,19 @@ class Viewer {
         this.updateEffectsPass
     }
 
+    get fogDensity() {
+        return this._fogDensity
+    }
+
+    set fogDensity(density) {
+        if (density===0) {
+            this.scene.fog = undefined
+        } else {
+            this.fog.density = density
+            this.scene.fog = this.fog
+        }
+    }
+
     // External functions
 
     queueReady(callback) {
@@ -499,7 +528,7 @@ class Viewer {
         }
         var effectChain = []
         if (this._bloom !== 0) {
-            effectChain.push(new BloomEffect({"kernelSize":Math.max(Math.min(this._bloom-1, 5),0), "luminanceThreshold":0.8}))
+            effectChain.push(new BloomEffect({"kernelSize":Math.max(Math.min(this._bloom-1, 5),0), "luminanceThreshold":0.8, "intensity":1, "resolutionScale":0.4}))
         }
         if (this._vignette === true) {
             effectChain.push(new VignetteEffect())
@@ -509,7 +538,8 @@ class Viewer {
             // console.log(SMAAEffect.areaImageDataURL)
         }
         if (this._lut !== null) {
-            effectChain.push(new LUTEffect({}))
+            // console.log(this._lut)
+            effectChain.push(new LUTEffect(this._lut)) // should be changed to settable via url later on
         }
         this.effectPass = new EffectPass(this.rendererCamera, ...effectChain)
         this.composer.addPass(this.effectPass)
@@ -658,6 +688,12 @@ class Viewer {
                 break
         }
         console.warn("Not implemented.")
+    }
+
+    load3dlut(url) {
+        return new Promise((resolve, reject)=>{
+            this.lutloader3dl.load(url, (x)=>{this._lut = x; this.updateEffectPass(); resolve()}, (x)=>{reject()})
+        })
     }
 
     // Todo:

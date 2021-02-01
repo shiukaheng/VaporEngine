@@ -29,9 +29,10 @@ uniform float spacing;
 uniform float time;
 uniform float sigmoid_alpha;
 uniform float sigmoid_beta;
-uniform float displaceFac;
-uniform float displaceSize;
-uniform float timeFac;
+uniform vec3 displacement_vector;
+uniform vec3 wind_vector;
+uniform float wind_scale;
+uniform float highlight_factor;
 
 #if defined use_clip_box
 	uniform mat4 clipBoxes[max_clip_boxes];
@@ -479,14 +480,11 @@ void main() {
 	vec4 mvPosition_ = modelViewMatrix * vec4(position, 1.0);
 	vec4 mPosition = modelMatrix * vec4(position, 1.0);
 
-	float displaceFac = displaceFac * scaledConfidence;
-
-	float displaceX = snoise(vec4(mPosition.x*displaceSize, mPosition.y*displaceSize, mPosition.z*displaceSize, 0.0+time*timeFac));
-	float displaceY = snoise(vec4(mPosition.x*displaceSize, mPosition.y*displaceSize, mPosition.z*displaceSize, 10.0+time*timeFac));
-	float displaceZ = snoise(vec4(mPosition.x*displaceSize, mPosition.y*displaceSize, mPosition.z*displaceSize, 20.0+time*timeFac));
-	float displaceLength = sqrt(pow(displaceX, 2.0) + pow(displaceY, 2.0) + pow(displaceZ, 2.0));
-
-	vec4 mvPosition = vec4(mvPosition_.x+displaceX*displaceFac, mvPosition_.y+displaceY*displaceFac, mvPosition_.z+displaceZ*displaceFac, mvPosition_.w);
+	float wind_vector_length = distance(wind_vector, vec3(0, 0, 0));
+	float offset = scaledConfidence*abs(snoise(vec4(vec3(mPosition.x+time*wind_vector.x, mPosition.y+time*wind_vector.y, mPosition.z+time*wind_vector.z) * wind_scale, time*wind_vector_length/2.)) + snoise(vec4(vec3(mPosition.x+time*wind_vector.x, mPosition.y+time*wind_vector.y, mPosition.z+time*wind_vector.z) * wind_scale * 5., time*wind_vector_length/2.)) + snoise(vec4(vec3(mPosition.x+time*wind_vector.x, mPosition.y+time*wind_vector.y, mPosition.z+time*wind_vector.z) * wind_scale * 50., time*wind_vector_length/2.))/3.);
+	vec4 mvPosition = viewMatrix * vec4(mPosition.x+displacement_vector.x*offset, mPosition.y+displacement_vector.y*offset, mPosition.z+displacement_vector.z*offset, mPosition.w); 
+	float displaceLength = distance(displacement_vector,vec3(0,0,0));
+	gl_Position = projectionMatrix * mvPosition;
 
 	gl_Position = projectionMatrix * mvPosition;
 
@@ -530,7 +528,7 @@ void main() {
 		vRadius = pointSize / projFactor;
 	#endif
 	
-	gl_PointSize = pointSize*1.5;
+	gl_PointSize = pointSize*(1.-scaledConfidence);
 
 	// ---------------------
 	// OPACITY
@@ -635,4 +633,8 @@ void main() {
 			#endif
 		}
 	#endif
+	vColor.r += offset/displaceLength*highlight_factor;
+	vColor.g += offset/displaceLength*highlight_factor;
+	vColor.b += offset/displaceLength*highlight_factor;
+
 }

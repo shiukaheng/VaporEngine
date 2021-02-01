@@ -52,6 +52,7 @@ class PlayerObject extends Serializable.createConstructor(
         this.velocityDragModifier = new VelocityDragModifier({"coef":this.args.drag, "serialize":false})
         this.modifiers.add(this.playerModifier)
         this.modifiers.add(this.velocityDragModifier)
+        this.playerModifier.updateControlObjectFromContainer()
     }
     unload(){
         this.modifiers.remove(this.playerModifier)
@@ -60,6 +61,7 @@ class PlayerObject extends Serializable.createConstructor(
     }
     update(dt) {
         super.update(dt)
+        this.playerModifier.updateControlObjectFromContainer()
         if (this._bezierHelper) {
             this._bezierHelper.update((pos, vel) => {
                 this.position.copy(pos)
@@ -238,7 +240,7 @@ class OldPlayerObject extends BasePhysicalObject {
         return this.playerModifier.acceleration
     }
     set speed(speed) {
-        this.playerModifier.acceleration = speed
+        this.playerModifier.args.acceleration = speed
     }
     get drag() {
         return this.velocityDragModifier.coef
@@ -246,6 +248,8 @@ class OldPlayerObject extends BasePhysicalObject {
     set drag(drag) {
         this.velocityDragModifier.coef = drag
     }
+
+
     bezierFlyTo(destCamera=camB, duration=10, segments=500, endVel=1, onEnd=()=>{}) {
         var startPos = this.playerModifier.camera.getWorldPosition(new THREE.Vector3())
         if (this.velocity.length() == 0) {

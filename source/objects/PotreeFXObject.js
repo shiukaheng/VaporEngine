@@ -1,7 +1,7 @@
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
-var PointCloudWavyMaterial = require("./materials/PointCloudWavyMaterial")
+var PointCloudWavyMaterial2 = require("./materials/PointCloudWavyMaterial2")
 
 class PotreeFXObject extends Serializable.createConstructor(
     {
@@ -45,14 +45,14 @@ class PotreeFXObject extends Serializable.createConstructor(
         promise2.then(
             pco => {
                 // Hijack default potree material
-                pco.material = new PointCloudWavyMaterial({
+                pco.material = new PointCloudWavyMaterial2({
                     "treeType":pco.material.treeType,
                     "size":pco.material.size,
                     "minSize":pco.material.minSize,
                     "maxSize":pco.material.maxSize
                 })
-                pco.material.shape = this.args.pointShape
-                pco.material.pointSizeType = 0
+                pco.material.shape = 0
+                pco.material.pointSizeType = 2
                 this.container.add(pco)
                 // console.log(this.container.children)
                 this.fxpco = pco

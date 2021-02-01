@@ -103291,7 +103291,7 @@ function(scope){
 BaseObject.registerConstructor()
 
 module.exports = BaseObject
-},{"../Serialization":38,"../arrays/ModifierArray":45,"../helpers/TransformControls":48,"../utils/eulerShadowHandler":75,"../utils/vec3ShadowHandler":76,"../viewers/viewer":81}],36:[function(require,module,exports){
+},{"../Serialization":38,"../arrays/ModifierArray":45,"../helpers/TransformControls":48,"../utils/eulerShadowHandler":78,"../utils/vec3ShadowHandler":79,"../viewers/viewer":84}],36:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var {Serializable} = require("../Serialization")
 var vec3ShadowHandler = require("../utils/vec3ShadowHandler")
@@ -103350,7 +103350,7 @@ class BasePhysicalObject extends Serializable.createConstructor(
 BasePhysicalObject.registerConstructor()
 
 module.exports = BasePhysicalObject
-},{"../Serialization":38,"../utils/vec3ShadowHandler":76,"./BaseObject":35}],37:[function(require,module,exports){
+},{"../Serialization":38,"../utils/vec3ShadowHandler":79,"./BaseObject":35}],37:[function(require,module,exports){
 var BasePhysicalObject = require("./BasePhysicalObject")
 var PlayerModifier = require("../modifiers/PlayerModifier")
 var VelocityDragModifier = require("../modifiers/VelocityDragModifier")
@@ -103405,6 +103405,7 @@ class PlayerObject extends Serializable.createConstructor(
         this.velocityDragModifier = new VelocityDragModifier({"coef":this.args.drag, "serialize":false})
         this.modifiers.add(this.playerModifier)
         this.modifiers.add(this.velocityDragModifier)
+        this.playerModifier.updateControlObjectFromContainer()
     }
     unload(){
         this.modifiers.remove(this.playerModifier)
@@ -103413,6 +103414,7 @@ class PlayerObject extends Serializable.createConstructor(
     }
     update(dt) {
         super.update(dt)
+        this.playerModifier.updateControlObjectFromContainer()
         if (this._bezierHelper) {
             this._bezierHelper.update((pos, vel) => {
                 this.position.copy(pos)
@@ -103591,7 +103593,7 @@ class OldPlayerObject extends BasePhysicalObject {
         return this.playerModifier.acceleration
     }
     set speed(speed) {
-        this.playerModifier.acceleration = speed
+        this.playerModifier.args.acceleration = speed
     }
     get drag() {
         return this.velocityDragModifier.coef
@@ -103599,6 +103601,8 @@ class OldPlayerObject extends BasePhysicalObject {
     set drag(drag) {
         this.velocityDragModifier.coef = drag
     }
+
+
     bezierFlyTo(destCamera=camB, duration=10, segments=500, endVel=1, onEnd=()=>{}) {
         var startPos = this.playerModifier.camera.getWorldPosition(new THREE.Vector3())
         if (this.velocity.length() == 0) {
@@ -103733,7 +103737,7 @@ window.BezierPathAnimation = BezierPathAnimation;
 module.exports = PlayerObject
 
 // Todo: Properly handle setting fov, and make it a serializable argument
-},{"../Serialization":38,"../modifiers/PlayerModifier":53,"../modifiers/VelocityDragModifier":54,"../utils/argumentProcessor":74,"./BasePhysicalObject":36}],38:[function(require,module,exports){
+},{"../Serialization":38,"../modifiers/PlayerModifier":53,"../modifiers/VelocityDragModifier":54,"../utils/argumentProcessor":77,"./BasePhysicalObject":36}],38:[function(require,module,exports){
 module.exports = {
     Serializable: require("./SerializationLib/Serializable"),
     DeserializationObjectContainer: require("./SerializationLib/DeserializationObjectContainer")
@@ -104355,7 +104359,7 @@ module.exports = {
     vec3ShadowHandler: require("./utils/vec3ShadowHandler"),
     eulerShadowHandler: require("./utils/eulerShadowHandler")
 }
-},{"./utils/ArgumentProcessor":71,"./utils/Subscription":72,"./utils/argumentProcessor":74,"./utils/eulerShadowHandler":75,"./utils/vec3ShadowHandler":76}],43:[function(require,module,exports){
+},{"./utils/ArgumentProcessor":74,"./utils/Subscription":75,"./utils/argumentProcessor":77,"./utils/eulerShadowHandler":78,"./utils/vec3ShadowHandler":79}],43:[function(require,module,exports){
 
 THREE = require("@shiukaheng/three")
 module.exports = {
@@ -104372,7 +104376,7 @@ module.exports = {
     Viewer: require("./viewers/Viewer"),
     EditorViewer: require("./viewers/EditorViewer")
 }
-},{"./viewers/EditorViewer":78,"./viewers/Viewer":79}],45:[function(require,module,exports){
+},{"./viewers/EditorViewer":81,"./viewers/Viewer":82}],45:[function(require,module,exports){
 var {Serializable} = require("../Serialization")
 var _ = require("underscore")
 var BaseModifier = require("../modifiers/BaseModifier")
@@ -107229,7 +107233,7 @@ class ConstantRotationModifier extends BaseModifier {
 }
 ConstantRotationModifier.registerConstructor()
 module.exports = ConstantRotationModifier
-},{"../Serialization":38,"../utils/vec3ShadowHandler":76,"./BaseModifier":50}],52:[function(require,module,exports){
+},{"../Serialization":38,"../utils/vec3ShadowHandler":79,"./BaseModifier":50}],52:[function(require,module,exports){
 var THREE = require('three')
 var BaseModifier = require("./BaseModifier")
 var Serialization = require("../Serialization")
@@ -107263,7 +107267,7 @@ class LinearAccelerationModifier extends BaseModifier{
 }
 LinearAccelerationModifier.registerConstructor()
 module.exports = LinearAccelerationModifier
-},{"../Serialization":38,"../utils/vec3ShadowHandler":76,"./BaseModifier":50,"three":10}],53:[function(require,module,exports){
+},{"../Serialization":38,"../utils/vec3ShadowHandler":79,"./BaseModifier":50,"three":10}],53:[function(require,module,exports){
 var { Serializable } = require("../Serialization");
 var BaseModifier = require("./BaseModifier")
 var BasePhysicalObject = require("../objects/BasePhysicalObject")
@@ -107344,6 +107348,10 @@ class PlayerModifier extends BaseModifier{
         this.object.viewer.pointerControlSubscription.unsubscribe(this.boundPointerControlHandler)
         this.object.container.remove(this.camera)
         super.unload()
+    }
+    updateControlObjectFromContainer() {
+        this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
+        this.updateRotationFromControlObject()
     }
     // @event_based_modifier_method TODO: Migrate to ES6 with babel
     pointerControlsUpdate(e) {
@@ -110592,9 +110600,9 @@ class OldAudioSourceObject extends BasePhysicalObject {
 module.exports = AudioSourceObject
 },{"../Serialization":38,"./BasePhysicalObject":60}],59:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"../Serialization":38,"../arrays/ModifierArray":45,"../helpers/TransformControls":48,"../utils/eulerShadowHandler":75,"../utils/vec3ShadowHandler":76,"../viewers/viewer":81,"dup":35}],60:[function(require,module,exports){
+},{"../Serialization":38,"../arrays/ModifierArray":45,"../helpers/TransformControls":48,"../utils/eulerShadowHandler":78,"../utils/vec3ShadowHandler":79,"../viewers/viewer":84,"dup":35}],60:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"../Serialization":38,"../utils/vec3ShadowHandler":76,"./BaseObject":59,"dup":36}],61:[function(require,module,exports){
+},{"../Serialization":38,"../utils/vec3ShadowHandler":79,"./BaseObject":59,"dup":36}],61:[function(require,module,exports){
 var BaseObject = require("./BaseObject")
 var PCDLoader = require("../loaders/PCDLoader")
 var createTree = require('yaot');
@@ -110677,7 +110685,7 @@ class CollisionCloudObject extends Serializable.createConstructor(
 CollisionCloudObject.registerConstructor()
 
 module.exports = CollisionCloudObject
-},{"../Serialization":38,"../loaders/PCDLoader":49,"../utils/argumentProcessor":74,"./BaseObject":59,"yaot":29}],62:[function(require,module,exports){
+},{"../Serialization":38,"../loaders/PCDLoader":49,"../utils/argumentProcessor":77,"./BaseObject":59,"yaot":29}],62:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -110720,7 +110728,7 @@ class DepthkitObject extends Serializable.createConstructor(
 DepthkitObject.registerConstructor()
 
 module.exports = DepthkitObject
-},{"../Serialization":38,"../depthkit":47,"../utils/argumentProcessor":74,"./BasePhysicalObject":60}],63:[function(require,module,exports){
+},{"../Serialization":38,"../depthkit":47,"../utils/argumentProcessor":77,"./BasePhysicalObject":60}],63:[function(require,module,exports){
 var Nexus = require("../nexus/Nexus")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -110756,11 +110764,11 @@ NexusObject.registerConstructor()
 module.exports = NexusObject
 },{"../Serialization":38,"../nexus/Nexus":55,"./BasePhysicalObject":60}],64:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"../Serialization":38,"../modifiers/PlayerModifier":53,"../modifiers/VelocityDragModifier":54,"../utils/argumentProcessor":74,"./BasePhysicalObject":60,"dup":37}],65:[function(require,module,exports){
+},{"../Serialization":38,"../modifiers/PlayerModifier":53,"../modifiers/VelocityDragModifier":54,"../utils/argumentProcessor":77,"./BasePhysicalObject":60,"dup":37}],65:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
-var PointCloudWavyMaterial = require("./materials/PointCloudWavyMaterial")
+var PointCloudWavyMaterial2 = require("./materials/PointCloudWavyMaterial2")
 
 class PotreeFXObject extends Serializable.createConstructor(
     {
@@ -110804,14 +110812,14 @@ class PotreeFXObject extends Serializable.createConstructor(
         promise2.then(
             pco => {
                 // Hijack default potree material
-                pco.material = new PointCloudWavyMaterial({
+                pco.material = new PointCloudWavyMaterial2({
                     "treeType":pco.material.treeType,
                     "size":pco.material.size,
                     "minSize":pco.material.minSize,
                     "maxSize":pco.material.maxSize
                 })
-                pco.material.shape = this.args.pointShape
-                pco.material.pointSizeType = 0
+                pco.material.shape = 0
+                pco.material.pointSizeType = 2
                 this.container.add(pco)
                 // console.log(this.container.children)
                 this.fxpco = pco
@@ -110851,7 +110859,7 @@ class PotreeFXObject extends Serializable.createConstructor(
 PotreeFXObject.registerConstructor()
 
 module.exports = PotreeFXObject
-},{"../Serialization":38,"../utils/argumentProcessor":74,"./BasePhysicalObject":60,"./materials/PointCloudWavyMaterial":68}],66:[function(require,module,exports){
+},{"../Serialization":38,"../utils/argumentProcessor":77,"./BasePhysicalObject":60,"./materials/PointCloudWavyMaterial2":68}],66:[function(require,module,exports){
 var argsProc = require("../utils/argumentProcessor")
 var {Serializable} = require("../Serialization")
 var BasePhysicalObject = require("./BasePhysicalObject")
@@ -110916,7 +110924,7 @@ class PotreeObject extends Serializable.createConstructor(
 PotreeObject.registerConstructor()
 
 module.exports = PotreeObject
-},{"../Serialization":38,"../utils/argumentProcessor":74,"./BasePhysicalObject":60}],67:[function(require,module,exports){
+},{"../Serialization":38,"../utils/argumentProcessor":77,"./BasePhysicalObject":60}],67:[function(require,module,exports){
 BasePhysicalObject = require("./BasePhysicalObject")
 var {Serializable} = require("../Serialization")
 
@@ -110957,56 +110965,171 @@ module.exports = TestObject
 var ThreeLoader = require('@pnext/three-loader')
 var glsl = require("glslify")
 
+var { PointColorType, PointOpacityType, PointShape, PointSizeType, TreeType } = require("./enums")
+
+const TREE_TYPE_DEFS = {
+	[TreeType.OCTREE]: 'tree_type_octree',
+	[TreeType.KDTREE]: 'tree_type_kdtree',
+};
+const SIZE_TYPE_DEFS = {
+	[PointSizeType.FIXED]: 'fixed_point_size',
+	[PointSizeType.ATTENUATED]: 'attenuated_point_size',
+	[PointSizeType.ADAPTIVE]: 'adaptive_point_size',
+};
+const OPACITY_DEFS = {
+	[PointOpacityType.ATTENUATED]: 'attenuated_opacity',
+	[PointOpacityType.FIXED]: 'fixed_opacity',
+};
+const SHAPE_DEFS = {
+	[PointShape.SQUARE]: 'square_point_shape',
+	[PointShape.CIRCLE]: 'circle_point_shape',
+	[PointShape.PARABOLOID]: 'paraboloid_point_shape',
+};
+const COLOR_DEFS = {
+	[PointColorType.RGB]: 'color_type_rgb',
+	[PointColorType.COLOR]: 'color_type_color',
+	[PointColorType.DEPTH]: 'color_type_depth',
+	[PointColorType.HEIGHT]: 'color_type_height',
+	[PointColorType.INTENSITY]: 'color_type_intensity',
+	[PointColorType.INTENSITY_GRADIENT]: 'color_type_intensity_gradient',
+	[PointColorType.LOD]: 'color_type_lod',
+	[PointColorType.POINT_INDEX]: 'color_type_point_index',
+	[PointColorType.CLASSIFICATION]: 'color_type_classification',
+	[PointColorType.RETURN_NUMBER]: 'color_type_return_number',
+	[PointColorType.SOURCE]: 'color_type_source',
+	[PointColorType.NORMAL]: 'color_type_normal',
+	[PointColorType.PHONG]: 'color_type_phong',
+	[PointColorType.RGB_HEIGHT]: 'color_type_rgb_height',
+	[PointColorType.COMPOSITE]: 'color_type_composite',
+};
+const CLIP_MODE_DEFS = {
+	[0]: 'clip_disabled',
+	[1]: 'clip_outside',
+	[2]: 'clip_highlight_inside',
+};
+
 class PointCloudWavyMaterial extends ThreeLoader.PointCloudMaterial {
     constructor(...args) {
         super(...args)
         this.clock = new THREE.Clock()
-        this.compiled = false
+        this.fog = true
     }
     updateMaterial(...args) {
         super.updateMaterial(...args)
         // console.log(this)
         if (this.compiled===true) { // Hacky.. Don't know why uniform does not appear until few frames later
             this.uniforms.time.value = this.clock.getElapsedTime()
-            
-
         }
-
+    }
+    updateShaderSource() {
+        this.vertexShader = this.applyDefines(require('./shaders/pointcloud.vert').default);
+        this.fragmentShader = this.applyDefines(require('./shaders/pointcloud.frag').default);
+        this.needsUpdate = true
     }
     onBeforeCompile(scope) {
         scope.uniforms.time = {value: 0.}
-        scope.uniforms.sigmoid_alpha = {value: 10.}
-        scope.uniforms.sigmoid_beta = {value: 0.2}
-        scope.uniforms.displaceFac = {value: 0.1}
-        scope.uniforms.displaceSize = {value: 8.0}
-        scope.uniforms.timeFac = {value: 0.2}
-        // scope.uniforms = Object.assign({
-        //     "time":{
-        //         "type": "f",
-        //         "value": 0
-        //     },
-        //     "wind_scale": {
-        //         "value": 0.2
-        //     },
-        //     "resolution": {
-        //         "value": new THREE.Vector2()
-        //     },
-        //     "displacement_vector": {
-        //         "value": new THREE.Vector3(0, 0.1, 0)
-        //     },
-        //     "wind_vector": {
-        //         "value": new THREE.Vector3(0.7, 0.7, 0)
-        //     }
-        // }, this.uniforms)
+        scope.uniforms.sigmoid_alpha = {value: 10.} // Controls difference of effect on high confidence / low confidence points
+        scope.uniforms.sigmoid_beta = {value: 0.2} // Controls the thresholding point for judging good / bad points from confidence
+        scope.uniforms.wind_scale = {value: 0.3} // Scale of wind detail
+        scope.uniforms.displacement_vector = {value: new THREE.Vector3(0,0.2,0)} // Which direction waves are standing
+        scope.uniforms.wind_vector = {value: new THREE.Vector3(0.5, 0, 0)}  // Which direction waves are travelling
+        scope.uniforms.global_alpha = {value: 1}
+        scope.uniforms.highlight_factor = {value: 0.1}
+        Object.assign(scope.uniforms, THREE.UniformsLib.fog)
 
-        scope.vertexShader = this.applyDefines(require("./shaders/pointcloud.vert")())
-        scope.fragmentShader = this.applyDefines(require("./shaders/pointcloud.frag")())
+        scope.vertexShader = this.applyDefines(require("./shaders/pointcloud2.vert")())
+        scope.fragmentShader = this.applyDefines(require("./shaders/pointcloud2.frag")())
         this.compiled = true
+    }
+    applyDefines(shaderSrc) {
+        const parts = [];
+    
+        function define(value) {
+            if (value) {
+                parts.push(`#define ${value}`);
+            }
+        }
+        define(TREE_TYPE_DEFS[this.treeType]);
+        define(SIZE_TYPE_DEFS[this.pointSizeType]);
+        define(SHAPE_DEFS[this.shape]);
+        define(COLOR_DEFS[this.pointColorType]);
+        define(CLIP_MODE_DEFS[this.clipMode]);
+        define(OPACITY_DEFS[this.pointOpacityType]);
+        // We only perform gamma and brightness/contrast calculations per point if values are specified.
+        if (this.rgbGamma !== 1 ||
+            this.rgbBrightness !== 0 ||
+            this.rgbContrast !== 0) {
+            define('use_rgb_gamma_contrast_brightness');
+        }
+        if (this.useFilterByNormal) {
+            define('use_filter_by_normal');
+        }
+        if (this.useEDL) {
+            define('use_edl');
+        }
+        if (this.weighted) {
+            define('weighted_splats');
+        }
+        if (this.numClipBoxes > 0) {
+            define('use_clip_box');
+        }
+        if (this.fog === true) {
+            define('USE_FOG')
+        }
+        define('MAX_POINT_LIGHTS 0');
+        define('MAX_DIR_LIGHTS 0');
+        parts.push(shaderSrc);
+        return parts.join('\n');
     }
 }
 
 module.exports = PointCloudWavyMaterial
-},{"./shaders/pointcloud.frag":69,"./shaders/pointcloud.vert":70,"@pnext/three-loader":1,"glslify":6}],69:[function(require,module,exports){
+},{"./enums":69,"./shaders/pointcloud.frag":70,"./shaders/pointcloud.vert":71,"./shaders/pointcloud2.frag":72,"./shaders/pointcloud2.vert":73,"@pnext/three-loader":1,"glslify":6}],69:[function(require,module,exports){
+var PointSizeType;
+(function (PointSizeType) {
+    PointSizeType[PointSizeType["FIXED"] = 0] = "FIXED";
+    PointSizeType[PointSizeType["ATTENUATED"] = 1] = "ATTENUATED";
+    PointSizeType[PointSizeType["ADAPTIVE"] = 2] = "ADAPTIVE";
+})(PointSizeType || (PointSizeType = {}));
+var PointShape;
+(function (PointShape) {
+    PointShape[PointShape["SQUARE"] = 0] = "SQUARE";
+    PointShape[PointShape["CIRCLE"] = 1] = "CIRCLE";
+    PointShape[PointShape["PARABOLOID"] = 2] = "PARABOLOID";
+})(PointShape || (PointShape = {}));
+var TreeType;
+(function (TreeType) {
+    TreeType[TreeType["OCTREE"] = 0] = "OCTREE";
+    TreeType[TreeType["KDTREE"] = 1] = "KDTREE";
+})(TreeType || (TreeType = {}));
+var PointOpacityType;
+(function (PointOpacityType) {
+    PointOpacityType[PointOpacityType["FIXED"] = 0] = "FIXED";
+    PointOpacityType[PointOpacityType["ATTENUATED"] = 1] = "ATTENUATED";
+})(PointOpacityType || (PointOpacityType = {}));
+var PointColorType;
+(function (PointColorType) {
+    PointColorType[PointColorType["RGB"] = 0] = "RGB";
+    PointColorType[PointColorType["COLOR"] = 1] = "COLOR";
+    PointColorType[PointColorType["DEPTH"] = 2] = "DEPTH";
+    PointColorType[PointColorType["HEIGHT"] = 3] = "HEIGHT";
+    PointColorType[PointColorType["ELEVATION"] = 3] = "ELEVATION";
+    PointColorType[PointColorType["INTENSITY"] = 4] = "INTENSITY";
+    PointColorType[PointColorType["INTENSITY_GRADIENT"] = 5] = "INTENSITY_GRADIENT";
+    PointColorType[PointColorType["LOD"] = 6] = "LOD";
+    PointColorType[PointColorType["LEVEL_OF_DETAIL"] = 6] = "LEVEL_OF_DETAIL";
+    PointColorType[PointColorType["POINT_INDEX"] = 7] = "POINT_INDEX";
+    PointColorType[PointColorType["CLASSIFICATION"] = 8] = "CLASSIFICATION";
+    PointColorType[PointColorType["RETURN_NUMBER"] = 9] = "RETURN_NUMBER";
+    PointColorType[PointColorType["SOURCE"] = 10] = "SOURCE";
+    PointColorType[PointColorType["NORMAL"] = 11] = "NORMAL";
+    PointColorType[PointColorType["PHONG"] = 12] = "PHONG";
+    PointColorType[PointColorType["RGB_HEIGHT"] = 13] = "RGB_HEIGHT";
+    PointColorType[PointColorType["COMPOSITE"] = 50] = "COMPOSITE";
+})(PointColorType || (PointColorType = {}));
+
+module.exports = {PointSizeType, PointShape, TreeType, PointOpacityType, PointColorType}
+},{}],70:[function(require,module,exports){
 module.exports = function parse(params){
       var template = "precision highp float; \n" +" \n" +
 "precision highp int; \n" +" \n" +
@@ -111260,7 +111383,7 @@ module.exports = function parse(params){
       return template
     };
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 module.exports = function parse(params){
       var template = "precision highp float; \n" +" \n" +
 "precision highp int; \n" +" \n" +
@@ -111908,7 +112031,933 @@ module.exports = function parse(params){
       return template
     };
 
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
+module.exports = function parse(params){
+      var template = "precision highp float; \n" +" \n" +
+"precision highp int; \n" +" \n" +
+" \n" +" \n" +
+"#if defined paraboloid_point_shape \n" +" \n" +
+"	#extension GL_EXT_frag_depth : enable \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"uniform mat4 viewMatrix; \n" +" \n" +
+"uniform vec3 cameraPosition; \n" +" \n" +
+" \n" +" \n" +
+"uniform mat4 projectionMatrix; \n" +" \n" +
+"uniform float opacity; \n" +" \n" +
+" \n" +" \n" +
+"uniform float blendHardness; \n" +" \n" +
+"uniform float blendDepthSupplement; \n" +" \n" +
+"uniform float fov; \n" +" \n" +
+"uniform float spacing; \n" +" \n" +
+"uniform float pcIndex; \n" +" \n" +
+"uniform float screenWidth; \n" +" \n" +
+"uniform float screenHeight; \n" +" \n" +
+" \n" +" \n" +
+"uniform vec3 fogColor; \n" +" \n" +
+"uniform float fogNear; \n" +" \n" +
+"uniform float fogFar; \n" +" \n" +
+"uniform float fogDensity; \n" +" \n" +
+" \n" +" \n" +
+"uniform sampler2D depthMap; \n" +" \n" +
+" \n" +" \n" +
+"varying vec3 vColor; \n" +" \n" +
+" \n" +" \n" +
+"#if !defined(color_type_point_index) \n" +" \n" +
+"	varying float vOpacity; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if defined(weighted_splats) \n" +" \n" +
+"	varying float vLinearDepth; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if !defined(paraboloid_point_shape) && defined(use_edl) \n" +" \n" +
+"	varying float vLogDepth; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape) \n" +" \n" +
+"	varying vec3 vViewPosition; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if defined(weighted_splats) || defined(paraboloid_point_shape) \n" +" \n" +
+"	varying float vRadius; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) \n" +" \n" +
+"	varying vec3 vNormal; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"float specularStrength = 1.0; \n" +" \n" +
+" \n" +" \n" +
+"void main() { \n" +" \n" +
+"	vec3 color = vColor; \n" +" \n" +
+"	float depth = gl_FragCoord.z; \n" +" \n" +
+" \n" +" \n" +
+"	#if defined(circle_point_shape) || defined(paraboloid_point_shape) || defined (weighted_splats) \n" +" \n" +
+"		float u = 2.0 * gl_PointCoord.x - 1.0; \n" +" \n" +
+"		float v = 2.0 * gl_PointCoord.y - 1.0; \n" +" \n" +
+"	#endif \n" +" \n" +
+"	 \n" +" \n" +
+"	#if defined(circle_point_shape) || defined (weighted_splats) \n" +" \n" +
+"		float cc = u*u + v*v; \n" +" \n" +
+"		if(cc > 1.0){ \n" +" \n" +
+"			discard; \n" +" \n" +
+"		} \n" +" \n" +
+"	#endif \n" +" \n" +
+"	 \n" +" \n" +
+"	#if defined weighted_splats \n" +" \n" +
+"		vec2 uv = gl_FragCoord.xy / vec2(screenWidth, screenHeight); \n" +" \n" +
+"		float sDepth = texture2D(depthMap, uv).r; \n" +" \n" +
+"		if(vLinearDepth > sDepth + vRadius + blendDepthSupplement){ \n" +" \n" +
+"			discard; \n" +" \n" +
+"		} \n" +" \n" +
+"	#endif \n" +" \n" +
+"		 \n" +" \n" +
+"	#if defined color_type_point_index \n" +" \n" +
+"		gl_FragColor = vec4(color, pcIndex / 255.0); \n" +" \n" +
+"	#else \n" +" \n" +
+"		gl_FragColor = vec4(color, vOpacity); \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	#if defined(color_type_phong) \n" +" \n" +
+"		#if MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0 \n" +" \n" +
+"			vec3 normal = normalize( vNormal ); \n" +" \n" +
+"			normal.z = abs(normal.z); \n" +" \n" +
+" \n" +" \n" +
+"			vec3 viewPosition = normalize( vViewPosition ); \n" +" \n" +
+"		#endif \n" +" \n" +
+" \n" +" \n" +
+"		// code taken from three.js phong light fragment shader \n" +" \n" +
+"	 \n" +" \n" +
+"		#if MAX_POINT_LIGHTS > 0 \n" +" \n" +
+" \n" +" \n" +
+"			vec3 pointDiffuse = vec3( 0.0 ); \n" +" \n" +
+"			vec3 pointSpecular = vec3( 0.0 ); \n" +" \n" +
+" \n" +" \n" +
+"			for ( int i = 0; i < MAX_POINT_LIGHTS; i ++ ) { \n" +" \n" +
+" \n" +" \n" +
+"				vec4 lPosition = viewMatrix * vec4( pointLightPosition[ i ], 1.0 ); \n" +" \n" +
+"				vec3 lVector = lPosition.xyz + vViewPosition.xyz; \n" +" \n" +
+" \n" +" \n" +
+"				float lDistance = 1.0; \n" +" \n" +
+"				if ( pointLightDistance[ i ] > 0.0 ) \n" +" \n" +
+"					lDistance = 1.0 - min( ( length( lVector ) / pointLightDistance[ i ] ), 1.0 ); \n" +" \n" +
+" \n" +" \n" +
+"				lVector = normalize( lVector ); \n" +" \n" +
+" \n" +" \n" +
+"						// diffuse \n" +" \n" +
+" \n" +" \n" +
+"				float dotProduct = dot( normal, lVector ); \n" +" \n" +
+" \n" +" \n" +
+"				#ifdef WRAP_AROUND \n" +" \n" +
+" \n" +" \n" +
+"					float pointDiffuseWeightFull = max( dotProduct, 0.0 ); \n" +" \n" +
+"					float pointDiffuseWeightHalf = max( 0.5 * dotProduct + 0.5, 0.0 ); \n" +" \n" +
+" \n" +" \n" +
+"					vec3 pointDiffuseWeight = mix( vec3( pointDiffuseWeightFull ), vec3( pointDiffuseWeightHalf ), wrapRGB ); \n" +" \n" +
+" \n" +" \n" +
+"				#else \n" +" \n" +
+" \n" +" \n" +
+"					float pointDiffuseWeight = max( dotProduct, 0.0 ); \n" +" \n" +
+" \n" +" \n" +
+"				#endif \n" +" \n" +
+" \n" +" \n" +
+"				pointDiffuse += diffuse * pointLightColor[ i ] * pointDiffuseWeight * lDistance; \n" +" \n" +
+" \n" +" \n" +
+"				// specular \n" +" \n" +
+" \n" +" \n" +
+"				vec3 pointHalfVector = normalize( lVector + viewPosition ); \n" +" \n" +
+"				float pointDotNormalHalf = max( dot( normal, pointHalfVector ), 0.0 ); \n" +" \n" +
+"				float pointSpecularWeight = specularStrength * max( pow( pointDotNormalHalf, shininess ), 0.0 ); \n" +" \n" +
+" \n" +" \n" +
+"				float specularNormalization = ( shininess + 2.0 ) / 8.0; \n" +" \n" +
+" \n" +" \n" +
+"				vec3 schlick = specular + vec3( 1.0 - specular ) * pow( max( 1.0 - dot( lVector, pointHalfVector ), 0.0 ), 5.0 ); \n" +" \n" +
+"				pointSpecular += schlick * pointLightColor[ i ] * pointSpecularWeight * pointDiffuseWeight * lDistance * specularNormalization; \n" +" \n" +
+"				pointSpecular = vec3(0.0, 0.0, 0.0); \n" +" \n" +
+"			} \n" +" \n" +
+"		 \n" +" \n" +
+"		#endif \n" +" \n" +
+"		 \n" +" \n" +
+"		#if MAX_DIR_LIGHTS > 0 \n" +" \n" +
+" \n" +" \n" +
+"			vec3 dirDiffuse = vec3( 0.0 ); \n" +" \n" +
+"			vec3 dirSpecular = vec3( 0.0 ); \n" +" \n" +
+" \n" +" \n" +
+"			for( int i = 0; i < MAX_DIR_LIGHTS; i ++ ) { \n" +" \n" +
+" \n" +" \n" +
+"				vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 ); \n" +" \n" +
+"				vec3 dirVector = normalize( lDirection.xyz ); \n" +" \n" +
+" \n" +" \n" +
+"						// diffuse \n" +" \n" +
+" \n" +" \n" +
+"				float dotProduct = dot( normal, dirVector ); \n" +" \n" +
+" \n" +" \n" +
+"				#ifdef WRAP_AROUND \n" +" \n" +
+" \n" +" \n" +
+"					float dirDiffuseWeightFull = max( dotProduct, 0.0 ); \n" +" \n" +
+"					float dirDiffuseWeightHalf = max( 0.5 * dotProduct + 0.5, 0.0 ); \n" +" \n" +
+" \n" +" \n" +
+"					vec3 dirDiffuseWeight = mix( vec3( dirDiffuseWeightFull ), vec3( dirDiffuseWeightHalf ), wrapRGB ); \n" +" \n" +
+" \n" +" \n" +
+"				#else \n" +" \n" +
+" \n" +" \n" +
+"					float dirDiffuseWeight = max( dotProduct, 0.0 ); \n" +" \n" +
+" \n" +" \n" +
+"				#endif \n" +" \n" +
+" \n" +" \n" +
+"				dirDiffuse += diffuse * directionalLightColor[ i ] * dirDiffuseWeight; \n" +" \n" +
+" \n" +" \n" +
+"				// specular \n" +" \n" +
+" \n" +" \n" +
+"				vec3 dirHalfVector = normalize( dirVector + viewPosition ); \n" +" \n" +
+"				float dirDotNormalHalf = max( dot( normal, dirHalfVector ), 0.0 ); \n" +" \n" +
+"				float dirSpecularWeight = specularStrength * max( pow( dirDotNormalHalf, shininess ), 0.0 ); \n" +" \n" +
+" \n" +" \n" +
+"				float specularNormalization = ( shininess + 2.0 ) / 8.0; \n" +" \n" +
+" \n" +" \n" +
+"				vec3 schlick = specular + vec3( 1.0 - specular ) * pow( max( 1.0 - dot( dirVector, dirHalfVector ), 0.0 ), 5.0 ); \n" +" \n" +
+"				dirSpecular += schlick * directionalLightColor[ i ] * dirSpecularWeight * dirDiffuseWeight * specularNormalization; \n" +" \n" +
+"			} \n" +" \n" +
+" \n" +" \n" +
+"		#endif \n" +" \n" +
+"		 \n" +" \n" +
+"		vec3 totalDiffuse = vec3( 0.0 ); \n" +" \n" +
+"		vec3 totalSpecular = vec3( 0.0 ); \n" +" \n" +
+"		 \n" +" \n" +
+"		#if MAX_POINT_LIGHTS > 0 \n" +" \n" +
+" \n" +" \n" +
+"			totalDiffuse += pointDiffuse; \n" +" \n" +
+"			totalSpecular += pointSpecular; \n" +" \n" +
+" \n" +" \n" +
+"		#endif \n" +" \n" +
+"		 \n" +" \n" +
+"		#if MAX_DIR_LIGHTS > 0 \n" +" \n" +
+" \n" +" \n" +
+"			totalDiffuse += dirDiffuse; \n" +" \n" +
+"			totalSpecular += dirSpecular; \n" +" \n" +
+" \n" +" \n" +
+"		#endif \n" +" \n" +
+"		 \n" +" \n" +
+"		gl_FragColor.xyz = gl_FragColor.xyz * ( emissive + totalDiffuse + ambientLightColor * ambient ) + totalSpecular; \n" +" \n" +
+" \n" +" \n" +
+"	#endif \n" +" \n" +
+"	 \n" +" \n" +
+"	#if defined weighted_splats \n" +" \n" +
+"	    //float w = pow(1.0 - (u*u + v*v), blendHardness); \n" +" \n" +
+"		 \n" +" \n" +
+"		float wx = 2.0 * length(2.0 * gl_PointCoord - 1.0); \n" +" \n" +
+"		float w = exp(-wx * wx * 0.5); \n" +" \n" +
+"		 \n" +" \n" +
+"		//float distance = length(2.0 * gl_PointCoord - 1.0); \n" +" \n" +
+"		//float w = exp( -(distance * distance) / blendHardness); \n" +" \n" +
+"		 \n" +" \n" +
+"		gl_FragColor.rgb = gl_FragColor.rgb * w; \n" +" \n" +
+"		gl_FragColor.a = w; \n" +" \n" +
+"	#endif \n" +" \n" +
+"	 \n" +" \n" +
+"	#if defined paraboloid_point_shape \n" +" \n" +
+"		float wi = 0.0 - ( u*u + v*v); \n" +" \n" +
+"		vec4 pos = vec4(vViewPosition, 1.0); \n" +" \n" +
+"		pos.z += wi * vRadius; \n" +" \n" +
+"		float linearDepth = -pos.z; \n" +" \n" +
+"		pos = projectionMatrix * pos; \n" +" \n" +
+"		pos = pos / pos.w; \n" +" \n" +
+"		float expDepth = pos.z; \n" +" \n" +
+"		depth = (pos.z + 1.0) / 2.0; \n" +" \n" +
+"		gl_FragDepthEXT = depth; \n" +" \n" +
+"		 \n" +" \n" +
+"		#if defined(color_type_depth) \n" +" \n" +
+"			gl_FragColor.r = linearDepth; \n" +" \n" +
+"			gl_FragColor.g = expDepth; \n" +" \n" +
+"		#endif \n" +" \n" +
+"		 \n" +" \n" +
+"		#if defined(use_edl) \n" +" \n" +
+"			gl_FragColor.a = log2(linearDepth); \n" +" \n" +
+"		#endif \n" +" \n" +
+"		 \n" +" \n" +
+"	#else \n" +" \n" +
+"		#if defined(use_edl) \n" +" \n" +
+"			gl_FragColor.a = vLogDepth; \n" +" \n" +
+"		#endif \n" +" \n" +
+"	#endif	 \n" +" \n" +
+" \n" +" \n" +
+"	#ifdef USE_FOG \n" +" \n" +
+"		#ifdef USE_LOGDEPTHBUF_EXT \n" +" \n" +
+"			float fogDepth = gl_FragDepthEXT / gl_FragCoord.w; \n" +" \n" +
+"		#else \n" +" \n" +
+"			float fogDepth = gl_FragCoord.z / gl_FragCoord.w; \n" +" \n" +
+"		#endif \n" +" \n" +
+" \n" +" \n" +
+"		float fogFactor = 1.0 - exp( - fogDensity * fogDensity * fogDepth * fogDepth ); // Have not figured out how to apply defines.. \n" +" \n" +
+"		 \n" +" \n" +
+"		// #ifdef FOG_EXP2 \n" +" \n" +
+"			// float fogFactor = 1.0 - exp( - fogDensity * fogDensity * fogDepth * fogDepth ); \n" +" \n" +
+"		// #else \n" +" \n" +
+"			// float fogFactor = smoothstep( fogNear, fogFar, fogDepth ); \n" +" \n" +
+"		// #endif \n" +" \n" +
+"		gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor ); \n" +" \n" +
+"	#endif \n" +" \n" +
+"} \n" 
+      params = params || {}
+      for(var key in params) {
+        var matcher = new RegExp("{{"+key+"}}","g")
+        template = template.replace(matcher, params[key])
+      }
+      return template
+    };
+
+},{}],73:[function(require,module,exports){
+module.exports = function parse(params){
+      var template = "precision highp float; \n" +" \n" +
+"precision highp int; \n" +" \n" +
+" \n" +" \n" +
+"#define max_clip_boxes 30 \n" +" \n" +
+" \n" +" \n" +
+"attribute vec3 position; \n" +" \n" +
+"attribute vec3 color; \n" +" \n" +
+"attribute vec3 normal; \n" +" \n" +
+"attribute float intensity; \n" +" \n" +
+"attribute float classification; \n" +" \n" +
+"attribute float returnNumber; \n" +" \n" +
+"attribute float numberOfReturns; \n" +" \n" +
+"attribute float pointSourceID; \n" +" \n" +
+"attribute vec4 indices; \n" +" \n" +
+" \n" +" \n" +
+"uniform mat4 modelMatrix; \n" +" \n" +
+"uniform mat4 modelViewMatrix; \n" +" \n" +
+"uniform mat4 projectionMatrix; \n" +" \n" +
+"uniform mat4 viewMatrix; \n" +" \n" +
+"uniform mat3 normalMatrix; \n" +" \n" +
+" \n" +" \n" +
+"uniform float pcIndex; \n" +" \n" +
+" \n" +" \n" +
+"uniform float screenWidth; \n" +" \n" +
+"uniform float screenHeight; \n" +" \n" +
+"uniform float fov; \n" +" \n" +
+"uniform float spacing; \n" +" \n" +
+" \n" +" \n" +
+"uniform float time; \n" +" \n" +
+"uniform float sigmoid_alpha; \n" +" \n" +
+"uniform float sigmoid_beta; \n" +" \n" +
+"uniform vec3 displacement_vector; \n" +" \n" +
+"uniform vec3 wind_vector; \n" +" \n" +
+"uniform float wind_scale; \n" +" \n" +
+"uniform float highlight_factor; \n" +" \n" +
+" \n" +" \n" +
+"#if defined use_clip_box \n" +" \n" +
+"	uniform mat4 clipBoxes[max_clip_boxes]; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"uniform float heightMin; \n" +" \n" +
+"uniform float heightMax; \n" +" \n" +
+"uniform float size; // pixel size factor \n" +" \n" +
+"uniform float minSize; // minimum pixel size \n" +" \n" +
+"uniform float maxSize; // maximum pixel size \n" +" \n" +
+"uniform float octreeSize; \n" +" \n" +
+"uniform vec3 bbSize; \n" +" \n" +
+"uniform vec3 uColor; \n" +" \n" +
+"uniform float opacity; \n" +" \n" +
+"uniform float clipBoxCount; \n" +" \n" +
+"uniform float level; \n" +" \n" +
+"uniform float vnStart; \n" +" \n" +
+"uniform bool isLeafNode; \n" +" \n" +
+" \n" +" \n" +
+"uniform float filterByNormalThreshold; \n" +" \n" +
+"uniform vec2 intensityRange; \n" +" \n" +
+"uniform float opacityAttenuation; \n" +" \n" +
+"uniform float intensityGamma; \n" +" \n" +
+"uniform float intensityContrast; \n" +" \n" +
+"uniform float intensityBrightness; \n" +" \n" +
+"uniform float rgbGamma; \n" +" \n" +
+"uniform float rgbContrast; \n" +" \n" +
+"uniform float rgbBrightness; \n" +" \n" +
+"uniform float transition; \n" +" \n" +
+"uniform float wRGB; \n" +" \n" +
+"uniform float wIntensity; \n" +" \n" +
+"uniform float wElevation; \n" +" \n" +
+"uniform float wClassification; \n" +" \n" +
+"uniform float wReturnNumber; \n" +" \n" +
+"uniform float wSourceID; \n" +" \n" +
+" \n" +" \n" +
+"uniform sampler2D visibleNodes; \n" +" \n" +
+"uniform sampler2D gradient; \n" +" \n" +
+"uniform sampler2D classificationLUT; \n" +" \n" +
+"uniform sampler2D depthMap; \n" +" \n" +
+" \n" +" \n" +
+"varying vec3 vColor; \n" +" \n" +
+" \n" +" \n" +
+"#if !defined(color_type_point_index) \n" +" \n" +
+"	varying float vOpacity; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if defined(weighted_splats) \n" +" \n" +
+"	varying float vLinearDepth; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if !defined(paraboloid_point_shape) && defined(use_edl) \n" +" \n" +
+"	varying float vLogDepth; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape) \n" +" \n" +
+"	varying vec3 vViewPosition; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if defined(weighted_splats) || defined(paraboloid_point_shape) \n" +" \n" +
+"	varying float vRadius; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) \n" +" \n" +
+"	varying vec3 vNormal; \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+" \n" +" \n" +
+"// --------------------- \n" +" \n" +
+"// OCTREE \n" +" \n" +
+"// --------------------- \n" +" \n" +
+" \n" +" \n" +
+"#if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_octree) \n" +" \n" +
+" \n" +" \n" +
+"/** \n" +" \n" +
+" * Rounds the specified number to the closest integer. \n" +" \n" +
+" */ \n" +" \n" +
+"float round(float number){ \n" +" \n" +
+"	return floor(number + 0.5); \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"/** \n" +" \n" +
+" * Gets the number of 1-bits up to inclusive index position. \n" +" \n" +
+" *  \n" +" \n" +
+" * number is treated as if it were an integer in the range 0-255 \n" +" \n" +
+" */ \n" +" \n" +
+"int numberOfOnes(int number, int index) { \n" +" \n" +
+"	int numOnes = 0; \n" +" \n" +
+"	int tmp = 128; \n" +" \n" +
+"	for (int i = 7; i >= 0; i--) { \n" +" \n" +
+" \n" +" \n" +
+"		if (number >= tmp) { \n" +" \n" +
+"			number = number - tmp; \n" +" \n" +
+" \n" +" \n" +
+"			if (i <= index) { \n" +" \n" +
+"				numOnes++; \n" +" \n" +
+"			} \n" +" \n" +
+"		} \n" +" \n" +
+" \n" +" \n" +
+"		tmp = tmp / 2; \n" +" \n" +
+"	} \n" +" \n" +
+" \n" +" \n" +
+"	return numOnes; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"/** \n" +" \n" +
+" * Checks whether the bit at index is 1.0 \n" +" \n" +
+" * \n" +" \n" +
+" * number is treated as if it were an integer in the range 0-255 \n" +" \n" +
+" */ \n" +" \n" +
+"bool isBitSet(int number, int index){ \n" +" \n" +
+" \n" +" \n" +
+"	// weird multi else if due to lack of proper array, int and bitwise support in WebGL 1.0 \n" +" \n" +
+"	int powi = 1; \n" +" \n" +
+"	if (index == 0) { \n" +" \n" +
+"		powi = 1; \n" +" \n" +
+"	} else if (index == 1) { \n" +" \n" +
+"		powi = 2; \n" +" \n" +
+"	} else if (index == 2) { \n" +" \n" +
+"		powi = 4; \n" +" \n" +
+"	} else if (index == 3) { \n" +" \n" +
+"		powi = 8; \n" +" \n" +
+"	} else if (index == 4) { \n" +" \n" +
+"		powi = 16; \n" +" \n" +
+"	} else if (index == 5) { \n" +" \n" +
+"		powi = 32; \n" +" \n" +
+"	} else if (index == 6) { \n" +" \n" +
+"		powi = 64; \n" +" \n" +
+"	} else if (index == 7) { \n" +" \n" +
+"		powi = 128; \n" +" \n" +
+"	} \n" +" \n" +
+" \n" +" \n" +
+"	int ndp = number / powi; \n" +" \n" +
+" \n" +" \n" +
+"	return mod(float(ndp), 2.0) != 0.0; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"/** \n" +" \n" +
+" * Gets the the LOD at the point position. \n" +" \n" +
+" */ \n" +" \n" +
+"float getLOD() { \n" +" \n" +
+"	vec3 offset = vec3(0.0, 0.0, 0.0); \n" +" \n" +
+"	int iOffset = int(vnStart); \n" +" \n" +
+"	float depth = level; \n" +" \n" +
+" \n" +" \n" +
+"	for (float i = 0.0; i <= 30.0; i++) { \n" +" \n" +
+"		float nodeSizeAtLevel = octreeSize  / pow(2.0, i + level + 0.0); \n" +" \n" +
+"		 \n" +" \n" +
+"		vec3 index3d = (position-offset) / nodeSizeAtLevel; \n" +" \n" +
+"		index3d = floor(index3d + 0.5); \n" +" \n" +
+"		int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z)); \n" +" \n" +
+"		 \n" +" \n" +
+"		vec4 value = texture2D(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0)); \n" +" \n" +
+"		int mask = int(round(value.r * 255.0)); \n" +" \n" +
+" \n" +" \n" +
+"		if (isBitSet(mask, index)) { \n" +" \n" +
+"			// there are more visible child nodes at this position \n" +" \n" +
+"			int advanceG = int(round(value.g * 255.0)) * 256; \n" +" \n" +
+"			int advanceB = int(round(value.b * 255.0)); \n" +" \n" +
+"			int advanceChild = numberOfOnes(mask, index - 1); \n" +" \n" +
+"			int advance = advanceG + advanceB + advanceChild; \n" +" \n" +
+" \n" +" \n" +
+"			iOffset = iOffset + advance; \n" +" \n" +
+" \n" +" \n" +
+"			depth++; \n" +" \n" +
+"		} else { \n" +" \n" +
+"			return value.a * 255.0; // no more visible child nodes at this position \n" +" \n" +
+"		} \n" +" \n" +
+"		 \n" +" \n" +
+"		offset = offset + (vec3(1.0, 1.0, 1.0) * nodeSizeAtLevel * 0.5) * index3d;   \n" +" \n" +
+"	} \n" +" \n" +
+"		 \n" +" \n" +
+"	return depth; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"float getPointSizeAttenuation() { \n" +" \n" +
+"	return 0.5 * pow(2.0, getLOD()); \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"// --------------------- \n" +" \n" +
+"// KD-TREE \n" +" \n" +
+"// --------------------- \n" +" \n" +
+" \n" +" \n" +
+"#if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_kdtree) \n" +" \n" +
+" \n" +" \n" +
+"float getLOD() { \n" +" \n" +
+"	vec3 offset = vec3(0.0, 0.0, 0.0); \n" +" \n" +
+"	float intOffset = 0.0; \n" +" \n" +
+"	float depth = 0.0; \n" +" \n" +
+"			 \n" +" \n" +
+"	vec3 size = bbSize;	 \n" +" \n" +
+"	vec3 pos = position; \n" +" \n" +
+"		 \n" +" \n" +
+"	for (float i = 0.0; i <= 1000.0; i++) { \n" +" \n" +
+"		 \n" +" \n" +
+"		vec4 value = texture2D(visibleNodes, vec2(intOffset / 2048.0, 0.0)); \n" +" \n" +
+"		 \n" +" \n" +
+"		int children = int(value.r * 255.0); \n" +" \n" +
+"		float next = value.g * 255.0; \n" +" \n" +
+"		int split = int(value.b * 255.0); \n" +" \n" +
+"		 \n" +" \n" +
+"		if (next == 0.0) { \n" +" \n" +
+"		 	return depth; \n" +" \n" +
+"		} \n" +" \n" +
+"		 \n" +" \n" +
+"		vec3 splitv = vec3(0.0, 0.0, 0.0); \n" +" \n" +
+"		if (split == 1) { \n" +" \n" +
+"			splitv.x = 1.0; \n" +" \n" +
+"		} else if (split == 2) { \n" +" \n" +
+"		 	splitv.y = 1.0; \n" +" \n" +
+"		} else if (split == 4) { \n" +" \n" +
+"		 	splitv.z = 1.0; \n" +" \n" +
+"		} \n" +" \n" +
+"		 \n" +" \n" +
+"		intOffset = intOffset + next; \n" +" \n" +
+"		 \n" +" \n" +
+"		float factor = length(pos * splitv / size); \n" +" \n" +
+"		if (factor < 0.5) { \n" +" \n" +
+"		 	// left \n" +" \n" +
+"			if (children == 0 || children == 2) { \n" +" \n" +
+"				return depth; \n" +" \n" +
+"			} \n" +" \n" +
+"		} else { \n" +" \n" +
+"			// right \n" +" \n" +
+"			pos = pos - size * splitv * 0.5; \n" +" \n" +
+"			if (children == 0 || children == 1) { \n" +" \n" +
+"				return depth; \n" +" \n" +
+"			} \n" +" \n" +
+"			if (children == 3) { \n" +" \n" +
+"				intOffset = intOffset + 1.0; \n" +" \n" +
+"			} \n" +" \n" +
+"		} \n" +" \n" +
+"		size = size * ((1.0 - (splitv + 1.0) / 2.0) + 0.5); \n" +" \n" +
+"		 \n" +" \n" +
+"		depth++; \n" +" \n" +
+"	} \n" +" \n" +
+"		 \n" +" \n" +
+"		 \n" +" \n" +
+"	return depth;	 \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"float getPointSizeAttenuation() { \n" +" \n" +
+"	return 0.5 * pow(1.3, getLOD()); \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"#endif \n" +" \n" +
+" \n" +" \n" +
+"// formula adapted from: http://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/ \n" +" \n" +
+"float getContrastFactor(float contrast) { \n" +" \n" +
+"	return (1.0158730158730156 * (contrast + 1.0)) / (1.0158730158730156 - contrast); \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"vec3 getRGB() { \n" +" \n" +
+"	#if defined(use_rgb_gamma_contrast_brightness) \n" +" \n" +
+"	  vec3 rgb = color; \n" +" \n" +
+"		rgb = pow(rgb, vec3(rgbGamma)); \n" +" \n" +
+"		rgb = rgb + rgbBrightness; \n" +" \n" +
+"		rgb = (rgb - 0.5) * getContrastFactor(rgbContrast) + 0.5; \n" +" \n" +
+"		rgb = clamp(rgb, 0.0, 1.0); \n" +" \n" +
+"		return rgb; \n" +" \n" +
+"	#else \n" +" \n" +
+"		return color; \n" +" \n" +
+"	#endif \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"float getIntensity() { \n" +" \n" +
+"	float w = (intensity - intensityRange.x) / (intensityRange.y - intensityRange.x); \n" +" \n" +
+"	w = pow(w, intensityGamma); \n" +" \n" +
+"	w = w + intensityBrightness; \n" +" \n" +
+"	w = (w - 0.5) * getContrastFactor(intensityContrast) + 0.5; \n" +" \n" +
+"	w = clamp(w, 0.0, 1.0); \n" +" \n" +
+"	 \n" +" \n" +
+"	return w; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"vec3 getElevation() { \n" +" \n" +
+"	vec4 world = modelMatrix * vec4( position, 1.0 ); \n" +" \n" +
+"	float w = (world.z - heightMin) / (heightMax-heightMin); \n" +" \n" +
+"	vec3 cElevation = texture2D(gradient, vec2(w,1.0-w)).rgb; \n" +" \n" +
+"	 \n" +" \n" +
+"	return cElevation; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"vec4 getClassification() { \n" +" \n" +
+"	vec2 uv = vec2(classification / 255.0, 0.5); \n" +" \n" +
+"	vec4 classColor = texture2D(classificationLUT, uv); \n" +" \n" +
+"	 \n" +" \n" +
+"	return classColor; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"vec3 getReturnNumber() { \n" +" \n" +
+"	if (numberOfReturns == 1.0) { \n" +" \n" +
+"		return vec3(1.0, 1.0, 0.0); \n" +" \n" +
+"	} else { \n" +" \n" +
+"		if (returnNumber == 1.0) { \n" +" \n" +
+"			return vec3(1.0, 0.0, 0.0); \n" +" \n" +
+"		} else if (returnNumber == numberOfReturns) { \n" +" \n" +
+"			return vec3(0.0, 0.0, 1.0); \n" +" \n" +
+"		} else { \n" +" \n" +
+"			return vec3(0.0, 1.0, 0.0); \n" +" \n" +
+"		} \n" +" \n" +
+"	} \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"vec3 getSourceID() { \n" +" \n" +
+"	float w = mod(pointSourceID, 10.0) / 10.0; \n" +" \n" +
+"	return texture2D(gradient, vec2(w, 1.0 - w)).rgb; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"vec3 getCompositeColor() { \n" +" \n" +
+"	vec3 c; \n" +" \n" +
+"	float w; \n" +" \n" +
+" \n" +" \n" +
+"	c += wRGB * getRGB(); \n" +" \n" +
+"	w += wRGB; \n" +" \n" +
+"	 \n" +" \n" +
+"	c += wIntensity * getIntensity() * vec3(1.0, 1.0, 1.0); \n" +" \n" +
+"	w += wIntensity; \n" +" \n" +
+"	 \n" +" \n" +
+"	c += wElevation * getElevation(); \n" +" \n" +
+"	w += wElevation; \n" +" \n" +
+"	 \n" +" \n" +
+"	c += wReturnNumber * getReturnNumber(); \n" +" \n" +
+"	w += wReturnNumber; \n" +" \n" +
+"	 \n" +" \n" +
+"	c += wSourceID * getSourceID(); \n" +" \n" +
+"	w += wSourceID; \n" +" \n" +
+"	 \n" +" \n" +
+"	vec4 cl = wClassification * getClassification(); \n" +" \n" +
+"	c += cl.a * cl.rgb; \n" +" \n" +
+"	w += wClassification * cl.a; \n" +" \n" +
+" \n" +" \n" +
+"	c = c / w; \n" +" \n" +
+"	 \n" +" \n" +
+"	if (w == 0.0) { \n" +" \n" +
+"		gl_Position = vec4(100.0, 100.0, 100.0, 0.0); \n" +" \n" +
+"	} \n" +" \n" +
+"	 \n" +" \n" +
+"	return c; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"/// Distortion experiments \n" +" \n" +
+"//	Simplex 4D Noise  \n" +" \n" +
+"//	by Ian McEwan, Ashima Arts \n" +" \n" +
+"// \n" +" \n" +
+"vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);} \n" +" \n" +
+"float permute(float x){return floor(mod(((x*34.0)+1.0)*x, 289.0));} \n" +" \n" +
+"vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;} \n" +" \n" +
+"float taylorInvSqrt(float r){return 1.79284291400159 - 0.85373472095314 * r;} \n" +" \n" +
+" \n" +" \n" +
+"vec4 grad4(float j, vec4 ip){ \n" +" \n" +
+"  const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0); \n" +" \n" +
+"  vec4 p,s; \n" +" \n" +
+" \n" +" \n" +
+"  p.xyz = floor( fract (vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0; \n" +" \n" +
+"  p.w = 1.5 - dot(abs(p.xyz), ones.xyz); \n" +" \n" +
+"  s = vec4(lessThan(p, vec4(0.0))); \n" +" \n" +
+"  p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;  \n" +" \n" +
+" \n" +" \n" +
+"  return p; \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"float snoise(vec4 v){ \n" +" \n" +
+"  const vec2  C = vec2( 0.138196601125010504,  // (5 - sqrt(5))/20  G4 \n" +" \n" +
+"                        0.309016994374947451); // (sqrt(5) - 1)/4   F4 \n" +" \n" +
+"// First corner \n" +" \n" +
+"  vec4 i  = floor(v + dot(v, C.yyyy) ); \n" +" \n" +
+"  vec4 x0 = v -   i + dot(i, C.xxxx); \n" +" \n" +
+" \n" +" \n" +
+"// Other corners \n" +" \n" +
+" \n" +" \n" +
+"// Rank sorting originally contributed by Bill Licea-Kane, AMD (formerly ATI) \n" +" \n" +
+"  vec4 i0; \n" +" \n" +
+" \n" +" \n" +
+"  vec3 isX = step( x0.yzw, x0.xxx ); \n" +" \n" +
+"  vec3 isYZ = step( x0.zww, x0.yyz ); \n" +" \n" +
+"//  i0.x = dot( isX, vec3( 1.0 ) ); \n" +" \n" +
+"  i0.x = isX.x + isX.y + isX.z; \n" +" \n" +
+"  i0.yzw = 1.0 - isX; \n" +" \n" +
+" \n" +" \n" +
+"//  i0.y += dot( isYZ.xy, vec2( 1.0 ) ); \n" +" \n" +
+"  i0.y += isYZ.x + isYZ.y; \n" +" \n" +
+"  i0.zw += 1.0 - isYZ.xy; \n" +" \n" +
+" \n" +" \n" +
+"  i0.z += isYZ.z; \n" +" \n" +
+"  i0.w += 1.0 - isYZ.z; \n" +" \n" +
+" \n" +" \n" +
+"  // i0 now contains the unique values 0,1,2,3 in each channel \n" +" \n" +
+"  vec4 i3 = clamp( i0, 0.0, 1.0 ); \n" +" \n" +
+"  vec4 i2 = clamp( i0-1.0, 0.0, 1.0 ); \n" +" \n" +
+"  vec4 i1 = clamp( i0-2.0, 0.0, 1.0 ); \n" +" \n" +
+" \n" +" \n" +
+"  //  x0 = x0 - 0.0 + 0.0 * C  \n" +" \n" +
+"  vec4 x1 = x0 - i1 + 1.0 * C.xxxx; \n" +" \n" +
+"  vec4 x2 = x0 - i2 + 2.0 * C.xxxx; \n" +" \n" +
+"  vec4 x3 = x0 - i3 + 3.0 * C.xxxx; \n" +" \n" +
+"  vec4 x4 = x0 - 1.0 + 4.0 * C.xxxx; \n" +" \n" +
+" \n" +" \n" +
+"// Permutations \n" +" \n" +
+"  i = mod(i, 289.0);  \n" +" \n" +
+"  float j0 = permute( permute( permute( permute(i.w) + i.z) + i.y) + i.x); \n" +" \n" +
+"  vec4 j1 = permute( permute( permute( permute ( \n" +" \n" +
+"             i.w + vec4(i1.w, i2.w, i3.w, 1.0 )) \n" +" \n" +
+"           + i.z + vec4(i1.z, i2.z, i3.z, 1.0 )) \n" +" \n" +
+"           + i.y + vec4(i1.y, i2.y, i3.y, 1.0 )) \n" +" \n" +
+"           + i.x + vec4(i1.x, i2.x, i3.x, 1.0 )); \n" +" \n" +
+"// Gradients \n" +" \n" +
+"// ( 7*7*6 points uniformly over a cube, mapped onto a 4-octahedron.) \n" +" \n" +
+"// 7*7*6 = 294, which is close to the ring size 17*17 = 289. \n" +" \n" +
+" \n" +" \n" +
+"  vec4 ip = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0) ; \n" +" \n" +
+" \n" +" \n" +
+"  vec4 p0 = grad4(j0,   ip); \n" +" \n" +
+"  vec4 p1 = grad4(j1.x, ip); \n" +" \n" +
+"  vec4 p2 = grad4(j1.y, ip); \n" +" \n" +
+"  vec4 p3 = grad4(j1.z, ip); \n" +" \n" +
+"  vec4 p4 = grad4(j1.w, ip); \n" +" \n" +
+" \n" +" \n" +
+"// Normalise gradients \n" +" \n" +
+"  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3))); \n" +" \n" +
+"  p0 *= norm.x; \n" +" \n" +
+"  p1 *= norm.y; \n" +" \n" +
+"  p2 *= norm.z; \n" +" \n" +
+"  p3 *= norm.w; \n" +" \n" +
+"  p4 *= taylorInvSqrt(dot(p4,p4)); \n" +" \n" +
+" \n" +" \n" +
+"// Mix contributions from the five corners \n" +" \n" +
+"  vec3 m0 = max(0.6 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.0); \n" +" \n" +
+"  vec2 m1 = max(0.6 - vec2(dot(x3,x3), dot(x4,x4)            ), 0.0); \n" +" \n" +
+"  m0 = m0 * m0; \n" +" \n" +
+"  m1 = m1 * m1; \n" +" \n" +
+"  return 49.0 * ( dot(m0*m0, vec3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 ))) \n" +" \n" +
+"               + dot(m1*m1, vec2( dot( p3, x3 ), dot( p4, x4 ) ) ) ) ; \n" +" \n" +
+" \n" +" \n" +
+"} \n" +" \n" +
+" \n" +" \n" +
+"/// End of distortion experiments \n" +" \n" +
+" \n" +" \n" +
+"void main() { \n" +" \n" +
+" \n" +" \n" +
+"	float scaledConfidence = 1./(1.+exp(sigmoid_alpha*(getIntensity()-sigmoid_beta))); \n" +" \n" +
+"	 \n" +" \n" +
+"	vec4 mvPosition_ = modelViewMatrix * vec4(position, 1.0); \n" +" \n" +
+"	vec4 mPosition = modelMatrix * vec4(position, 1.0); \n" +" \n" +
+" \n" +" \n" +
+"	float wind_vector_length = distance(wind_vector, vec3(0, 0, 0)); \n" +" \n" +
+"	float offset = scaledConfidence*abs(snoise(vec4(vec3(mPosition.x+time*wind_vector.x, mPosition.y+time*wind_vector.y, mPosition.z+time*wind_vector.z) * wind_scale, time*wind_vector_length/2.)) + snoise(vec4(vec3(mPosition.x+time*wind_vector.x, mPosition.y+time*wind_vector.y, mPosition.z+time*wind_vector.z) * wind_scale * 5., time*wind_vector_length/2.)) + snoise(vec4(vec3(mPosition.x+time*wind_vector.x, mPosition.y+time*wind_vector.y, mPosition.z+time*wind_vector.z) * wind_scale * 50., time*wind_vector_length/2.))/3.); \n" +" \n" +
+"	vec4 mvPosition = viewMatrix * vec4(mPosition.x+displacement_vector.x*offset, mPosition.y+displacement_vector.y*offset, mPosition.z+displacement_vector.z*offset, mPosition.w);  \n" +" \n" +
+"	float displaceLength = distance(displacement_vector,vec3(0,0,0)); \n" +" \n" +
+"	gl_Position = projectionMatrix * mvPosition; \n" +" \n" +
+" \n" +" \n" +
+"	gl_Position = projectionMatrix * mvPosition; \n" +" \n" +
+" \n" +" \n" +
+"	#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape) \n" +" \n" +
+"		vViewPosition = mvPosition.xyz; \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	#if defined weighted_splats \n" +" \n" +
+"		vLinearDepth = gl_Position.w; \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) \n" +" \n" +
+"		vNormal = normalize(normalMatrix * normal); \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	#if !defined(paraboloid_point_shape) && defined(use_edl) \n" +" \n" +
+"		vLogDepth = log2(-mvPosition.z); \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+"	// POINT SIZE \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+" \n" +" \n" +
+"	float pointSize = 1.0; \n" +" \n" +
+"	float slope = tan(fov / 2.0); \n" +" \n" +
+"	float projFactor =  -0.5 * screenHeight / (slope * mvPosition.z); \n" +" \n" +
+" \n" +" \n" +
+"	#if defined fixed_point_size \n" +" \n" +
+"		pointSize = size; \n" +" \n" +
+"	#elif defined attenuated_point_size \n" +" \n" +
+"		pointSize = size * spacing * projFactor; \n" +" \n" +
+"	#elif defined adaptive_point_size \n" +" \n" +
+"		float worldSpaceSize = 2.0 * size * spacing / getPointSizeAttenuation(); \n" +" \n" +
+"		pointSize = worldSpaceSize * projFactor; \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	pointSize = max(minSize, pointSize); \n" +" \n" +
+"	pointSize = min(maxSize, pointSize); \n" +" \n" +
+" \n" +" \n" +
+"	#if defined(weighted_splats) || defined(paraboloid_point_shape) \n" +" \n" +
+"		vRadius = pointSize / projFactor; \n" +" \n" +
+"	#endif \n" +" \n" +
+"	 \n" +" \n" +
+"	gl_PointSize = pointSize*(1.-scaledConfidence); \n" +" \n" +
+" \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+"	// OPACITY \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+" \n" +" \n" +
+"	#ifndef color_type_point_index \n" +" \n" +
+"		#ifdef attenuated_opacity \n" +" \n" +
+"			vOpacity = opacity * exp(-length(-mvPosition.xyz) / opacityAttenuation); \n" +" \n" +
+"		#else \n" +" \n" +
+"			vOpacity = opacity; \n" +" \n" +
+"		#endif \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+"	// FILTERING \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+" \n" +" \n" +
+"	#ifdef use_filter_by_normal \n" +" \n" +
+"		if(abs((modelViewMatrix * vec4(normal, 0.0)).z) > filterByNormalThreshold) { \n" +" \n" +
+"			// Move point outside clip space space to discard it. \n" +" \n" +
+"			gl_Position = vec4(0.0, 0.0, 2.0, 1.0); \n" +" \n" +
+"		} \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+"	// POINT COLOR \n" +" \n" +
+"	// ---------------------	 \n" +" \n" +
+" \n" +" \n" +
+"	#ifdef color_type_rgb \n" +" \n" +
+"		vColor = getRGB(); \n" +" \n" +
+"	#elif defined color_type_height \n" +" \n" +
+"		vColor = getElevation(); \n" +" \n" +
+"	#elif defined color_type_rgb_height \n" +" \n" +
+"		vec3 cHeight = getElevation(); \n" +" \n" +
+"		vColor = (1.0 - transition) * getRGB() + transition * cHeight; \n" +" \n" +
+"	#elif defined color_type_depth \n" +" \n" +
+"		float linearDepth = -mvPosition.z ; \n" +" \n" +
+"		float expDepth = (gl_Position.z / gl_Position.w) * 0.5 + 0.5; \n" +" \n" +
+"		vColor = vec3(linearDepth, expDepth, 0.0); \n" +" \n" +
+"	#elif defined color_type_intensity \n" +" \n" +
+"		float w = getIntensity(); \n" +" \n" +
+"		vColor = vec3(w, w, w); \n" +" \n" +
+"	#elif defined color_type_intensity_gradient \n" +" \n" +
+"		float w = getIntensity(); \n" +" \n" +
+"		vColor = texture2D(gradient, vec2(w, 1.0 - w)).rgb; \n" +" \n" +
+"	#elif defined color_type_color \n" +" \n" +
+"		vColor = uColor; \n" +" \n" +
+"	#elif defined color_type_lod \n" +" \n" +
+"	float w = getLOD() / 10.0; \n" +" \n" +
+"	vColor = texture2D(gradient, vec2(w, 1.0 - w)).rgb; \n" +" \n" +
+"	#elif defined color_type_point_index \n" +" \n" +
+"		vColor = indices.rgb; \n" +" \n" +
+"	#elif defined color_type_classification \n" +" \n" +
+"	  vec4 cl = getClassification();  \n" +" \n" +
+"		vColor = cl.rgb; \n" +" \n" +
+"	#elif defined color_type_return_number \n" +" \n" +
+"		vColor = getReturnNumber(); \n" +" \n" +
+"	#elif defined color_type_source \n" +" \n" +
+"		vColor = getSourceID(); \n" +" \n" +
+"	#elif defined color_type_normal \n" +" \n" +
+"		vColor = (modelMatrix * vec4(normal, 0.0)).xyz; \n" +" \n" +
+"	#elif defined color_type_phong \n" +" \n" +
+"		vColor = color; \n" +" \n" +
+"	#elif defined color_type_composite \n" +" \n" +
+"		vColor = getCompositeColor(); \n" +" \n" +
+"	#endif \n" +" \n" +
+"	 \n" +" \n" +
+"	#if !defined color_type_composite && defined color_type_classification \n" +" \n" +
+"		if (cl.a == 0.0) { \n" +" \n" +
+"			gl_Position = vec4(100.0, 100.0, 100.0, 0.0); \n" +" \n" +
+"			return; \n" +" \n" +
+"		} \n" +" \n" +
+"	#endif \n" +" \n" +
+" \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+"	// CLIPPING \n" +" \n" +
+"	// --------------------- \n" +" \n" +
+" \n" +" \n" +
+"	#if defined use_clip_box \n" +" \n" +
+"		bool insideAny = false; \n" +" \n" +
+"		for (int i = 0; i < max_clip_boxes; i++) { \n" +" \n" +
+"			if (i == int(clipBoxCount)) { \n" +" \n" +
+"				break; \n" +" \n" +
+"			} \n" +" \n" +
+"		 \n" +" \n" +
+"			vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4(position, 1.0); \n" +" \n" +
+"			bool inside = -0.5 <= clipPosition.x && clipPosition.x <= 0.5; \n" +" \n" +
+"			inside = inside && -0.5 <= clipPosition.y && clipPosition.y <= 0.5; \n" +" \n" +
+"			inside = inside && -0.5 <= clipPosition.z && clipPosition.z <= 0.5; \n" +" \n" +
+"			insideAny = insideAny || inside; \n" +" \n" +
+"		} \n" +" \n" +
+" \n" +" \n" +
+"		if (!insideAny) { \n" +" \n" +
+"			#if defined clip_outside \n" +" \n" +
+"				gl_Position = vec4(1000.0, 1000.0, 1000.0, 1.0); \n" +" \n" +
+"			#elif defined clip_highlight_inside && !defined(color_type_depth) \n" +" \n" +
+"				float c = (vColor.r + vColor.g + vColor.b) / 6.0; \n" +" \n" +
+"			#endif \n" +" \n" +
+"		} else { \n" +" \n" +
+"			#if defined clip_highlight_inside \n" +" \n" +
+"				vColor.r += 0.5; \n" +" \n" +
+"			#endif \n" +" \n" +
+"		} \n" +" \n" +
+"	#endif \n" +" \n" +
+"	vColor.r += offset/displaceLength*highlight_factor; \n" +" \n" +
+"	vColor.g += offset/displaceLength*highlight_factor; \n" +" \n" +
+"	vColor.b += offset/displaceLength*highlight_factor; \n" +" \n" +
+" \n" +" \n" +
+"} \n" 
+      params = params || {}
+      for(var key in params) {
+        var matcher = new RegExp("{{"+key+"}}","g")
+        template = template.replace(matcher, params[key])
+      }
+      return template
+    };
+
+},{}],74:[function(require,module,exports){
 const _ = require("underscore")
 
 function argumentProcessor(defaultArgs, args) {
@@ -111928,7 +112977,7 @@ function argumentProcessor(defaultArgs, args) {
 }
 
 module.exports = argumentProcessor
-},{"underscore":12}],72:[function(require,module,exports){
+},{"underscore":12}],75:[function(require,module,exports){
 class Subscription {
     constructor() {
         this.subscribers = new Set()
@@ -111947,7 +112996,7 @@ class Subscription {
     }
 }
 module.exports = Subscription
-},{}],73:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 /**
  * @author mrdoob / http://mrdoob.com
  * @author Mugen87 / https://github.com/Mugen87
@@ -112122,9 +113171,9 @@ var VRButton = {
 };
 
 module.exports = VRButton;
-},{}],74:[function(require,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"dup":71,"underscore":12}],75:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
+arguments[4][74][0].apply(exports,arguments)
+},{"dup":74,"underscore":12}],78:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function eulerShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -112170,7 +113219,7 @@ function eulerShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = eulerShadowHandler
-},{"../Serialization":38}],76:[function(require,module,exports){
+},{"../Serialization":38}],79:[function(require,module,exports){
 var Serialization = require("../Serialization")
 function vec3ShadowHandler(shadowVec3TraversalFunc) {
     return {
@@ -112205,9 +113254,9 @@ function vec3ShadowHandler(shadowVec3TraversalFunc) {
     }
 }
 module.exports = vec3ShadowHandler
-},{"../Serialization":38}],77:[function(require,module,exports){
+},{"../Serialization":38}],80:[function(require,module,exports){
 var css = "@import url(\"https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap\");\n.vapor-editor-button {\n  background-color: white;\n  height: 1em;\n  padding: 0.4em 1em 0.5em 1em;\n  font-size: 18px;\n  font-family: \"Roboto\", sans-serif;\n  transition: background-color 0.1s, opacity 0.1s;\n  pointer-events: auto;\n  cursor: pointer;\n  white-space: nowrap;\n  user-select: none;\n}\n.vapor-editor-button-selected {\n  outline-style: solid;\n  outline-width: 4px;\n  outline-color: white;\n  outline-offset: -4px;\n}\n.vapor-editor-button:hover {\n  background-color: rgba(255,255,255,0.7);\n}\n.vapor-editor-disabled.vapor-editor-button,\n.vapor-editor-disabled *.vapor-editor-button {\n  cursor: default;\n  opacity: 0.5;\n  background-color: white;\n}\n.vapor-editor-overlay {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  /* background-color: rgba(255,255,255,0.5); */\n  z-index: 2;\n  padding: 30px 30px 30px 30px;\n  box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -webkit-box-sizing: border-box;\n  pointer-events: none;\n}\n.vapor-editor-button-row {\n  display: flex;\n  flex-wrap: nowrap;\n  height: max-content;\n  max-width: 100%;\n  pointer-events: auto;\n  overflow-x: scroll;\n  /* -ms-overflow-style: none; \r\n    /* scrollbar-width: none;  Firefox */\n}\n/* Hide scrollbar for Chrome, Safari, Opera */\n.vapor-editor-button-row::-webkit-scrollbar {\n  display: none;\n}\n.vapor-editor-button-row>.vapor-editor-button {\n  margin: 0 1em 0 0;\n}\n.vapor-editor-button-row-stack {\n  display: flex;\n  flex-direction: column;\n  max-width: 100%;\n}\n.vapor-editor-button-row-stack>.vapor-editor-button-row {\n  margin-bottom: 1em;\n}\n.vapor-editor-object-editor-title-row>.vapor-editor-button {\n  margin: auto;\n}\n.vapor-editor-input {\n  font-family: \"Roboto\", sans-serif;\n  font-size: 18px;\n  /* border-color: red; */\n  border: 0;\n  outline-style: solid;\n  outline-color: #BBB;\n  outline-width: 2px;\n  outline-offset: -2px;\n  padding: 0.4em 0.5em 0.5em 0.5em;\n  pointer-events: auto;\n  width: 100%;\n}\n.vapor-editor-input:focus {\n  outline-color: white;\n}\n.vapor-editor-input-default {\n  color: #BBB;\n}\n.vapor-editor-input-invalid {\n  outline-color: #9e3b3b;\n}\n.vapor-editor-object-editor {\n  background-color: rgba(0,0,0,0.5);\n  padding: 20px 20px 20px 20px;\n  pointer-events: auto;\n}\n.vapor-editor-object-editor-form {\n  border-collapse: collapse;\n  width: 100%;\n}\n.vapor-editor-label {\n  font-family: \"Roboto\", sans-serif;\n  font-size: 18px;\n  margin: auto;\n  white-space: nowrap;\n}\n.vapor-editor-grouped-cells-row {\n  /* display: flex; */\n  /* flex-direction: column; */\n}\n.vapor-editor-grouped-cells-row {\n  margin-bottom: 0;\n}\n.vapor-editor-grouped-cells-row *+* {\n  margin-left: 10px;\n}\n.vapor-editor-grouped-cells-row .vapor-editor-button-row {\n  margin-bottom: 10px;\n}\n.vapor-editor-object-editor-title {\n  /* width: fit-content; */\n}\n.vapor-editor-object-editor-title-row {\n  display: inline-flex;\n}\n.vapor-editor-object-editor-title-row *+* {\n  margin-left: 10px !important;\n}\n.vapor-editor-post-form-row {\n  margin-top: 10px;\n  display: flex;\n  justify-content: flex-end;\n}\n.vapor-editor-post-form-row * {\n  margin: 0 !important;\n}\n.vapor-editor-post-form-row *~* {\n  margin: 0 0 0 1em !important;\n}\n.vapor-editor-close-button {\n  color: white;\n  background-color: #9e3b3b;\n}\n.vapor-editor-close-button:hover {\n  color: white;\n  background-color: #9e3b3b7e;\n}\n.vapor-editor-disabled.vapor-editor-close-button,\n.vapor-editor-disabled *.vapor-editor-close-button {\n  cursor: default;\n  opacity: 0.5;\n  background-color: #9e3b3b;\n}\n.vapor-editor-searchable-list-entry-list {\n  display: flex;\n  flex-direction: column;\n}\n.vapor-editor-searchable-list-entry {\n  background-color: white;\n  height: 1em;\n  padding: 0.4em 1em 0.5em 1em;\n  font-size: 18px;\n  font-family: \"Roboto\", sans-serif;\n  pointer-events: auto;\n  white-space: nowrap;\n  user-select: none;\n  cursor: pointer;\n  transition: background-color 0.1s, opacity 0.1s;\n}\n.vapor-editor-searchable-list-entry:hover {\n  background-color: rgba(255,255,255,0.7);\n}\n.vapor-editor-searchable-list .vapor-editor-input {\n  padding: 0 0.5em 0 0.5em;\n}\n.vapor-editor-searchable-list>*+* {\n  padding-top: 1em;\n}\n.vapor-editor-searchable-list-entry-list>* {\n  padding-top: 0.5em;\n  padding-bottom: 0.5em;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\EditorViewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":3}],78:[function(require,module,exports){
+},{"browserify-css":3}],81:[function(require,module,exports){
 var Viewer = require("./Viewer")
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var Serializable = require("../SerializationLib/Serializable")
@@ -113426,14 +114475,14 @@ class SearchableList {
 }
 
 module.exports = EditorViewer
-},{"../Objects/PlayerObject":37,"../SerializationLib/Serializable":40,"../arrays/ObjectArray":46,"../helpers/TransformControls":48,"./EditorViewer.css":77,"./Viewer":79,"copy-to-clipboard":4,"css-element-queries/src/ResizeSensor":5}],79:[function(require,module,exports){
+},{"../Objects/PlayerObject":37,"../SerializationLib/Serializable":40,"../arrays/ObjectArray":46,"../helpers/TransformControls":48,"./EditorViewer.css":80,"./Viewer":82,"copy-to-clipboard":4,"css-element-queries/src/ResizeSensor":5}],82:[function(require,module,exports){
 var ResizeSensor = require("css-element-queries/src/ResizeSensor")
 var ThreeLoader = require('@pnext/three-loader')
 var ObjectArray = require("../arrays/ObjectArray")
 var Subscription = require("../utils/Subscription")
 var {Serializable, DeserializationObjectContainer} = require("../Serialization")
 var VRButton = require("../utils/VRButton")
-var {BloomEffect, EffectComposer, EffectPass, RenderPass, VignetteEffect, SMAAEffect, LUTEffect, BlendFunction} = require("postprocessing")
+var {BloomEffect, EffectComposer, EffectPass, RenderPass, VignetteEffect, SMAAEffect, LUTEffect, LUT3dlLoader, BlendFunction} = require("postprocessing")
 // var postprocessing = require("postprocessing")
 
 require("./viewer.css")
@@ -113448,13 +114497,15 @@ class SettingsInterface{
             activeCameraUUID: this.activeCameraUUID,
             potreePointBudget: this.potreePointBudget,
             potreeFXPointBudget: this.potreeFXPointBudget,
-            controlMode: this.controlMode, // TODO
-            vrButton: this.vrButton, // TODO
+            // controlMode: this.controlMode, // TODO
+            // vrButton: this.vrButton, // TODO
             bloom: this.bloom,
             vignette: this.vignette,
             smaa: this.smaa,
-            lut: this.lut, // TODO
-            reverb: this.reverb // TODO
+            // lut: this.lut, // TODO
+            // reverb: this.reverb, // TODO
+            fogDensity: this.fogDensity
+
         }
     }
     _importSettings(settingDict) {
@@ -113509,6 +114560,12 @@ class SettingsInterface{
     }
     set smaa(bool) {
         this._viewer.smaa = bool
+    }
+    get fogDensity() {
+        return this._viewer.fogDensity
+    }
+    set fogDensity(density) {
+        this._viewer.fogDensity = density
     }
 
 }
@@ -113608,7 +114665,7 @@ class Viewer {
         document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
 
         // Initialize renderer
-        this.renderer = new THREE.WebGL1Renderer({powerPreference: "high-performance", antialias: false});
+        this.renderer = new THREE.WebGLRenderer({powerPreference: "high-performance", antialias: false});
         this.renderer.domElement.className += "vaporViewer"
         this.containerElement.appendChild(this.renderer.domElement)
         this.renderer.setSize(this.containerElement.scrollWidth, this.containerElement.scrollHeight)
@@ -113644,6 +114701,12 @@ class Viewer {
         this.potreeFXPointClouds = []
 
         // this.PCDLoader = new PCDLoader()
+
+        // Fog
+        this.fog = new THREE.FogExp2("black", 1.5)
+
+        // LUT
+        this.lutloader3dl = new LUT3dlLoader()
 
         // Keyboard input initialization
         this.keyPressed = {}
@@ -113737,6 +114800,8 @@ class Viewer {
         this._updatePlayerOnly = false
         this._allowPointerLock = true
         this.deserializationContainer = new DeserializationObjectContainer()
+
+        this._fogDensity = 0
 
         // Post-processing
         this._bloom = 0 // 0 (None) - 6 (Huge)
@@ -113903,6 +114968,19 @@ class Viewer {
         this.updateEffectsPass
     }
 
+    get fogDensity() {
+        return this._fogDensity
+    }
+
+    set fogDensity(density) {
+        if (density===0) {
+            this.scene.fog = undefined
+        } else {
+            this.fog.density = density
+            this.scene.fog = this.fog
+        }
+    }
+
     // External functions
 
     queueReady(callback) {
@@ -113928,7 +115006,7 @@ class Viewer {
         }
         var effectChain = []
         if (this._bloom !== 0) {
-            effectChain.push(new BloomEffect({"kernelSize":Math.max(Math.min(this._bloom-1, 5),0), "luminanceThreshold":0.8}))
+            effectChain.push(new BloomEffect({"kernelSize":Math.max(Math.min(this._bloom-1, 5),0), "luminanceThreshold":0.8, "intensity":1, "resolutionScale":0.4}))
         }
         if (this._vignette === true) {
             effectChain.push(new VignetteEffect())
@@ -113938,7 +115016,8 @@ class Viewer {
             // console.log(SMAAEffect.areaImageDataURL)
         }
         if (this._lut !== null) {
-            effectChain.push(new LUTEffect({}))
+            // console.log(this._lut)
+            effectChain.push(new LUTEffect(this._lut)) // should be changed to settable via url later on
         }
         this.effectPass = new EffectPass(this.rendererCamera, ...effectChain)
         this.composer.addPass(this.effectPass)
@@ -114089,6 +115168,12 @@ class Viewer {
         console.warn("Not implemented.")
     }
 
+    load3dlut(url) {
+        return new Promise((resolve, reject)=>{
+            this.lutloader3dl.load(url, (x)=>{this._lut = x; this.updateEffectPass(); resolve()}, (x)=>{reject()})
+        })
+    }
+
     // Todo:
 
     // URGENT: Demo
@@ -114123,9 +115208,9 @@ class Viewer {
 
 
 module.exports = Viewer;
-},{"../Serialization":38,"../arrays/ObjectArray":46,"../utils/Subscription":72,"../utils/VRButton":73,"./viewer.css":80,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":5,"postprocessing":8}],80:[function(require,module,exports){
+},{"../Serialization":38,"../arrays/ObjectArray":46,"../utils/Subscription":75,"../utils/VRButton":76,"./viewer.css":83,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":5,"postprocessing":8}],83:[function(require,module,exports){
 var css = "canvas.vaporViewer {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n}\n"; (require("browserify-css").createStyle(css, { "href": "source\\viewers\\viewer.css" }, { "insertAt": "bottom" })); module.exports = css;
-},{"browserify-css":3}],81:[function(require,module,exports){
-arguments[4][79][0].apply(exports,arguments)
-},{"../Serialization":38,"../arrays/ObjectArray":46,"../utils/Subscription":72,"../utils/VRButton":73,"./viewer.css":80,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":5,"dup":79,"postprocessing":8}]},{},[43])(43)
+},{"browserify-css":3}],84:[function(require,module,exports){
+arguments[4][82][0].apply(exports,arguments)
+},{"../Serialization":38,"../arrays/ObjectArray":46,"../utils/Subscription":75,"../utils/VRButton":76,"./viewer.css":83,"@pnext/three-loader":1,"css-element-queries/src/ResizeSensor":5,"dup":82,"postprocessing":8}]},{},[43])(43)
 });

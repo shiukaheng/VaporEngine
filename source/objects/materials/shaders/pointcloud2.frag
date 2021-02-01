@@ -19,6 +19,11 @@ uniform float pcIndex;
 uniform float screenWidth;
 uniform float screenHeight;
 
+uniform vec3 fogColor;
+uniform float fogNear;
+uniform float fogFar;
+uniform float fogDensity;
+
 uniform sampler2D depthMap;
 
 varying vec3 vColor;
@@ -241,4 +246,21 @@ void main() {
 			gl_FragColor.a = vLogDepth;
 		#endif
 	#endif	
+
+	#ifdef USE_FOG
+		#ifdef USE_LOGDEPTHBUF_EXT
+			float fogDepth = gl_FragDepthEXT / gl_FragCoord.w;
+		#else
+			float fogDepth = gl_FragCoord.z / gl_FragCoord.w;
+		#endif
+
+		float fogFactor = 1.0 - exp( - fogDensity * fogDensity * fogDepth * fogDepth ); // Have not figured out how to apply defines..
+		
+		// #ifdef FOG_EXP2
+			// float fogFactor = 1.0 - exp( - fogDensity * fogDensity * fogDepth * fogDepth );
+		// #else
+			// float fogFactor = smoothstep( fogNear, fogFar, fogDepth );
+		// #endif
+		gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+	#endif
 }

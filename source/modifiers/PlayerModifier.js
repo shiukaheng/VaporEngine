@@ -79,6 +79,10 @@ class PlayerModifier extends BaseModifier{
         this.object.container.remove(this.camera)
         super.unload()
     }
+    updateControlObjectFromContainer() {
+        this.controlObject.setRotationFromQuaternion(this.object.container.getWorldQuaternion(this._quaternion_container))
+        this.updateRotationFromControlObject()
+    }
     // @event_based_modifier_method TODO: Migrate to ES6 with babel
     pointerControlsUpdate(e) {
         if (this.args.enabled&&!this.object.bypassModifiers&&this.object.viewer.allowUserControl) {
