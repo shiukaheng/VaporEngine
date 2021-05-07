@@ -17,7 +17,7 @@
     "potree-core": "^1.0.7",
     "three": "^0.116.1",
     "three-mesh-ui": "^4.1.5",
-    "underscore": "^1.10.2",
+    "underscore": "^1.12.1",
     "uuid": "^8.3.0",
     "watchify": "^3.11.1",
     "webworkify": "^1.5.0",
